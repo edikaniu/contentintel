@@ -197,26 +197,54 @@ Follow PRD Section 6.3 exactly. Core tables:
 This project is built across 6 sessions. Each session has a defined scope in PRD Section 8. **Do not build ahead.** Complete the current session's scope fully before moving to the next. Each session prompt will specify exactly what to build.
 
 ### Current Session
-> **Session: NOT STARTED**
-> **Status:** Project not yet initialised
-> **Completed:** Nothing yet
-> **Next:** Session 1 — Foundation, Auth & Multi-Tenancy
-
-*(Update this section at the END of every session with what was built, what works, and any issues or decisions made.)*
+> **Session: 6 — COMPLETED (v1 COMPLETE)**
+> **Status:** All features built, polished, and compiling. Project is v1 complete.
+> **Completed:**
+> - Topic Validator API (`app/api/topics/validate/route.ts`) — POST endpoint accepts topic text + domainId, fetches keyword data + SERP + related keywords from DataforSEO in parallel, checks competitors against SERP, checks content_inventory for cannibalisation, generates AI analysis via Anthropic (angles, outline, content type, opportunity score, verdict), returns full brief object, falls back to heuristic scoring if AI unavailable
+> - Brief Display component (`components/brief-display.tsx`) — SVG circular score gauge (green/amber/red), keyword metrics cards with trend indicator, related keywords table, SERP landscape table with feature badges, competitor check card, cannibalisation check card, AI recommendations with numbered outline, "Add to Recommendations" button, "Export Brief" markdown download
+> - Validate Topic page (`app/(app)/validate/page.tsx`) — text input tab (active) + URL input tab (disabled with "Coming in v1.1" tooltip), domain-aware form, multi-step animated progress indicator, error state with retry, full brief display on success
+> - Topics POST endpoint (`app/api/topics/route.ts`) — added POST handler to create topic recommendations from validator, source="validator", status="pending"
+> - Vercel cron config (`vercel.json`) — weekly batch Monday 5:00 UTC, endpoint /api/cron/weekly-batch
+> - Mobile responsiveness polish: topics page header/filters/rows stack on mobile, content-health summary grid 2-col on mobile, filter bars wrap on small screens, column headers hidden on mobile
+> - All pages verified for: loading states (skeletons/spinners), empty states, error handling, "no domain selected" states
+> - `npm run build` passes with zero errors (43 routes)
 
 ### Session Decisions Log
-*(Record architectural decisions, trade-offs, and deviations from PRD here. This carries context between sessions.)*
 
 | Session | Decision | Rationale |
 |---------|----------|-----------|
-| — | — | — |
+| 1 | Added `password_reset_tokens` table (not in PRD schema) | Needed for password reset flow; tokens must be stored with expiry and used-at tracking |
+| 1 | Used `next-auth@4` (not v5) | v4 is stable with App Router support via `getServerSession`; v5 (Auth.js) has breaking changes and is less documented |
+| 1 | Resend client lazily initialized via `getResend()` | Resend constructor throws if API key is missing; lazy init allows build without env vars set |
+| 1 | Used Next.js middleware (withAuth) for route protection | Deprecated in Next.js 16 in favour of "proxy" but still functional; will evaluate migration in future session |
+| 1 | `useSearchParams` wrapped in Suspense boundaries | Required by Next.js for static generation of pages using client-side search params |
+| 2 | Stitch designs not accessible via URL — built with design system colors | Used indigo #3730A3 primary, emerald #059669 accent, slate neutrals as fallback per instructions |
+| 2 | Onboarding saves + tests credentials in one step | Better UX: user clicks Continue, credentials are saved then tested, only proceeds on success |
+| 2 | Admin routes use ADMIN_EMAIL env var check (not role) | Platform admin is separate from org-level roles per PRD; checked in both middleware and admin layout |
+| 3 | Windsor API used for both GSC and GA4 data pulls | Per PRD, GSC and GA4 are accessed via Windsor.ai REST API, not direct Google APIs |
+| 3 | URL matching uses path normalization for snapshot building | GSC/GA4 may return full URLs or paths; extractPath() normalizes for matching against content_inventory URLs |
+| 3 | Pipeline continues on partial data source failures | If HubSpot/GSC/GA4 not configured or fails, that step is skipped and logged; other steps proceed |
+| 4 | Used claude-haiku-4-5 for AI topic angle generation | Cost-effective for bulk generation (up to 30 topics per batch); model ID `claude-haiku-4-5-20251001` |
+| 4 | Seed clusters capped at top 3 seeds per cluster for API calls | Limits DataforSEO API credit consumption per batch while still getting good keyword coverage |
+| 4 | Competitor gap keywords get +10 score boost | Per PRD: "These get a score boost (they represent proven demand our competitors are capturing)" |
+| 4 | Keyword clustering uses shared significant words (2+) | Stop words filtered out; substring matching as fallback; max 5 supporting keywords per cluster |
+| 5 | SVG-based charts instead of recharts library | PRD mentions recharts but CLAUDE.md prohibits installing unlisted packages; inline SVG achieves same visual without dependency |
+| 5 | Domain context via React context + localStorage | Selected domain persists across page navigations and browser sessions; DomainProvider wraps AppShell |
+| 5 | Stitch designs successfully fetched via MCP | Used Stitch MCP tools to get screen HTML, then adapted to React/Next.js components with lucide-react icons |
+| 5 | All dashboard API queries run in parallel via Promise.all | Dashboard stats endpoint runs 8 queries simultaneously for fast page load |
+| 5 | Topic status history tracked as JSONB array | Each approve/reject appends to statusHistoryJson with changedBy, changedAt, and optional rejectionReason |
+| 6 | Used claude-haiku-4-5 for validator AI analysis | Same model as batch topic generation; cost-effective for on-demand validation with 800 max_tokens |
+| 6 | Fallback heuristic scoring when AI unavailable | Simple volume/difficulty formula gives approximate score if Anthropic credentials missing or API fails |
+| 6 | DataforSEO calls parallelized in validator | keyword suggestions, SERP results, and related keywords fetched via Promise.all for faster response |
+| 6 | Cannibalisation check uses first 3 words of topic | ilike query with first 3 keyword words joined by % wildcard matches against content_inventory titles |
+| 6 | Vercel cron set to Monday 5:00 UTC | Equals 6:00 AM WAT (West Africa Time) per PRD requirement |
 
 ### Known Issues
-*(Track bugs, incomplete items, or things to revisit. Carry between sessions.)*
 
 | Issue | Session Found | Status |
 |-------|--------------|--------|
-| — | — | — |
+| Next.js 16 deprecates `middleware` in favour of `proxy` convention | 1 | Monitor — middleware still works, evaluate migration later |
+| Stitch design URLs could not be resolved | 2 | Resolved in Session 5 — Stitch MCP tools used to fetch HTML, designs integrated |
 
 ---
 

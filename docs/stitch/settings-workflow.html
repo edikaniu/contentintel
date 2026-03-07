@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ContentIntel - Workflow Settings</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#3730A3",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#1E293B",
+                        "emerald": "#059669",
+                        "amber": "#D97706",
+                        "error": "#DC2626",
+                        "slate-custom": "#1E293B"
+                    },
+                    fontFamily: {
+                        "display": ["Public Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Public Sans', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100">
+<div class="flex h-screen overflow-hidden">
+<!-- Sidebar -->
+<aside class="w-64 bg-[#0F172A] flex flex-col h-full border-r border-slate-800">
+<div class="p-6 flex items-center gap-3"><div class="bg-primary p-2 rounded-lg"><span class="material-symbols-outlined text-white">analytics</span></div><div><h1 class="text-white text-base font-bold leading-none uppercase tracking-tight">ContentIntel</h1></div></div>
+<div class="px-4 mb-4"><div class="text-slate-500 text-[10px] uppercase font-bold tracking-wider mb-2">PROJECT</div><button class="w-full flex items-center justify-between bg-slate-800/50 border border-slate-700/50 px-3 py-2 rounded-lg"><div class="flex flex-col items-start gap-0.5"><span class="text-white text-sm font-medium">NairaCompare</span></div><span class="material-symbols-outlined text-slate-400 text-sm">unfold_more</span></button></div>
+<nav class="flex-1 px-3 space-y-1"><div class="text-slate-500 text-[10px] uppercase font-bold tracking-wider px-3 py-2 mt-2">MAIN</div><a class="flex items-center gap-3 px-3 py-2 text-slate-300 hover:bg-slate-800 rounded-lg transition-colors" href="#"><span class="material-symbols-outlined text-[20px]">grid_view</span><span class="text-sm">Overview</span></a><a class="flex items-center gap-3 px-3 py-2 text-slate-300 hover:bg-slate-800 rounded-lg transition-colors" href="#"><span class="material-symbols-outlined text-[20px]">lightbulb</span><span class="text-sm">Recommendations</span></a><a class="flex items-center gap-3 px-3 py-2 text-slate-300 hover:bg-slate-800 rounded-lg transition-colors" href="#"><span class="material-symbols-outlined text-[20px]">monitoring</span><span class="text-sm">Content Health</span></a><a class="flex items-center gap-3 px-3 py-2 text-slate-300 hover:bg-slate-800 rounded-lg transition-colors" href="#"><span class="material-symbols-outlined text-[20px]">rule</span><span class="text-sm">Validate Topic</span></a><div class="text-slate-500 text-[10px] uppercase font-bold tracking-wider px-3 py-2 mt-6">MANAGE</div><a class="flex items-center gap-3 px-3 py-2 bg-primary text-white rounded-lg transition-colors" href="#"><span class="material-symbols-outlined text-[20px]">settings</span><span class="text-sm font-medium">Settings</span></a></nav>
+<div class="p-4 border-t border-slate-700"><div class="flex items-center gap-3 px-2 py-2"><div class="w-8 h-8 rounded-full bg-slate-600 overflow-hidden"><img alt="User" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCnodR2LCggy2AP_3JfvK-f5LMATkdlyHFlv5J_EWXxvzlPJB1vP1Ge8wa-bwPIePtDuiKxDtWVfRywS98O6c2F_IUYklHqVlf1opLhobGWSv-SE1MQqNZJY5D0TMIe_thuJnIP7T-XdWDT01TzvXYZSOibtJ1Sj2LFPc5wEUSvPELjALR70Oy6uhpjqtxzOBwxdKmPOiPu3ZHuQmME9w_rlInQhSE-liQnqcm9IIFCwnZ0ix8VNXycBpxe9C-6ZOBdxXg_3L27cmg"/></div><div class="flex-1 min-w-0"><p class="text-white text-xs font-medium truncate">Tunde Adebayo</p><p class="text-slate-400 text-[9px] uppercase tracking-wider truncate">ADMINISTRATOR</p></div><span class="material-symbols-outlined text-slate-500 text-lg">logout</span></div></div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col bg-slate-50 dark:bg-slate-900 overflow-y-auto">
+<!-- Header -->
+<header class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 h-16 flex items-center justify-between px-8 shrink-0">
+<nav class="flex items-center gap-2 text-sm"><span class="text-slate-500">Settings</span><span class="text-slate-300">/</span><span class="text-primary font-medium">Workflow</span></nav>
+<div class="flex items-center gap-4">
+<div class="bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-lg flex items-center gap-2 text-xs font-medium text-slate-600 dark:text-slate-400"><div class="border border-slate-200 dark:border-slate-800 px-3 py-1.5 rounded flex items-center gap-2 text-xs font-medium text-slate-700 dark:text-slate-300"><span class="material-symbols-outlined text-sm text-slate-400">calendar_today</span>Last 4 weeks<span class="material-symbols-outlined text-sm text-slate-400">expand_more</span></div></div>
+<button class="relative p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full border-2 border-white dark:border-slate-900"></span>
+</button>
+<div class="w-8 h-8 rounded-full border-2 border-primary/20 p-0.5">
+<div class="w-full h-full rounded-full bg-slate-200 overflow-hidden">
+<img alt="Avatar" data-alt="Small avatar of a professional person" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCnodR2LCggy2AP_3JfvK-f5LMATkdlyHFlv5J_EWXxvzlPJB1vP1Ge8wa-bwPIePtDuiKxDtWVfRywS98O6c2F_IUYklHqVlf1opLhobGWSv-SE1MQqNZJY5D0TMIe_thuJnIP7T-XdWDT01TzvXYZSOibtJ1Sj2LFPc5wEUSvPELjALR70Oy6uhpjqtxzOBwxdKmPOiPu3ZHuQmME9w_rlInQhSE-liQnqcm9IIFCwnZ0ix8VNXycBpxe9C-6ZOBdxXg_3L27cmg"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Sub Navigation -->
+<div class="bg-white dark:bg-slate-900 px-8 border-b border-slate-200 dark:border-slate-800 shrink-0">
+<div class="flex gap-8">
+<a class="py-4 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors" href="#">Connections</a>
+<a class="py-4 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors" href="#">Domains</a>
+<a class="py-4 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors" href="#">Team</a>
+<a class="py-4 text-sm font-bold text-primary border-b-2 border-primary" href="#">Workflow</a>
+</div>
+</div>
+<!-- Content Area -->
+<div class="p-8 max-w-5xl">
+<div class="mb-8">
+<h2 class="text-2xl font-bold text-slate-900 dark:text-slate-100">Approval Workflow</h2>
+<p class="text-slate-500 mt-1">Manage your content approval pipeline and automated transitions.</p>
+</div>
+<!-- Pipeline Visualization -->
+<div class="bg-white dark:bg-slate-800 p-8 rounded-xl border border-slate-200 dark:border-slate-700 mb-8">
+<div class="flex items-center justify-between max-w-2xl mx-auto">
+<div class="flex flex-col items-center gap-3">
+<div class="bg-amber/10 text-amber px-6 py-2 rounded-full font-bold text-sm border border-amber/20">Pending</div>
+<span class="text-[10px] text-slate-400 uppercase font-bold tracking-tighter">Creation</span>
+</div>
+<div class="flex-1 flex justify-center text-slate-300">
+<span class="material-symbols-outlined text-4xl">trending_flat</span>
+</div>
+<div class="flex flex-col items-center gap-3">
+<div class="bg-emerald/10 text-emerald px-6 py-2 rounded-full font-bold text-sm border border-emerald/20">Approved</div>
+<span class="text-[10px] text-slate-400 uppercase font-bold tracking-tighter">Live</span>
+</div>
+<div class="flex-1 flex justify-center text-slate-300">
+<span class="material-symbols-outlined text-4xl">trending_flat</span>
+</div>
+<div class="flex flex-col items-center gap-3">
+<div class="bg-error/10 text-error px-6 py-2 rounded-full font-bold text-sm border border-error/20">Rejected</div>
+<span class="text-[10px] text-slate-400 uppercase font-bold tracking-tighter">Archived</span>
+</div>
+</div>
+</div>
+<!-- Info Banner -->
+<div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 mb-8 flex items-start gap-3">
+<span class="material-symbols-outlined text-blue-500 mt-0.5">info</span>
+<div>
+<p class="text-sm text-blue-800 dark:text-blue-300">v1 ships with a simple three-stage workflow. Custom stages and complex logic are coming in a future update.</p>
+</div>
+</div>
+<!-- Configuration Section -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- Pending Card -->
+<div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden opacity-80">
+<div class="p-5 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
+<h3 class="font-bold text-slate-900 dark:text-slate-100">Stage: Pending</h3>
+<span class="material-symbols-outlined text-slate-400 text-sm">lock</span>
+</div>
+<div class="p-5 space-y-4">
+<div>
+<label class="text-[10px] uppercase font-bold text-slate-400 block mb-1">Description</label>
+<p class="text-sm text-slate-600 dark:text-slate-400 italic">Initial stage for newly submitted content.</p>
+</div>
+<div>
+<label class="text-[10px] uppercase font-bold text-slate-400 block mb-1">Transitions</label>
+<div class="flex items-center gap-2 mt-1">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald"></span>
+<span class="text-xs text-slate-500">Auto-transition to 'Approved' on vote</span>
+</div>
+</div>
+<div class="pt-4">
+<button class="w-full py-2 bg-slate-100 dark:bg-slate-700 text-slate-400 rounded-lg text-sm font-medium cursor-not-allowed" disabled="">Locked in v1</button>
+</div>
+</div>
+</div>
+<!-- Approved Card -->
+<div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden opacity-80">
+<div class="p-5 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
+<h3 class="font-bold text-slate-900 dark:text-slate-100">Stage: Approved</h3>
+<span class="material-symbols-outlined text-slate-400 text-sm">lock</span>
+</div>
+<div class="p-5 space-y-4">
+<div>
+<label class="text-[10px] uppercase font-bold text-slate-400 block mb-1">Description</label>
+<p class="text-sm text-slate-600 dark:text-slate-400 italic">Success state. Content is ready for publishing.</p>
+</div>
+<div>
+<label class="text-[10px] uppercase font-bold text-slate-400 block mb-1">Transitions</label>
+<div class="flex items-center gap-2 mt-1">
+<span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+<span class="text-xs text-slate-500">Manual re-evaluation enabled</span>
+</div>
+</div>
+<div class="pt-4">
+<button class="w-full py-2 bg-slate-100 dark:bg-slate-700 text-slate-400 rounded-lg text-sm font-medium cursor-not-allowed" disabled="">Locked in v1</button>
+</div>
+</div>
+</div>
+<!-- Rejected Card -->
+<div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden opacity-80">
+<div class="p-5 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
+<h3 class="font-bold text-slate-900 dark:text-slate-100">Stage: Rejected</h3>
+<span class="material-symbols-outlined text-slate-400 text-sm">lock</span>
+</div>
+<div class="p-5 space-y-4">
+<div>
+<label class="text-[10px] uppercase font-bold text-slate-400 block mb-1">Description</label>
+<p class="text-sm text-slate-600 dark:text-slate-400 italic">Terminal state for failed content items.</p>
+</div>
+<div>
+<label class="text-[10px] uppercase font-bold text-slate-400 block mb-1">Transitions</label>
+<div class="flex items-center gap-2 mt-1">
+<span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+<span class="text-xs text-slate-500">Permanent archival on entry</span>
+</div>
+</div>
+<div class="pt-4">
+<button class="w-full py-2 bg-slate-100 dark:bg-slate-700 text-slate-400 rounded-lg text-sm font-medium cursor-not-allowed" disabled="">Locked in v1</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

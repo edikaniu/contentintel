@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Settings - Connections | ContentIntel</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#3730A3",
+                        "background-light": "#f8fafc",
+                        "background-dark": "#0f172a",
+                        "sidebar-bg": "#1e1b4b"
+                    },
+                    fontFamily: {
+                        "display": ["Public Sans"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Public Sans', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100">
+<div class="flex h-screen overflow-hidden">
+<!-- Sidebar -->
+<aside class="w-64 bg-[#1e1b4b] text-white flex flex-col shrink-0">
+<div class="p-6 flex items-center gap-3">
+<div class="flex items-center gap-3">
+<div class="bg-indigo-600 size-8 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-xl">analytics</span>
+</div>
+<h1 class="text-white text-lg font-bold leading-none tracking-tight">ContentIntel</h1>
+</div>
+</div>
+<div class="px-4 mb-6">
+<div class="bg-white/5 border border-white/10 rounded-lg p-3 flex items-center justify-between cursor-pointer hover:bg-white/10 transition-colors">
+<div class="flex flex-col">
+<span class="text-[10px] text-slate-400 uppercase font-bold tracking-widest">Project</span>
+<span class="text-sm font-medium">NairaCompare</span>
+</div>
+<span class="material-symbols-outlined text-slate-400">unfold_more</span>
+</div>
+</div>
+<nav class="flex-1 px-4 space-y-6 overflow-y-auto">
+<div class="space-y-1">
+<p class="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Main</p>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-400 hover:text-white transition-colors rounded-lg group" href="#">
+<span class="material-symbols-outlined group-hover:text-white">dashboard</span>
+<span class="text-sm font-medium">Overview</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-400 hover:text-white transition-colors rounded-lg group" href="#">
+<span class="material-symbols-outlined group-hover:text-white">lightbulb</span>
+<span class="text-sm font-medium">Recommendations</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-400 hover:text-white transition-colors rounded-lg group" href="#">
+<span class="material-symbols-outlined group-hover:text-white">monitor_heart</span>
+<span class="text-sm font-medium">Content Health</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-400 hover:text-white transition-colors rounded-lg group" href="#">
+<span class="material-symbols-outlined group-hover:text-white">rule</span>
+<span class="text-sm font-medium">Validate Topic</span>
+</a>
+</div>
+<div class="space-y-1">
+<p class="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Manage</p>
+<a class="flex items-center gap-3 px-3 py-2 bg-[#3730A3] text-white rounded-lg" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-sm font-medium">Settings</span>
+</a>
+</div>
+</nav>
+<div class="p-4 border-t border-slate-800">
+<div class="flex items-center gap-3 p-2">
+<div class="size-10 rounded-full overflow-hidden border-2 border-slate-700">
+<img class="w-full h-full object-cover" data-alt="User profile avatar showing a professional man" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUJNx0S0INm8Oj4iK5keePgU6YLvMmvQnwYBZMrku1g8vHqTbv0W-3WNhwZTJZSOjC3114VDsXAeZltXSj_Jr2QlOaC35rfFFORky9FpZ7YoZbVOSfrncR5mAZ5lOIN_muj4OW9QpTbH_X8J-cnayJxQqyuqDmmzSpd6VOiYMgL9Jod2TRYhd_ZL_NO199PAn_KbNlPeYvAtEP06L5WoRWHv7RW-RkkXGhktkx6vkn1aDhJ1mw7dF1E0C5kb4IXKzfPPSaSU1IaP4"/>
+</div>
+<div class="flex-1 min-w-0 ml-1">
+<p class="text-sm font-bold truncate">Tunde Adebayo</p>
+<p class="text-[10px] text-slate-500 font-bold truncate uppercase">Administrator</p>
+</div>
+<button class="text-slate-400 hover:text-white transition-colors">
+<span class="material-symbols-outlined">logout</span>
+</button>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col overflow-hidden">
+<!-- Header -->
+<header class="h-16 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-8 bg-white dark:bg-background-dark/50 backdrop-blur-sm z-10">
+<div class="flex items-center gap-4">
+<span class="text-slate-500 text-sm font-medium"><div class="flex items-center gap-2">
+<span class="font-bold text-slate-800 dark:text-slate-200">Settings</span>
+<span class="text-slate-300 dark:text-slate-600">/</span>
+<span class="text-indigo-600 dark:text-indigo-400 font-medium">Domains</span>
+</div></span>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded-lg text-sm text-slate-600 dark:text-slate-300 cursor-pointer">
+<span class="material-symbols-outlined text-slate-400 text-lg">calendar_today</span>
+<span class="font-medium">Last 4 weeks</span>
+<span class="material-symbols-outlined text-slate-400 text-lg">expand_more</span>
+</div>
+<div class="relative">
+<span class="material-symbols-outlined text-slate-400 cursor-pointer hover:text-indigo-600 transition-colors p-2">notifications</span>
+<span class="absolute top-2 right-2 size-2 bg-rose-500 rounded-full border-2 border-white dark:border-slate-900"></span>
+</div>
+<div class="size-8 rounded-full overflow-hidden cursor-pointer">
+<img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUJNx0S0INm8Oj4iK5keePgU6YLvMmvQnwYBZMrku1g8vHqTbv0W-3WNhwZTJZSOjC3114VDsXAeZltXSj_Jr2QlOaC35rfFFORky9FpZ7YoZbVOSfrncR5mAZ5lOIN_muj4OW9QpTbH_X8J-cnayJxQqyuqDmmzSpd6VOiYMgL9Jod2TRYhd_ZL_NO199PAn_KbNlPeYvAtEP06L5WoRWHv7RW-RkkXGhktkx6vkn1aDhJ1mw7dF1E0C5kb4IXKzfPPSaSU1IaP4"/>
+</div>
+</div>
+</header>
+<!-- Secondary Nav -->
+<div class="bg-white dark:bg-background-dark/30 px-8 border-b border-slate-200 dark:border-slate-800">
+<div class="flex gap-8">
+<a class="py-4 border-b-2 border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 text-sm font-medium transition-all" href="#">Connections</a>
+<a class="py-4 border-b-2 text-sm font-bold flex items-center gap-2 border-indigo-600 text-indigo-600" href="#">
+<span class="material-symbols-outlined text-[18px]">language</span>
+                        Domains
+                    </a>
+<a class="py-4 border-b-2 border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 text-sm font-medium transition-all" href="#">Team</a>
+<a class="py-4 border-b-2 border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 text-sm font-medium transition-all" href="#">Workflow</a>
+</div>
+</div>
+<!-- Scrollable Content -->
+<div class="flex-1 overflow-y-auto p-8 bg-background-light dark:bg-background-dark">
+<div class="max-w-5xl mx-auto space-y-6">
+<!-- Section Header -->
+<div class="flex items-center justify-between mb-2">
+<div class="flex flex-col gap-1">
+<h2 class="text-xl font-bold">Domains</h2>
+<p class="text-slate-500 text-sm">Manage your tracked domains and their associated data sources.</p>
+</div>
+<button class="px-4 py-2 bg-[#3730A3] text-white text-sm font-bold rounded-lg flex items-center gap-2 hover:bg-indigo-800 transition-colors shadow-sm">
+<span class="material-symbols-outlined text-lg">add</span>
+        Add Domain
+    </button>
+</div>
+<!-- Connection Cards Grid -->
+<div class="space-y-4">
+<!-- Domain Card: NairaCompare -->
+<div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+<!-- Card Header -->
+<div class="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="size-12 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center shrink-0 border border-indigo-100 dark:border-indigo-800">
+<span class="material-symbols-outlined text-indigo-600 text-3xl">public</span>
+</div>
+<div>
+<h4 class="text-base font-semibold">NairaCompare</h4>
+<p class="text-sm text-slate-500">nairacompare.ng</p>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2 bg-slate-50 dark:bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 cursor-pointer">
+<span class="text-sm font-medium text-slate-700 dark:text-slate-300">Finance</span>
+<span class="material-symbols-outlined text-slate-400 text-lg">expand_more</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="text-xs font-bold text-slate-400 uppercase">Active</span>
+<div class="w-10 h-5 bg-indigo-600 rounded-full relative cursor-pointer">
+<div class="absolute right-0.5 top-0.5 size-4 bg-white rounded-full"></div>
+</div>
+</div>
+<button class="text-slate-400 hover:text-slate-600">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+</div>
+<div class="p-6 space-y-8">
+<!-- Mapped Sources -->
+<div class="space-y-4">
+<h5 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Mapped Sources</h5>
+<div class="space-y-3">
+<div class="flex items-center justify-between py-2 px-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-emerald-500 text-lg">check_circle</span>
+<span class="text-sm text-slate-700 dark:text-slate-300">GA4 Property: <span class="font-medium">336058071 — Nairacompare.ng</span></span>
+</div>
+<a class="text-xs font-bold text-indigo-600 hover:underline" href="#">Change</a>
+</div>
+<div class="flex items-center justify-between py-2 px-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-emerald-500 text-lg">check_circle</span>
+<span class="text-sm text-slate-700 dark:text-slate-300">Google Search Console: <span class="font-medium">sc-domain:nairacompare.ng</span></span>
+</div>
+<a class="text-xs font-bold text-indigo-600 hover:underline" href="#">Change</a>
+</div>
+<div class="flex items-center justify-between py-2 px-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-emerald-500 text-lg">check_circle</span>
+<span class="text-sm text-slate-700 dark:text-slate-300">HubSpot Blog: <span class="font-medium">/blog-posts</span></span>
+</div>
+<a class="text-xs font-bold text-indigo-600 hover:underline" href="#">Change</a>
+</div>
+</div>
+</div>
+<!-- Competitors & Categories Row -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<div class="space-y-3">
+<h5 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Competitors</h5>
+<div class="flex flex-wrap gap-2 items-center">
+<span class="inline-flex items-center gap-1 px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-full text-xs font-medium border border-slate-200 dark:border-slate-700">
+                            nairametrics.com
+                            <span class="material-symbols-outlined text-sm cursor-pointer hover:text-rose-500">close</span>
+</span>
+<span class="inline-flex items-center gap-1 px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-full text-xs font-medium border border-slate-200 dark:border-slate-700">
+                            punchng.com
+                            <span class="material-symbols-outlined text-sm cursor-pointer hover:text-rose-500">close</span>
+</span>
+<button class="text-xs font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1 ml-2">
+<span class="material-symbols-outlined text-sm">add</span>
+                            Add competitor
+                        </button>
+</div>
+</div>
+<div class="space-y-3">
+<h5 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Content Categories</h5>
+<div class="flex flex-wrap gap-2 items-center">
+<span class="inline-flex items-center gap-1 px-3 py-1 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400 rounded-full text-xs font-medium border border-indigo-100 dark:border-indigo-800">
+                            Personal Finance
+                            <span class="material-symbols-outlined text-sm cursor-pointer">close</span>
+</span>
+<span class="inline-flex items-center gap-1 px-3 py-1 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400 rounded-full text-xs font-medium border border-indigo-100 dark:border-indigo-800">
+                            Banking
+                            <span class="material-symbols-outlined text-sm cursor-pointer">close</span>
+</span>
+<button class="text-xs font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1 ml-2">
+<span class="material-symbols-outlined text-sm">add</span>
+                            Add category
+                        </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Card Footer -->
+<div class="px-6 py-4 bg-slate-50 dark:bg-slate-800/30 border-t border-slate-100 dark:border-slate-800 flex justify-end">
+<button class="px-6 py-2 bg-[#3730A3] text-white text-sm font-bold rounded-lg hover:bg-indigo-800 transition-colors shadow-sm">
+                Save Changes
+            </button>
+</div>
+</div>
+</div><!-- Footer Help Section -->
+<div class="mt-8 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl p-12 flex flex-col items-center text-center bg-slate-50/50 dark:bg-slate-900/20">
+<div class="size-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-slate-400 text-2xl">help</span>
+</div>
+<h3 class="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2">Need help with mapping?</h3>
+<p class="text-slate-500 text-sm max-w-md mb-4">
+        Check out our guide on how to correctly map your data sources for maximum insights.
+    </p>
+<a class="text-indigo-600 dark:text-indigo-400 font-bold text-sm flex items-center gap-1 hover:gap-2 transition-all" href="#">
+        View Documentation <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</a>
+</div>
+<!-- Footer Help -->
+</div>
+</div>
+</main>
+</div>
+</body></html>
