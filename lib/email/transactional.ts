@@ -63,6 +63,23 @@ export async function sendWaitlistConfirmationEmail(params: {
   });
 }
 
+export async function sendWelcomeEmail(params: {
+  to: string;
+  name: string;
+}) {
+  await getResend().emails.send({
+    from: FROM_EMAIL,
+    to: params.to,
+    subject: "Welcome to ContentIntel!",
+    html: `
+      <h2>Welcome aboard, ${params.name}!</h2>
+      <p>Your ContentIntel account is ready. You can now log in and start discovering content opportunities for your organisation.</p>
+      <p><a href="${process.env.NEXTAUTH_URL}/login" style="display:inline-block;padding:12px 24px;background:#3730A3;color:#fff;text-decoration:none;border-radius:6px;">Go to Dashboard</a></p>
+      <p style="color:#666;font-size:14px;">Need help getting started? Check out the onboarding wizard after you log in.</p>
+    `,
+  });
+}
+
 export async function sendBetaInviteEmail(params: {
   to: string;
   name: string;

@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { organisations, users } from "@/lib/db/schema";
 import { validateWaitlistInvite, markWaitlistSignedUp } from "@/lib/auth/invite";
+import { sendWelcomeEmail } from "@/lib/email/transactional";
 
 export async function POST(req: NextRequest) {
   try {
@@ -114,6 +115,11 @@ export async function POST(req: NextRequest) {
     if (inviteToken) {
       await markWaitlistSignedUp(inviteToken);
     }
+
+    // Send welcome email (fire-and-forget, don't block signup)
+    sendWelcomeEmail({ to: normalizedEmail, name }).catch((err) =>
+      console.error("Failed to send welcome email:", err)
+    );
 
     return NextResponse.json(
       {
