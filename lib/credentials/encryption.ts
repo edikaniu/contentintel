@@ -9,7 +9,13 @@ function getKey(): Buffer {
   if (!key) {
     throw new Error("ENCRYPTION_KEY environment variable is not set");
   }
-  return Buffer.from(key, "hex");
+  const buf = Buffer.from(key, "hex");
+  if (buf.length !== 32) {
+    throw new Error(
+      `ENCRYPTION_KEY must be 64 hex characters (32 bytes) for AES-256-GCM, got ${key.length} characters (${buf.length} bytes)`
+    );
+  }
+  return buf;
 }
 
 /**
