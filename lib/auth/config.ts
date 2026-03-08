@@ -35,7 +35,10 @@ declare module "next-auth/jwt" {
   }
 }
 
+const useSecureCookies = !!process.env.VERCEL || !!process.env.NEXTAUTH_URL?.startsWith("https://");
+
 export const authOptions: NextAuthOptions = {
+  useSecureCookies,
   providers: [
     CredentialsProvider({
       name: "credentials",

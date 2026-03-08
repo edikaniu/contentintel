@@ -3,27 +3,14 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export async function middleware(req: NextRequest) {
-  const allCookies = req.cookies.getAll().map((c) => c.name);
-  const hasSessionCookie =
-    allCookies.includes("__Secure-next-auth.session-token") ||
-    allCookies.includes("next-auth.session-token");
-  const hasSecret = !!process.env.NEXTAUTH_SECRET;
+  const secureCookie = !!process.env.VERCEL || !!process.env.NEXTAUTH_URL?.startsWith("https://");
 
   let token = null;
-  let tokenError = "";
   try {
-    token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-  } catch (e) {
-    tokenError = e instanceof Error ? e.message : String(e);
+    token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET, secureCookie });
+  } catch {
+    // token remains null
   }
-
-  console.log("[middleware]", req.nextUrl.pathname, {
-    cookieNames: allCookies,
-    hasSessionCookie,
-    hasSecret,
-    tokenFound: !!token,
-    tokenError: tokenError || undefined,
-  });
 
   if (!token) {
     const signInUrl = new URL("/login", req.url);
