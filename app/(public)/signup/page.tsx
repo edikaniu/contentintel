@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
@@ -16,7 +16,7 @@ export default function SignupPage() {
 
 function SignupForm() {
   const searchParams = useSearchParams();
-  const inviteToken = searchParams.get("invite");
+  const inviteToken = searchParams.get("invite") || searchParams.get("token");
   const router = useRouter();
 
   const [name, setName] = useState("");
@@ -25,9 +25,33 @@ function SignupForm() {
   const [orgName, setOrgName] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [checkingAccess, setCheckingAccess] = useState(!inviteToken);
+  const [closedBeta, setClosedBeta] = useState(false);
+
+  // Check signup access from server when no invite token
+  useEffect(() => {
+    if (inviteToken) return;
+    fetch("/api/auth/signup-access")
+      .then((res) => res.json())
+      .then((data) => {
+        setClosedBeta(!data.open);
+      })
+      .catch(() => {
+        setClosedBeta(true);
+      })
+      .finally(() => setCheckingAccess(false));
+  }, [inviteToken]);
+
+  if (checkingAccess) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC]">
+        <p className="text-slate-500">Loading...</p>
+      </div>
+    );
+  }
 
   // If no invite token and closed beta, show waitlist message
-  if (!inviteToken && process.env.NEXT_PUBLIC_OPEN_SIGNUP !== "true") {
+  if (!inviteToken && closedBeta) {
     return (
       <div className="min-h-screen flex flex-col bg-[#F8FAFC]">
         <header className="w-full flex justify-center py-8">
