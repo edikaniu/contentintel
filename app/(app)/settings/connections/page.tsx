@@ -76,6 +76,7 @@ export default function ConnectionsPage() {
         setEditingProvider(null);
         setFormValues({});
         await fetchCredentials();
+        handleTest(provider);
       }
     } finally { setSaving(false); }
   }
