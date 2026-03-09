@@ -4,7 +4,7 @@ function getResend() {
   return new Resend(process.env.RESEND_API_KEY);
 }
 
-const FROM_EMAIL = "ContentIntel <noreply@contentintel.app>";
+const FROM_EMAIL = "ContentIntel <onboarding@resend.dev>";
 
 export async function sendTeamInviteEmail(params: {
   to: string;
