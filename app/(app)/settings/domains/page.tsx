@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Globe, Plus, X, ChevronDown, MoreVertical, CheckCircle, HelpCircle, ArrowRight } from "lucide-react";
+import { Globe, Plus, X, ChevronDown, MoreVertical, CheckCircle, HelpCircle, ArrowRight, RefreshCw, Loader2, FileText } from "lucide-react";
 import { SettingsSubNav } from "@/components/settings-sub-nav";
 
 interface Competitor {
@@ -23,6 +23,13 @@ interface Domain {
   competitors: Competitor[];
 }
 
+interface HubSpotBlog {
+  id: string;
+  name: string;
+  slug: string;
+  absoluteUrl: string;
+}
+
 export default function DomainsPage() {
   const [domains, setDomains] = useState<Domain[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,6 +45,16 @@ export default function DomainsPage() {
   // Competitor add
   const [addingComp, setAddingComp] = useState<string | null>(null);
   const [compInput, setCompInput] = useState("");
+
+  // HubSpot blog selector
+  const [hubspotBlogs, setHubspotBlogs] = useState<HubSpotBlog[]>([]);
+  const [loadingBlogs, setLoadingBlogs] = useState(false);
+  const [selectingBlog, setSelectingBlog] = useState<string | null>(null);
+  const [blogError, setBlogError] = useState("");
+
+  // Sync
+  const [syncing, setSyncing] = useState(false);
+  const [syncResult, setSyncResult] = useState<{ success: boolean; message: string } | null>(null);
 
   useEffect(() => { fetchDomains(); }, []);
 
@@ -102,6 +119,55 @@ export default function DomainsPage() {
     } catch { /* ignore */ }
   }
 
+  async function fetchHubSpotBlogs(domainId: string) {
+    setSelectingBlog(domainId);
+    setBlogError("");
+    if (hubspotBlogs.length > 0) return; // already loaded
+    setLoadingBlogs(true);
+    try {
+      const res = await fetch("/api/hubspot/blogs");
+      if (res.ok) {
+        const data = await res.json();
+        setHubspotBlogs(data.blogs);
+      } else {
+        const data = await res.json();
+        setBlogError(data.error || "Failed to fetch blogs");
+      }
+    } catch {
+      setBlogError("Failed to fetch HubSpot blogs");
+    } finally { setLoadingBlogs(false); }
+  }
+
+  async function handleSelectBlog(domainId: string, blogId: string) {
+    try {
+      const res = await fetch(`/api/domains/${domainId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ hubspotBlogId: blogId }),
+      });
+      if (res.ok) {
+        setSelectingBlog(null);
+        await fetchDomains();
+      }
+    } catch { /* ignore */ }
+  }
+
+  async function handleSync() {
+    setSyncing(true);
+    setSyncResult(null);
+    try {
+      const res = await fetch("/api/batch/run", { method: "POST" });
+      const data = await res.json();
+      if (res.ok) {
+        setSyncResult({ success: true, message: `Sync complete. ${data.summary?.contentSynced ?? 0} content items synced.` });
+      } else {
+        setSyncResult({ success: false, message: data.error || "Sync failed" });
+      }
+    } catch {
+      setSyncResult({ success: false, message: "Sync request failed" });
+    } finally { setSyncing(false); }
+  }
+
   if (loading) return <div className="p-8 text-slate-500">Loading...</div>;
 
   return (
@@ -117,14 +183,31 @@ export default function DomainsPage() {
               <h2 className="text-xl font-bold text-slate-900">Domains</h2>
               <p className="text-slate-500 text-sm">Manage your tracked domains and their associated data sources.</p>
             </div>
-            <button
-              onClick={() => setShowAdd(!showAdd)}
-              className="px-4 py-2 bg-[#3730A3] text-white text-sm font-bold rounded-lg flex items-center gap-2 hover:bg-indigo-800 transition-colors shadow-sm"
-            >
-              <Plus className="w-[18px] h-[18px]" />
-              Add Domain
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleSync}
+                disabled={syncing}
+                className="px-4 py-2 bg-white border border-slate-200 text-slate-700 text-sm font-bold rounded-lg flex items-center gap-2 hover:bg-slate-50 transition-colors disabled:opacity-50"
+              >
+                {syncing ? <Loader2 className="w-[18px] h-[18px] animate-spin" /> : <RefreshCw className="w-[18px] h-[18px]" />}
+                {syncing ? "Syncing..." : "Sync Now"}
+              </button>
+              <button
+                onClick={() => setShowAdd(!showAdd)}
+                className="px-4 py-2 bg-[#3730A3] text-white text-sm font-bold rounded-lg flex items-center gap-2 hover:bg-indigo-800 transition-colors shadow-sm"
+              >
+                <Plus className="w-[18px] h-[18px]" />
+                Add Domain
+              </button>
+            </div>
           </div>
+
+          {/* Sync Result Banner */}
+          {syncResult && (
+            <div className={`px-4 py-3 rounded-lg text-sm font-medium ${syncResult.success ? "bg-emerald-50 text-emerald-800 border border-emerald-200" : "bg-red-50 text-red-700 border border-red-200"}`}>
+              {syncResult.message}
+            </div>
+          )}
 
           {/* Add Domain Form */}
           {showAdd && (
@@ -212,16 +295,69 @@ export default function DomainsPage() {
                           <button className="text-xs font-bold text-indigo-600 hover:underline">Change</button>
                         </div>
                       )}
-                      {d.hubspotBlogId && (
+
+                      {/* HubSpot Blog — with selector */}
+                      {d.hubspotBlogId && selectingBlog !== d.id && (
                         <div className="flex items-center justify-between py-2 px-3 bg-slate-50 rounded-lg">
                           <div className="flex items-center gap-3">
                             <CheckCircle className="w-[18px] h-[18px] text-emerald-500" />
-                            <span className="text-sm text-slate-700">HubSpot Blog: <span className="font-medium">{d.hubspotBlogId}</span></span>
+                            <span className="text-sm text-slate-700">HubSpot Blog: <span className="font-medium">
+                              {hubspotBlogs.find(b => b.id === d.hubspotBlogId)?.name || d.hubspotBlogId}
+                            </span></span>
                           </div>
-                          <button className="text-xs font-bold text-indigo-600 hover:underline">Change</button>
+                          <button onClick={() => fetchHubSpotBlogs(d.id)} className="text-xs font-bold text-indigo-600 hover:underline">Change</button>
                         </div>
                       )}
-                      {!d.ga4AccountId && !d.gscProperty && !d.hubspotBlogId && (
+                      {!d.hubspotBlogId && selectingBlog !== d.id && (
+                        <button
+                          onClick={() => fetchHubSpotBlogs(d.id)}
+                          className="flex items-center gap-3 py-2 px-3 rounded-lg border border-dashed border-slate-300 hover:border-indigo-300 hover:bg-indigo-50/50 transition-colors w-full text-left"
+                        >
+                          <FileText className="w-[18px] h-[18px] text-slate-400" />
+                          <span className="text-sm text-slate-500">Connect HubSpot Blog</span>
+                        </button>
+                      )}
+
+                      {/* Blog selector dropdown */}
+                      {selectingBlog === d.id && (
+                        <div className="py-3 px-3 bg-indigo-50/50 rounded-lg border border-indigo-200 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-bold text-slate-500 uppercase">Select HubSpot Blog</span>
+                            <button onClick={() => { setSelectingBlog(null); setBlogError(""); }} className="text-xs text-slate-400 hover:text-slate-600">Cancel</button>
+                          </div>
+                          {loadingBlogs && (
+                            <div className="flex items-center gap-2 py-2 text-sm text-slate-500">
+                              <Loader2 className="w-4 h-4 animate-spin" /> Loading blogs from HubSpot...
+                            </div>
+                          )}
+                          {blogError && <p className="text-xs text-red-600">{blogError}</p>}
+                          {!loadingBlogs && hubspotBlogs.length === 0 && !blogError && (
+                            <p className="text-xs text-slate-500 py-1">No blogs found. Make sure HubSpot is connected and your account has blog content.</p>
+                          )}
+                          {hubspotBlogs.map((blog) => (
+                            <button
+                              key={blog.id}
+                              onClick={() => handleSelectBlog(d.id, blog.id)}
+                              className={`w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-white transition-colors border ${
+                                d.hubspotBlogId === blog.id ? "border-indigo-400 bg-white" : "border-transparent"
+                              }`}
+                            >
+                              <span className="font-medium text-slate-800">{blog.name}</span>
+                              {blog.absoluteUrl && <span className="text-slate-400 ml-2 text-xs">{blog.absoluteUrl}</span>}
+                            </button>
+                          ))}
+                          {d.hubspotBlogId && (
+                            <button
+                              onClick={() => handleSelectBlog(d.id, "")}
+                              className="text-xs font-bold text-rose-600 hover:text-rose-700 mt-1"
+                            >
+                              Disconnect Blog
+                            </button>
+                          )}
+                        </div>
+                      )}
+
+                      {!d.ga4AccountId && !d.gscProperty && !d.hubspotBlogId && selectingBlog !== d.id && (
                         <p className="text-sm text-slate-400 italic py-2 px-3">No data sources mapped yet.</p>
                       )}
                     </div>

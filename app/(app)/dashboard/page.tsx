@@ -161,6 +161,8 @@ export default function DashboardPage() {
   const [batchMessage, setBatchMessage] = useState<string | null>(null);
 
   // Fetch dashboard data
+  const [refreshKey, setRefreshKey] = useState(0);
+
   useEffect(() => {
     if (!selectedDomainId) {
       setLoading(false);
@@ -189,7 +191,7 @@ export default function DashboardPage() {
     return () => {
       cancelled = true;
     };
-  }, [selectedDomainId]);
+  }, [selectedDomainId, refreshKey]);
 
   const runBatch = useCallback(async () => {
     setBatchRunning(true);
@@ -198,7 +200,9 @@ export default function DashboardPage() {
       const res = await fetch("/api/batch/run", { method: "POST" });
       const json = await res.json();
       if (res.ok) {
-        setBatchMessage("Batch started successfully");
+        setBatchMessage("Batch completed successfully");
+        // Re-fetch dashboard stats to show new data
+        setRefreshKey((k) => k + 1);
       } else {
         setBatchMessage(json.error ?? "Batch failed");
       }
