@@ -1,3 +1,4 @@
+import { eq, and } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { domains, topicRecommendations } from "@/lib/db/schema";
 import { getDataForSEOClient } from "@/lib/data-sources/dataforseo";
@@ -54,21 +55,6 @@ export async function runTopicDiscovery(
 
   const seenKeywords = new Set<string>();
   const minVolume = 100;
-
-  // Include seed keywords themselves as candidates (they're already relevant — domain ranks for them)
-  for (const seed of seedResult.seeds) {
-    const key = seed.keyword.toLowerCase();
-    if (!seenKeywords.has(key)) {
-      seenKeywords.add(key);
-      allExpandedKeywords.push({
-        keyword: seed.keyword,
-        searchVolume: seed.searchVolume,
-        keywordDifficulty: 0,
-        cpc: 0,
-        trendData: [],
-      });
-    }
-  }
 
   // Expand each seed cluster (pick top seeds per cluster to limit API calls)
   for (const [, clusterSeeds] of seedClusters) {
@@ -165,9 +151,28 @@ export async function runTopicDiscovery(
     }))
   );
 
-  // Step 8: Save topic recommendations
+  // Step 8: Save topic recommendations (skip duplicates)
+  // Fetch existing pending/approved topics for this domain to avoid duplicates
+  const existingTopics = await db
+    .select({ primaryKeyword: topicRecommendations.primaryKeyword })
+    .from(topicRecommendations)
+    .where(
+      and(
+        eq(topicRecommendations.domainId, domain.id),
+        eq(topicRecommendations.status, "pending")
+      )
+    );
+  const existingKeywords = new Set(
+    existingTopics.map((t) => t.primaryKeyword.toLowerCase())
+  );
+
   let topicsGenerated = 0;
   for (const cluster of clusters) {
+    // Skip if this topic already exists as pending
+    if (existingKeywords.has(cluster.primaryKeyword.toLowerCase())) {
+      continue;
+    }
+
     const aiData = aiResult.results.get(cluster.primaryKeyword);
     const serpData = serpDataMap.get(cluster.primaryKeyword);
 

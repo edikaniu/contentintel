@@ -78,16 +78,11 @@ export async function getWindsorClient(orgId: string) {
       dateFrom: string,
       dateTo: string
     ): Promise<WindsorResult<GSCPageData[]>> {
-      const params = new URLSearchParams({
-        connector: "searchconsole",
-        fields: "page,query,clicks,impressions,ctr,position",
-        date_from: dateFrom,
-        date_to: dateTo,
-        account_id: gscProperty,
-      });
+      // Build query string manually — URLSearchParams encodes commas/colons which Windsor rejects
+      const qs = `connector=searchconsole&fields=page,query,clicks,impressions,ctr,position&date_from=${dateFrom}&date_to=${dateTo}&account_id=${gscProperty}`;
 
       const result = await request<{ data?: Array<Record<string, unknown>> }>(
-        `/all?${params.toString()}`
+        `/all?${qs}`
       );
 
       if (!result.success || !result.data) {
@@ -115,16 +110,11 @@ export async function getWindsorClient(orgId: string) {
       dateFrom: string,
       dateTo: string
     ): Promise<WindsorResult<GA4PageData[]>> {
-      const params = new URLSearchParams({
-        connector: "googleanalytics4",
-        fields: "page_path,sessions,users,engagement_rate,bounce_rate",
-        date_from: dateFrom,
-        date_to: dateTo,
-        account_id: ga4AccountId,
-      });
+      // Build query string manually — URLSearchParams encodes commas which Windsor rejects
+      const qs = `connector=googleanalytics4&fields=page_path,sessions,users,engagement_rate,bounce_rate&date_from=${dateFrom}&date_to=${dateTo}&account_id=${ga4AccountId}`;
 
       const result = await request<{ data?: Array<Record<string, unknown>> }>(
-        `/all?${params.toString()}`
+        `/all?${qs}`
       );
 
       if (!result.success || !result.data) {
