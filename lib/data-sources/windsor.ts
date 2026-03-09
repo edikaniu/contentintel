@@ -150,29 +150,33 @@ export async function getWindsorClient(orgId: string) {
     },
 
     async listConnectedAccounts(): Promise<WindsorResult<WindsorAccount[]>> {
-      const result = await request<
-        Array<{ id: string; accounts?: Array<{ id?: string; name?: string }> }>
-      >("/connectors");
+      // Uses the onboard API (different base URL) to list connected data source accounts
+      try {
+        const url = `https://onboard.windsor.ai/api/common/ds-accounts?datasource=all&api_key=${apiKey}`;
+        const res = await fetch(url);
 
-      if (!result.success || !result.data) {
-        return { success: false, error: result.error ?? "No data returned" };
-      }
-
-      const connectors = Array.isArray(result.data) ? result.data : [];
-      const accounts: WindsorAccount[] = [];
-
-      for (const connector of connectors) {
-        const connectorId = connector.id;
-        for (const acct of connector.accounts ?? []) {
-          accounts.push({
-            id: acct.id ?? "",
-            name: acct.name ?? acct.id ?? "",
-            type: connectorId,
-          });
+        if (!res.ok) {
+          return {
+            success: false,
+            error: `Windsor API error: ${res.status} ${res.statusText}`,
+          };
         }
-      }
 
-      return { success: true, data: accounts };
+        const json = await res.json();
+        const items = Array.isArray(json) ? json : json.data ?? json.accounts ?? [];
+        const accounts: WindsorAccount[] = items.map((item: Record<string, unknown>) => ({
+          id: String(item.account_id ?? item.id ?? ""),
+          name: String(item.account_name ?? item.name ?? item.account_id ?? item.id ?? ""),
+          type: String(item.datasource ?? item.ds_id ?? item.type ?? ""),
+        }));
+
+        return { success: true, data: accounts };
+      } catch (err) {
+        return {
+          success: false,
+          error: err instanceof Error ? err.message : "Failed to fetch Windsor accounts",
+        };
+      }
     },
   };
 }

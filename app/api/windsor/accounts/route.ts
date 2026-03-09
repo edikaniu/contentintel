@@ -23,16 +23,25 @@ export async function GET() {
       );
     }
 
-    // Separate into GSC and GA4 accounts
+    // Log raw accounts for debugging
+    console.log("[Windsor Accounts] Raw accounts:", JSON.stringify(result.data));
+
+    // Separate into GSC and GA4 accounts (match various datasource type names)
     const gscAccounts = result.data
-      .filter((a) => a.type === "searchconsole")
+      .filter((a) => {
+        const t = a.type.toLowerCase();
+        return t.includes("searchconsole") || t.includes("search_console") || t === "gsc";
+      })
       .map((a) => ({ id: a.id, name: a.name || a.id }));
 
     const ga4Accounts = result.data
-      .filter((a) => a.type === "googleanalytics4" || a.type === "ga4")
+      .filter((a) => {
+        const t = a.type.toLowerCase();
+        return t.includes("analytics4") || t.includes("analytics_4") || t === "ga4";
+      })
       .map((a) => ({ id: a.id, name: a.name || a.id }));
 
-    return NextResponse.json({ gscAccounts, ga4Accounts });
+    return NextResponse.json({ gscAccounts, ga4Accounts, allAccounts: result.data });
   } catch (err) {
     console.error("Windsor accounts error:", err);
     return NextResponse.json(
