@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Globe, Plus, X, ChevronDown, MoreVertical, CheckCircle, HelpCircle, ArrowRight, RefreshCw, Loader2, FileText } from "lucide-react";
+import { Globe, Plus, X, ChevronDown, MoreVertical, CheckCircle, HelpCircle, ArrowRight, RefreshCw, Loader2, FileText, Search, BarChart3 } from "lucide-react";
 import { SettingsSubNav } from "@/components/settings-sub-nav";
 
 interface Competitor {
@@ -30,6 +30,11 @@ interface HubSpotBlog {
   absoluteUrl: string;
 }
 
+interface WindsorAccount {
+  id: string;
+  name: string;
+}
+
 export default function DomainsPage() {
   const [domains, setDomains] = useState<Domain[]>([]);
   const [loading, setLoading] = useState(true);
@@ -51,6 +56,15 @@ export default function DomainsPage() {
   const [loadingBlogs, setLoadingBlogs] = useState(false);
   const [selectingBlog, setSelectingBlog] = useState<string | null>(null);
   const [blogError, setBlogError] = useState("");
+
+  // Windsor GSC/GA4 account selector
+  const [gscAccounts, setGscAccounts] = useState<WindsorAccount[]>([]);
+  const [ga4Accounts, setGa4Accounts] = useState<WindsorAccount[]>([]);
+  const [loadingWindsor, setLoadingWindsor] = useState(false);
+  const [windsorLoaded, setWindsorLoaded] = useState(false);
+  const [selectingGsc, setSelectingGsc] = useState<string | null>(null);
+  const [selectingGa4, setSelectingGa4] = useState<string | null>(null);
+  const [windsorError, setWindsorError] = useState("");
 
   // Sync
   const [syncing, setSyncing] = useState(false);
@@ -147,6 +161,66 @@ export default function DomainsPage() {
       });
       if (res.ok) {
         setSelectingBlog(null);
+        await fetchDomains();
+      }
+    } catch { /* ignore */ }
+  }
+
+  async function fetchWindsorAccounts() {
+    if (windsorLoaded) return;
+    setLoadingWindsor(true);
+    setWindsorError("");
+    try {
+      const res = await fetch("/api/windsor/accounts");
+      if (res.ok) {
+        const data = await res.json();
+        setGscAccounts(data.gscAccounts ?? []);
+        setGa4Accounts(data.ga4Accounts ?? []);
+        setWindsorLoaded(true);
+      } else {
+        const data = await res.json();
+        setWindsorError(data.error || "Failed to fetch Windsor accounts");
+      }
+    } catch {
+      setWindsorError("Failed to fetch Windsor accounts");
+    } finally { setLoadingWindsor(false); }
+  }
+
+  async function openGscSelector(domainId: string) {
+    setSelectingGsc(domainId);
+    setSelectingGa4(null);
+    await fetchWindsorAccounts();
+  }
+
+  async function openGa4Selector(domainId: string) {
+    setSelectingGa4(domainId);
+    setSelectingGsc(null);
+    await fetchWindsorAccounts();
+  }
+
+  async function handleSelectGsc(domainId: string, gscProperty: string) {
+    try {
+      const res = await fetch(`/api/domains/${domainId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ gscProperty }),
+      });
+      if (res.ok) {
+        setSelectingGsc(null);
+        await fetchDomains();
+      }
+    } catch { /* ignore */ }
+  }
+
+  async function handleSelectGa4(domainId: string, ga4AccountId: string) {
+    try {
+      const res = await fetch(`/api/domains/${domainId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ga4AccountId }),
+      });
+      if (res.ok) {
+        setSelectingGa4(null);
         await fetchDomains();
       }
     } catch { /* ignore */ }
@@ -277,22 +351,123 @@ export default function DomainsPage() {
                   <div className="space-y-4">
                     <h5 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Mapped Sources</h5>
                     <div className="space-y-3">
-                      {d.ga4AccountId && (
+                      {/* GA4 Property — with selector */}
+                      {d.ga4AccountId && selectingGa4 !== d.id && (
                         <div className="flex items-center justify-between py-2 px-3 bg-slate-50 rounded-lg">
                           <div className="flex items-center gap-3">
                             <CheckCircle className="w-[18px] h-[18px] text-emerald-500" />
-                            <span className="text-sm text-slate-700">GA4 Property: <span className="font-medium">{d.ga4AccountId}</span></span>
+                            <span className="text-sm text-slate-700">GA4 Property: <span className="font-medium">
+                              {ga4Accounts.find(a => a.id === d.ga4AccountId)?.name || d.ga4AccountId}
+                            </span></span>
                           </div>
-                          <button className="text-xs font-bold text-indigo-600 hover:underline">Change</button>
+                          <button onClick={() => openGa4Selector(d.id)} className="text-xs font-bold text-indigo-600 hover:underline">Change</button>
                         </div>
                       )}
-                      {d.gscProperty && (
+                      {!d.ga4AccountId && selectingGa4 !== d.id && (
+                        <button
+                          onClick={() => openGa4Selector(d.id)}
+                          className="flex items-center gap-3 py-2 px-3 rounded-lg border border-dashed border-slate-300 hover:border-indigo-300 hover:bg-indigo-50/50 transition-colors w-full text-left"
+                        >
+                          <BarChart3 className="w-[18px] h-[18px] text-slate-400" />
+                          <span className="text-sm text-slate-500">Connect GA4 Property</span>
+                        </button>
+                      )}
+
+                      {/* GA4 selector dropdown */}
+                      {selectingGa4 === d.id && (
+                        <div className="py-3 px-3 bg-indigo-50/50 rounded-lg border border-indigo-200 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-bold text-slate-500 uppercase">Select GA4 Property</span>
+                            <button onClick={() => { setSelectingGa4(null); setWindsorError(""); }} className="text-xs text-slate-400 hover:text-slate-600">Cancel</button>
+                          </div>
+                          {loadingWindsor && (
+                            <div className="flex items-center gap-2 py-2 text-sm text-slate-500">
+                              <Loader2 className="w-4 h-4 animate-spin" /> Loading accounts from Windsor...
+                            </div>
+                          )}
+                          {windsorError && <p className="text-xs text-red-600">{windsorError}</p>}
+                          {!loadingWindsor && ga4Accounts.length === 0 && !windsorError && (
+                            <p className="text-xs text-slate-500 py-1">No GA4 properties found. Make sure GA4 is connected in your Windsor account.</p>
+                          )}
+                          {ga4Accounts.map((acct) => (
+                            <button
+                              key={acct.id}
+                              onClick={() => handleSelectGa4(d.id, acct.id)}
+                              className={`w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-white transition-colors border ${
+                                d.ga4AccountId === acct.id ? "border-indigo-400 bg-white" : "border-transparent"
+                              }`}
+                            >
+                              <span className="font-medium text-slate-800">{acct.name}</span>
+                              <span className="text-slate-400 ml-2 text-xs">ID: {acct.id}</span>
+                            </button>
+                          ))}
+                          {d.ga4AccountId && (
+                            <button
+                              onClick={() => handleSelectGa4(d.id, "")}
+                              className="text-xs font-bold text-rose-600 hover:text-rose-700 mt-1"
+                            >
+                              Disconnect GA4
+                            </button>
+                          )}
+                        </div>
+                      )}
+
+                      {/* GSC Property — with selector */}
+                      {d.gscProperty && selectingGsc !== d.id && (
                         <div className="flex items-center justify-between py-2 px-3 bg-slate-50 rounded-lg">
                           <div className="flex items-center gap-3">
                             <CheckCircle className="w-[18px] h-[18px] text-emerald-500" />
                             <span className="text-sm text-slate-700">Google Search Console: <span className="font-medium">{d.gscProperty}</span></span>
                           </div>
-                          <button className="text-xs font-bold text-indigo-600 hover:underline">Change</button>
+                          <button onClick={() => openGscSelector(d.id)} className="text-xs font-bold text-indigo-600 hover:underline">Change</button>
+                        </div>
+                      )}
+                      {!d.gscProperty && selectingGsc !== d.id && (
+                        <button
+                          onClick={() => openGscSelector(d.id)}
+                          className="flex items-center gap-3 py-2 px-3 rounded-lg border border-dashed border-slate-300 hover:border-indigo-300 hover:bg-indigo-50/50 transition-colors w-full text-left"
+                        >
+                          <Search className="w-[18px] h-[18px] text-slate-400" />
+                          <span className="text-sm text-slate-500">Connect Google Search Console</span>
+                        </button>
+                      )}
+
+                      {/* GSC selector dropdown */}
+                      {selectingGsc === d.id && (
+                        <div className="py-3 px-3 bg-indigo-50/50 rounded-lg border border-indigo-200 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-bold text-slate-500 uppercase">Select GSC Property</span>
+                            <button onClick={() => { setSelectingGsc(null); setWindsorError(""); }} className="text-xs text-slate-400 hover:text-slate-600">Cancel</button>
+                          </div>
+                          {loadingWindsor && (
+                            <div className="flex items-center gap-2 py-2 text-sm text-slate-500">
+                              <Loader2 className="w-4 h-4 animate-spin" /> Loading accounts from Windsor...
+                            </div>
+                          )}
+                          {windsorError && <p className="text-xs text-red-600">{windsorError}</p>}
+                          {!loadingWindsor && gscAccounts.length === 0 && !windsorError && (
+                            <p className="text-xs text-slate-500 py-1">No GSC properties found. Make sure Search Console is connected in your Windsor account.</p>
+                          )}
+                          {gscAccounts.map((acct) => (
+                            <button
+                              key={acct.id}
+                              onClick={() => handleSelectGsc(d.id, acct.id)}
+                              className={`w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-white transition-colors border ${
+                                d.gscProperty === acct.id ? "border-indigo-400 bg-white" : "border-transparent"
+                              }`}
+                            >
+                              <span className="font-medium text-slate-800">{acct.name}</span>
+                              {acct.id !== acct.name && <span className="text-slate-400 ml-2 text-xs">{acct.id}</span>}
+                            </button>
+                          ))}
+                          {d.gscProperty && (
+                            <button
+                              onClick={() => handleSelectGsc(d.id, "")}
+                              className="text-xs font-bold text-rose-600 hover:text-rose-700 mt-1"
+                            >
+                              Disconnect GSC
+                            </button>
+                          )}
                         </div>
                       )}
 
@@ -357,8 +532,8 @@ export default function DomainsPage() {
                         </div>
                       )}
 
-                      {!d.ga4AccountId && !d.gscProperty && !d.hubspotBlogId && selectingBlog !== d.id && (
-                        <p className="text-sm text-slate-400 italic py-2 px-3">No data sources mapped yet.</p>
+                      {!d.ga4AccountId && !d.gscProperty && !d.hubspotBlogId && selectingBlog !== d.id && selectingGsc !== d.id && selectingGa4 !== d.id && (
+                        <p className="text-sm text-slate-400 italic py-2 px-3">No data sources mapped yet. Use the buttons above to connect your accounts.</p>
                       )}
                     </div>
                   </div>

@@ -151,20 +151,26 @@ export async function getWindsorClient(orgId: string) {
 
     async listConnectedAccounts(): Promise<WindsorResult<WindsorAccount[]>> {
       const result = await request<
-        Array<{ id?: string; name?: string; type?: string }>
-      >("/all");
+        Array<{ id: string; accounts?: Array<{ id?: string; name?: string }> }>
+      >("/connectors");
 
       if (!result.success || !result.data) {
         return { success: false, error: result.error ?? "No data returned" };
       }
 
-      const accounts: WindsorAccount[] = Array.isArray(result.data)
-        ? result.data.map((item) => ({
-            id: item.id ?? "",
-            name: item.name ?? "",
-            type: item.type ?? "",
-          }))
-        : [];
+      const connectors = Array.isArray(result.data) ? result.data : [];
+      const accounts: WindsorAccount[] = [];
+
+      for (const connector of connectors) {
+        const connectorId = connector.id;
+        for (const acct of connector.accounts ?? []) {
+          accounts.push({
+            id: acct.id ?? "",
+            name: acct.name ?? acct.id ?? "",
+            type: connectorId,
+          });
+        }
+      }
 
       return { success: true, data: accounts };
     },
