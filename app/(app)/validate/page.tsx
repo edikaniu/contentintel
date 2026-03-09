@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useState, useEffect, useRef, FormEvent, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { Search, Loader2, Link2, Lock } from "lucide-react";
 import { BriefDisplay } from "@/components/brief-display";
 import { useDomain } from "@/components/domain-context";
@@ -49,7 +50,8 @@ const PROGRESS_STEPS = [
   "Generating AI analysis...",
 ];
 
-export default function ValidateTopicPage() {
+function ValidateTopicPageInner() {
+  const searchParams = useSearchParams();
   const { selectedDomainId, domains } = useDomain();
   const selectedDomain = domains.find((d) => d.id === selectedDomainId) ?? null;
   const [activeTab, setActiveTab] = useState<"text" | "url">("text");
@@ -59,6 +61,15 @@ export default function ValidateTopicPage() {
   const [brief, setBrief] = useState<Brief | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [adding, setAdding] = useState(false);
+  const autoSubmitDone = useRef(false);
+
+  // Pre-fill keyword from URL query param (e.g. ?keyword=best+loans)
+  useEffect(() => {
+    const kw = searchParams.get("keyword");
+    if (kw && !autoSubmitDone.current) {
+      setTopic(kw);
+    }
+  }, [searchParams]);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -275,5 +286,13 @@ export default function ValidateTopicPage() {
         />
       )}
     </div>
+  );
+}
+
+export default function ValidateTopicPage() {
+  return (
+    <Suspense fallback={null}>
+      <ValidateTopicPageInner />
+    </Suspense>
   );
 }

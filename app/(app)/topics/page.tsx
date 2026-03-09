@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { useDomain } from "@/components/domain-context";
 import {
   ChevronDown,
@@ -104,6 +105,7 @@ function getCategoryTags(topic: Topic): { label: string; color: string }[] {
 }
 
 export default function TopicsPage() {
+  const router = useRouter();
   const { selectedDomainId } = useDomain();
 
   const [topics, setTopics] = useState<Topic[]>([]);
@@ -640,7 +642,13 @@ export default function TopicsPage() {
                           <p className="text-sm text-slate-400">No AI outline available</p>
                         )}
                         <div className="mt-4">
-                          <button className="text-sm font-semibold text-indigo-700 hover:text-indigo-800 transition-colors">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              router.push(`/validate?keyword=${encodeURIComponent(topic.primaryKeyword)}`);
+                            }}
+                            className="text-sm font-semibold text-indigo-700 hover:text-indigo-800 transition-colors"
+                          >
                             VIEW FULL BRIEF &rsaquo;
                           </button>
                         </div>

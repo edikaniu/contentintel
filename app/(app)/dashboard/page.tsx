@@ -200,7 +200,23 @@ export default function DashboardPage() {
       const res = await fetch("/api/batch/run", { method: "POST" });
       const json = await res.json();
       if (res.ok) {
-        setBatchMessage("Batch completed successfully");
+        // Build a detailed message from batch results
+        const d = json.domains?.[0];
+        if (d) {
+          const parts: string[] = [];
+          if (d.topics > 0) parts.push(`${d.topics} topics`);
+          if (d.alerts > 0) parts.push(`${d.alerts} alerts`);
+          if (d.snapshots > 0) parts.push(`${d.snapshots} snapshots`);
+          if (d.contentSynced > 0) parts.push(`${d.contentSynced} content synced`);
+          const skipped = (d.skipped ?? []).join("; ");
+          const errors = (d.errors ?? []).join("; ");
+          let msg = parts.length > 0 ? `Batch done: ${parts.join(", ")}` : "Batch completed — no new data generated";
+          if (skipped) msg += ` | Skipped: ${skipped}`;
+          if (errors) msg += ` | Errors: ${errors}`;
+          setBatchMessage(msg);
+        } else {
+          setBatchMessage("Batch completed successfully");
+        }
         // Re-fetch dashboard stats to show new data
         setRefreshKey((k) => k + 1);
       } else {

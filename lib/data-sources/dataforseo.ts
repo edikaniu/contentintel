@@ -136,7 +136,7 @@ export async function getDataForSEOClient(orgId: string) {
       languageCode: number,
       limit: number = 50
     ): Promise<DataForSEOResult<KeywordData[]>> {
-      const result = await request<{ items?: KeywordItemRaw[] }>(
+      const result = await request<{ items?: KeywordItemRaw[]; seed_keyword_data?: KeywordItemRaw }>(
         "/dataforseo_labs/google/keyword_suggestions/live",
         {
           method: "POST",
@@ -154,7 +154,17 @@ export async function getDataForSEOClient(orgId: string) {
         return { success: false, error: result.error ?? "No data returned" };
       }
 
-      return { success: true, data: parseKeywordItems(result.data.items ?? []) };
+      const parsed = parseKeywordItems(result.data.items ?? []);
+
+      // Prepend the seed keyword's own metrics (returned separately by the API)
+      if (result.data.seed_keyword_data) {
+        const seedParsed = parseKeywordItems([result.data.seed_keyword_data]);
+        if (seedParsed.length > 0) {
+          parsed.unshift(seedParsed[0]);
+        }
+      }
+
+      return { success: true, data: parsed };
     },
 
     async getRelatedKeywords(
@@ -163,7 +173,7 @@ export async function getDataForSEOClient(orgId: string) {
       languageCode: number,
       limit: number = 50
     ): Promise<DataForSEOResult<KeywordData[]>> {
-      const result = await request<{ items?: KeywordItemRaw[] }>(
+      const result = await request<{ items?: KeywordItemRaw[]; seed_keyword_data?: KeywordItemRaw }>(
         "/dataforseo_labs/google/related_keywords/live",
         {
           method: "POST",
@@ -180,7 +190,17 @@ export async function getDataForSEOClient(orgId: string) {
         return { success: false, error: result.error ?? "No data returned" };
       }
 
-      return { success: true, data: parseKeywordItems(result.data.items ?? []) };
+      const parsed = parseKeywordItems(result.data.items ?? []);
+
+      // Prepend the seed keyword's own metrics (returned separately by the API)
+      if (result.data.seed_keyword_data) {
+        const seedParsed = parseKeywordItems([result.data.seed_keyword_data]);
+        if (seedParsed.length > 0) {
+          parsed.unshift(seedParsed[0]);
+        }
+      }
+
+      return { success: true, data: parsed };
     },
 
     async getDomainIntersection(

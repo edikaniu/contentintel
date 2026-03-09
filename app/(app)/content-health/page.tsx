@@ -61,6 +61,7 @@ export default function ContentHealthPage() {
   const [priorityFilter, setPriorityFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [rescanning, setRescanning] = useState(false);
 
   const fetchAlerts = useCallback(async () => {
     if (!selectedDomainId) return;
@@ -112,9 +113,17 @@ export default function ContentHealthPage() {
   };
 
   const handleRescan = async () => {
-    // Trigger rescan via the existing batch/cron mechanism
-    // For now, just refetch alerts
-    await fetchAlerts();
+    setRescanning(true);
+    try {
+      const res = await fetch("/api/batch/run", { method: "POST" });
+      if (res.ok) {
+        await fetchAlerts();
+      }
+    } catch {
+      // rescan failed
+    } finally {
+      setRescanning(false);
+    }
   };
 
   // Client-side filters for priority and search
@@ -187,10 +196,11 @@ export default function ContentHealthPage() {
           </button>
           <button
             onClick={handleRescan}
-            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold bg-[#3730A3] text-white hover:bg-indigo-700 rounded-xl transition-all shadow-lg shadow-indigo-600/20"
+            disabled={rescanning}
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold bg-[#3730A3] text-white hover:bg-indigo-700 rounded-xl transition-all shadow-lg shadow-indigo-600/20 disabled:opacity-60"
           >
-            <RefreshCw className="w-4 h-4" />
-            Rescan Now
+            <RefreshCw className={`w-4 h-4 ${rescanning ? "animate-spin" : ""}`} />
+            {rescanning ? "Scanning..." : "Rescan Now"}
           </button>
         </div>
       </div>
