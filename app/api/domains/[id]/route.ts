@@ -4,6 +4,36 @@ import { requireRole } from "@/lib/auth/middleware";
 import { db } from "@/lib/db";
 import { domains } from "@/lib/db/schema";
 
+export async function DELETE(
+  req: NextRequest,
+  ctx: { params: Promise<{ id: string }> }
+) {
+  const { session, error } = await requireRole("admin");
+  if (error) return error;
+
+  try {
+    const { id } = await ctx.params;
+
+    // Verify domain belongs to this org
+    const domain = await db
+      .select({ id: domains.id })
+      .from(domains)
+      .where(and(eq(domains.id, id), eq(domains.orgId, session!.user.orgId)))
+      .then((rows) => rows[0] ?? null);
+
+    if (!domain) {
+      return NextResponse.json({ error: "Domain not found" }, { status: 404 });
+    }
+
+    await db.delete(domains).where(eq(domains.id, id));
+
+    return NextResponse.json({ message: "Domain deleted" });
+  } catch (err) {
+    console.error("Delete domain error:", err);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}
+
 export async function PATCH(
   req: NextRequest,
   ctx: { params: Promise<{ id: string }> }

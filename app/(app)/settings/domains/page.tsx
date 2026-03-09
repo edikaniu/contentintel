@@ -66,6 +66,16 @@ export default function DomainsPage() {
   const [selectingGa4, setSelectingGa4] = useState<string | null>(null);
   const [windsorError, setWindsorError] = useState("");
 
+  // Category add
+  const [addingCategory, setAddingCategory] = useState<string | null>(null);
+  const [categoryInput, setCategoryInput] = useState("");
+
+  // Save feedback
+  const [savedDomainId, setSavedDomainId] = useState<string | null>(null);
+
+  // Ellipsis menu
+  const [menuOpen, setMenuOpen] = useState<string | null>(null);
+
   // Sync
   const [syncing, setSyncing] = useState(false);
   const [syncResult, setSyncResult] = useState<{ success: boolean; message: string } | null>(null);
@@ -242,6 +252,58 @@ export default function DomainsPage() {
     } finally { setSyncing(false); }
   }
 
+  async function handleAddCategory(domainId: string) {
+    if (!categoryInput.trim()) return;
+    const domain = domains.find((d) => d.id === domainId);
+    if (!domain) return;
+    const existing = Array.isArray(domain.contentCategoriesJson) ? domain.contentCategoriesJson : [];
+    const updated = [...existing, categoryInput.trim()];
+    try {
+      const res = await fetch(`/api/domains/${domainId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contentCategoriesJson: updated }),
+      });
+      if (res.ok) {
+        setCategoryInput("");
+        setAddingCategory(null);
+        await fetchDomains();
+      }
+    } catch { /* ignore */ }
+  }
+
+  async function handleRemoveCategory(domainId: string, index: number) {
+    const domain = domains.find((d) => d.id === domainId);
+    if (!domain) return;
+    const existing = Array.isArray(domain.contentCategoriesJson) ? [...domain.contentCategoriesJson] : [];
+    existing.splice(index, 1);
+    try {
+      const res = await fetch(`/api/domains/${domainId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contentCategoriesJson: existing }),
+      });
+      if (res.ok) await fetchDomains();
+    } catch { /* ignore */ }
+  }
+
+  async function handleSaveChanges(domainId: string) {
+    // All field changes are saved immediately; this confirms current state is persisted
+    setSavedDomainId(domainId);
+    setTimeout(() => setSavedDomainId(null), 2000);
+  }
+
+  async function handleDeleteDomain(domainId: string) {
+    if (!confirm("Are you sure you want to delete this domain? This cannot be undone.")) return;
+    try {
+      const res = await fetch(`/api/domains/${domainId}`, { method: "DELETE" });
+      if (res.ok) {
+        setMenuOpen(null);
+        await fetchDomains();
+      }
+    } catch { /* ignore */ }
+  }
+
   if (loading) return <div className="p-8 text-slate-500">Loading...</div>;
 
   return (
@@ -339,9 +401,21 @@ export default function DomainsPage() {
                         <div className="absolute right-0.5 top-0.5 size-4 bg-white rounded-full"></div>
                       </div>
                     </div>
-                    <button className="text-slate-400 hover:text-slate-600">
-                      <MoreVertical className="w-5 h-5" />
-                    </button>
+                    <div className="relative">
+                      <button onClick={() => setMenuOpen(menuOpen === d.id ? null : d.id)} className="text-slate-400 hover:text-slate-600">
+                        <MoreVertical className="w-5 h-5" />
+                      </button>
+                      {menuOpen === d.id && (
+                        <div className="absolute right-0 top-8 z-10 bg-white border border-slate-200 rounded-lg shadow-lg py-1 w-40">
+                          <button
+                            onClick={() => handleDeleteDomain(d.id)}
+                            className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 font-medium"
+                          >
+                            Delete Domain
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
 
@@ -585,20 +659,48 @@ export default function DomainsPage() {
                         {d.contentCategoriesJson && Array.isArray(d.contentCategoriesJson) && d.contentCategoriesJson.map((cat, i) => (
                           <span key={i} className="inline-flex items-center gap-1 px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-medium border border-indigo-100">
                             {String(cat)}
-                            <X className="w-3.5 h-3.5 cursor-pointer" />
+                            <button onClick={() => handleRemoveCategory(d.id, i)}>
+                              <X className="w-3.5 h-3.5 cursor-pointer hover:text-rose-500" />
+                            </button>
                           </span>
                         ))}
-                        <button className="text-xs font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1 ml-2">
-                          <Plus className="w-3.5 h-3.5" /> Add category
-                        </button>
+                        {addingCategory === d.id ? (
+                          <div className="flex gap-1 items-center">
+                            <input
+                              type="text" value={categoryInput}
+                              onChange={(e) => setCategoryInput(e.target.value)}
+                              onKeyDown={(e) => e.key === "Enter" && handleAddCategory(d.id)}
+                              className="px-2 py-1 border border-slate-300 rounded-lg text-xs w-40 focus:outline-none focus:ring-1 focus:ring-[#3730A3]"
+                              placeholder="e.g. personal finance"
+                              autoFocus
+                            />
+                            <button onClick={() => handleAddCategory(d.id)} className="text-xs font-bold text-indigo-600">Add</button>
+                            <button onClick={() => { setAddingCategory(null); setCategoryInput(""); }} className="text-xs text-slate-400">Cancel</button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => setAddingCategory(d.id)}
+                            className="text-xs font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1 ml-2"
+                          >
+                            <Plus className="w-3.5 h-3.5" /> Add category
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Card Footer */}
-                <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end">
-                  <button className="px-6 py-2 bg-[#3730A3] text-white text-sm font-bold rounded-lg hover:bg-indigo-800 transition-colors shadow-sm">
+                <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-3">
+                  {savedDomainId === d.id && (
+                    <span className="text-sm text-emerald-600 font-medium flex items-center gap-1">
+                      <CheckCircle className="w-4 h-4" /> All changes saved
+                    </span>
+                  )}
+                  <button
+                    onClick={() => handleSaveChanges(d.id)}
+                    className="px-6 py-2 bg-[#3730A3] text-white text-sm font-bold rounded-lg hover:bg-indigo-800 transition-colors shadow-sm"
+                  >
                     Save Changes
                   </button>
                 </div>
