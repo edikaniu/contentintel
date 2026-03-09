@@ -79,8 +79,8 @@ export async function getWindsorClient(orgId: string) {
       dateTo: string
     ): Promise<WindsorResult<GSCPageData[]>> {
       const params = new URLSearchParams({
-        connector: "google_search_console",
-        fields: "page,search_query,clicks,impressions,ctr,position",
+        connector: "searchconsole",
+        fields: "page,query,clicks,impressions,ctr,position",
         date_from: dateFrom,
         date_to: dateTo,
         account_id: gscProperty,
@@ -100,7 +100,7 @@ export async function getWindsorClient(orgId: string) {
 
       const pageData: GSCPageData[] = (rows as Array<Record<string, unknown>>).map((row) => ({
         page: String(row.page ?? row.landing_page ?? ""),
-        query: String(row.search_query ?? row.query ?? row.campaign ?? ""),
+        query: String(row.query ?? row.search_query ?? row.campaign ?? ""),
         clicks: Number(row.clicks ?? 0),
         impressions: Number(row.impressions ?? 0),
         ctr: Number(row.ctr ?? 0),
@@ -116,8 +116,8 @@ export async function getWindsorClient(orgId: string) {
       dateTo: string
     ): Promise<WindsorResult<GA4PageData[]>> {
       const params = new URLSearchParams({
-        connector: "ga4",
-        fields: "page,sessions,users,engagement_rate,bounce_rate,conversions",
+        connector: "googleanalytics4",
+        fields: "page_path,sessions,users,engagement_rate,bounce_rate",
         date_from: dateFrom,
         date_to: dateTo,
         account_id: ga4AccountId,
@@ -136,14 +136,12 @@ export async function getWindsorClient(orgId: string) {
         : result.data.data ?? [];
 
       const pageData: GA4PageData[] = (rows as Array<Record<string, unknown>>).map((row) => ({
-        page: String(row.page ?? row.landing_page ?? ""),
+        page: String(row.page_path ?? row.page ?? row.landing_page ?? ""),
         sessions: Number(row.sessions ?? 0),
-        users: Number(row.users ?? 0),
+        users: Number(row.users ?? row.totalusers ?? 0),
         engagementRate: Number(row.engagement_rate ?? 0),
         bounceRate: Number(row.bounce_rate ?? 0),
-        conversions: typeof row.conversions === "object" && row.conversions !== null
-          ? (row.conversions as Record<string, number>)
-          : {},
+        conversions: {},
       }));
 
       return { success: true, data: pageData };

@@ -30,6 +30,7 @@ export async function runTopicDiscovery(
 
   // Step 1: Extract seed keywords
   const seedResult = await extractSeedKeywords(orgId, domain);
+  console.log(`[Topic Discovery] ${domain.domain}: ${seedResult.seeds.length} seeds found (skipped: ${seedResult.skipped})`);
   if (seedResult.skipped || seedResult.seeds.length === 0) {
     return { topicsGenerated: 0, skipped: true, error: seedResult.error ?? "No seed keywords" };
   }
@@ -53,6 +54,21 @@ export async function runTopicDiscovery(
 
   const seenKeywords = new Set<string>();
   const minVolume = 100;
+
+  // Include seed keywords themselves as candidates (they're already relevant — domain ranks for them)
+  for (const seed of seedResult.seeds) {
+    const key = seed.keyword.toLowerCase();
+    if (!seenKeywords.has(key)) {
+      seenKeywords.add(key);
+      allExpandedKeywords.push({
+        keyword: seed.keyword,
+        searchVolume: seed.searchVolume,
+        keywordDifficulty: 0,
+        cpc: 0,
+        trendData: [],
+      });
+    }
+  }
 
   // Expand each seed cluster (pick top seeds per cluster to limit API calls)
   for (const [, clusterSeeds] of seedClusters) {
@@ -89,6 +105,8 @@ export async function runTopicDiscovery(
     }
   }
 
+  console.log(`[Topic Discovery] ${domain.domain}: ${allExpandedKeywords.length} keywords after expansion (minVolume: ${minVolume})`);
+
   // Step 3: Competitor gap analysis
   const gapResult = await analyzeCompetitorGap(orgId, domain);
   if (!gapResult.skipped && gapResult.keywords.length > 0) {
@@ -118,8 +136,10 @@ export async function runTopicDiscovery(
   // Step 5: Cluster into topics
   const clusters = clusterKeywords(scored, 30);
 
+  console.log(`[Topic Discovery] ${domain.domain}: ${scored.length} scored, ${clusters.length} clusters`);
+
   if (clusters.length === 0) {
-    return { topicsGenerated: 0, skipped: false, error: "No topic clusters generated" };
+    return { topicsGenerated: 0, skipped: false, error: `No topic clusters generated (${allExpandedKeywords.length} expanded, ${scored.length} scored)` };
   }
 
   // Step 6: SERP analysis for top clusters
