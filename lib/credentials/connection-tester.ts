@@ -55,10 +55,19 @@ export async function testWindsor(creds: {
   api_key: string;
 }): Promise<TestResult> {
   try {
+    const params = new URLSearchParams({
+      api_key: creds.api_key,
+      date_preset: "last_7d",
+      fields: "source,clicks",
+    });
     const res = await fetch(
-      `https://connectors.windsor.ai/all?api_key=${encodeURIComponent(creds.api_key)}`,
+      `https://connectors.windsor.ai/all?${params.toString()}`,
       { method: "GET" }
     );
+
+    if (res.status === 401 || res.status === 403) {
+      return { success: false, error: "Invalid API key" };
+    }
 
     if (!res.ok) {
       return {
