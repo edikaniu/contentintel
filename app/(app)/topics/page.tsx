@@ -22,7 +22,7 @@ interface Topic {
   domainId: string;
   batchDate: string;
   primaryKeyword: string;
-  supportingKeywordsJson: { keyword: string; volume?: number; kd?: number }[] | null;
+  supportingKeywordsJson: { keyword: string; volume?: number; kd?: number; searchVolume?: number; keywordDifficulty?: number }[] | null;
   searchVolume: number | null;
   keywordDifficulty: number | null;
   opportunityScore: number | null;
@@ -409,7 +409,7 @@ export default function TopicsPage() {
           {paginatedTopics.map((topic) => {
             const isExpanded = expandedId === topic.id;
             const supportingKeywords = Array.isArray(topic.supportingKeywordsJson)
-              ? (topic.supportingKeywordsJson as { keyword: string; volume?: number; kd?: number }[])
+              ? (topic.supportingKeywordsJson as { keyword: string; volume?: number; kd?: number; searchVolume?: number; keywordDifficulty?: number }[])
               : [];
             const categoryTags = getCategoryTags(topic);
 
@@ -603,10 +603,10 @@ export default function TopicsPage() {
                                 <tr key={i}>
                                   <td className="py-2 text-slate-700">{sk.keyword}</td>
                                   <td className="py-2 text-right text-slate-600">
-                                    {sk.volume !== undefined ? sk.volume.toLocaleString() : "--"}
+                                    {(sk.volume ?? sk.searchVolume) !== undefined ? (sk.volume ?? sk.searchVolume)!.toLocaleString() : "--"}
                                   </td>
                                   <td className="py-2 text-right text-slate-600">
-                                    {sk.kd !== undefined ? `$${(sk.kd * 0.05).toFixed(2)}` : "--"}
+                                    {(sk.kd ?? sk.keywordDifficulty) !== undefined ? `${(sk.kd ?? sk.keywordDifficulty)}` : "--"}
                                   </td>
                                 </tr>
                               ))

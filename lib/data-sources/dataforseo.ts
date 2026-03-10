@@ -1,5 +1,19 @@
 import { getCredentials } from "@/lib/credentials/credential-store";
 
+// DataforSEO language IDs → ISO language codes
+const LANG_ID_TO_CODE: Record<number, string> = {
+  1000: "en", 1001: "ar", 1002: "bn", 1003: "zh", 1004: "bg",
+  1009: "nl", 1010: "fi", 1011: "fr", 1012: "de", 1014: "el",
+  1015: "iw", 1016: "hi", 1018: "id", 1019: "it", 1020: "ja",
+  1021: "ko", 1024: "no", 1025: "fa", 1026: "pl", 1027: "pt",
+  1028: "ro", 1029: "ru", 1030: "sr", 1031: "sk", 1032: "sl",
+  1033: "es", 1034: "sv", 1038: "th", 1039: "tr", 1040: "uk", 1041: "vi",
+};
+
+function langCode(id: number): string {
+  return LANG_ID_TO_CODE[id] ?? "en";
+}
+
 interface DataForSEOResult<T> {
   success: boolean;
   data?: T;
@@ -107,7 +121,7 @@ export async function getDataForSEOClient(orgId: string) {
           body: JSON.stringify([{
             target,
             location_code: locationCode,
-            language_code: languageCode,
+            language_code: langCode(languageCode),
             limit,
             order_by: ["keyword_data.keyword_info.search_volume,desc"],
           }]),
@@ -121,7 +135,7 @@ export async function getDataForSEOClient(orgId: string) {
       const items = (result.data.items ?? []).map((item) => ({
         keyword: item.keyword_data?.keyword ?? "",
         searchVolume: item.keyword_data?.keyword_info?.search_volume ?? 0,
-        keywordDifficulty: item.keyword_data?.keyword_info?.keyword_difficulty ?? 0,
+        keywordDifficulty: item.keyword_data?.keyword_properties?.keyword_difficulty ?? item.keyword_data?.keyword_info?.keyword_difficulty ?? 0,
         cpc: item.keyword_data?.keyword_info?.cpc ?? 0,
         position: item.ranked_serp_element?.serp_item?.rank_absolute ?? 0,
         trendData: item.keyword_data?.keyword_info?.monthly_searches ?? [],
@@ -143,7 +157,7 @@ export async function getDataForSEOClient(orgId: string) {
           body: JSON.stringify([{
             keyword,
             location_code: locationCode,
-            language_code: languageCode,
+            language_code: langCode(languageCode),
             limit,
             include_serp_info: true,
           }]),
@@ -180,7 +194,7 @@ export async function getDataForSEOClient(orgId: string) {
           body: JSON.stringify([{
             keyword,
             location_code: locationCode,
-            language_code: languageCode,
+            language_code: langCode(languageCode),
             limit,
           }]),
         }
@@ -219,7 +233,7 @@ export async function getDataForSEOClient(orgId: string) {
             target2,
             intersection_mode: "target2_not_target1",
             location_code: locationCode,
-            language_code: languageCode,
+            language_code: langCode(languageCode),
             limit,
             order_by: ["keyword_data.keyword_info.search_volume,desc"],
             filters: [
@@ -236,8 +250,8 @@ export async function getDataForSEOClient(orgId: string) {
       const items = (result.data.items ?? []).map((item) => ({
         keyword: item.keyword_data?.keyword ?? "",
         searchVolume: item.keyword_data?.keyword_info?.search_volume ?? 0,
-        keywordDifficulty: item.keyword_data?.keyword_info?.keyword_difficulty ?? 0,
-        competitorPosition: item.keyword_data?.ranked_serp_element?.serp_item?.rank_absolute ?? 0,
+        keywordDifficulty: item.keyword_data?.keyword_properties?.keyword_difficulty ?? item.keyword_data?.keyword_info?.keyword_difficulty ?? 0,
+        competitorPosition: item.second_domain_serp_element?.serp_item?.rank_absolute ?? item.keyword_data?.ranked_serp_element?.serp_item?.rank_absolute ?? 0,
         competitorDomain: target2,
       }));
 
@@ -256,7 +270,7 @@ export async function getDataForSEOClient(orgId: string) {
           body: JSON.stringify([{
             keyword,
             location_code: locationCode,
-            language_code: languageCode,
+            language_code: langCode(languageCode),
             depth: 10,
           }]),
         }
@@ -309,6 +323,9 @@ interface RankedKeywordRaw {
       cpc?: number;
       monthly_searches?: Array<{ month: number; year: number; search_volume: number }>;
     };
+    keyword_properties?: {
+      keyword_difficulty?: number;
+    };
   };
   ranked_serp_element?: {
     serp_item?: { rank_absolute?: number };
@@ -332,6 +349,9 @@ interface KeywordItemRaw {
       cpc?: number;
       monthly_searches?: Array<{ month: number; year: number; search_volume: number }>;
     };
+    keyword_properties?: {
+      keyword_difficulty?: number;
+    };
   };
   // related_keywords wraps items differently
   keyword?: string;
@@ -341,16 +361,20 @@ interface KeywordItemRaw {
     cpc?: number;
     monthly_searches?: Array<{ month: number; year: number; search_volume: number }>;
   };
+  keyword_properties?: {
+    keyword_difficulty?: number;
+  };
 }
 
 function parseKeywordItems(items: KeywordItemRaw[]): KeywordData[] {
   return items.map((item) => {
     const kd = item.keyword_data;
     const ki = kd?.keyword_info ?? item.keyword_info;
+    const kp = kd?.keyword_properties ?? item.keyword_properties;
     return {
       keyword: kd?.keyword ?? item.keyword ?? "",
       searchVolume: ki?.search_volume ?? 0,
-      keywordDifficulty: ki?.keyword_difficulty ?? 0,
+      keywordDifficulty: kp?.keyword_difficulty ?? ki?.keyword_difficulty ?? 0,
       cpc: ki?.cpc ?? 0,
       trendData: ki?.monthly_searches ?? [],
     };
@@ -372,9 +396,15 @@ interface IntersectionRaw {
       search_volume?: number;
       keyword_difficulty?: number;
     };
+    keyword_properties?: {
+      keyword_difficulty?: number;
+    };
     ranked_serp_element?: {
       serp_item?: { rank_absolute?: number };
     };
+  };
+  second_domain_serp_element?: {
+    serp_item?: { rank_absolute?: number };
   };
 }
 
