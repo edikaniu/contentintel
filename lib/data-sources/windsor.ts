@@ -43,9 +43,10 @@ export async function getWindsorClient(orgId: string) {
       const res = await fetch(url);
 
       if (!res.ok) {
+        const body = await res.text().catch(() => "");
         return {
           success: false,
-          error: `Windsor API error: ${res.status} ${res.statusText}`,
+          error: `Windsor API error: ${res.status} ${res.statusText}${body ? ` — ${body.slice(0, 200)}` : ""}`,
         };
       }
 
@@ -78,11 +79,11 @@ export async function getWindsorClient(orgId: string) {
       dateFrom: string,
       dateTo: string
     ): Promise<WindsorResult<GSCPageData[]>> {
-      // Build query string manually — URLSearchParams encodes commas/colons which Windsor rejects
-      const qs = `connector=searchconsole&fields=page,query,clicks,impressions,ctr,position&date_from=${dateFrom}&date_to=${dateTo}&account_id=${encodeURIComponent(gscProperty)}`;
+      // Use connector-specific endpoint per Windsor docs (not /all?connector=)
+      const qs = `fields=page,query,clicks,impressions,ctr,position&date_from=${dateFrom}&date_to=${dateTo}&account_id=${encodeURIComponent(gscProperty)}`;
 
       const result = await request<{ data?: Array<Record<string, unknown>> }>(
-        `/all?${qs}`
+        `/searchconsole?${qs}`
       );
 
       if (!result.success || !result.data) {
@@ -110,11 +111,11 @@ export async function getWindsorClient(orgId: string) {
       dateFrom: string,
       dateTo: string
     ): Promise<WindsorResult<GA4PageData[]>> {
-      // Build query string manually — URLSearchParams encodes commas which Windsor rejects
-      const qs = `connector=googleanalytics4&fields=page_path,sessions,users,engagement_rate,bounce_rate&date_from=${dateFrom}&date_to=${dateTo}&account_id=${encodeURIComponent(ga4AccountId)}`;
+      // Use connector-specific endpoint per Windsor docs (not /all?connector=)
+      const qs = `fields=page_path,sessions,users,engagement_rate,bounce_rate&date_from=${dateFrom}&date_to=${dateTo}&account_id=${encodeURIComponent(ga4AccountId)}`;
 
       const result = await request<{ data?: Array<Record<string, unknown>> }>(
-        `/all?${qs}`
+        `/googleanalytics4?${qs}`
       );
 
       if (!result.success || !result.data) {
