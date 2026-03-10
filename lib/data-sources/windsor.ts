@@ -39,7 +39,7 @@ export async function getWindsorClient(orgId: string) {
 
   async function request<T>(path: string): Promise<WindsorResult<T>> {
     try {
-      const url = `${baseUrl}${path}${path.includes("?") ? "&" : "?"}api_key=${apiKey}`;
+      const url = `${baseUrl}${path}${path.includes("?") ? "&" : "?"}api_key=${encodeURIComponent(apiKey)}`;
       const res = await fetch(url);
 
       if (!res.ok) {
@@ -79,7 +79,7 @@ export async function getWindsorClient(orgId: string) {
       dateTo: string
     ): Promise<WindsorResult<GSCPageData[]>> {
       // Build query string manually — URLSearchParams encodes commas/colons which Windsor rejects
-      const qs = `connector=searchconsole&fields=page,query,clicks,impressions,ctr,position&date_from=${dateFrom}&date_to=${dateTo}&account_id=${gscProperty}`;
+      const qs = `connector=searchconsole&fields=page,query,clicks,impressions,ctr,position&date_from=${dateFrom}&date_to=${dateTo}&account_id=${encodeURIComponent(gscProperty)}`;
 
       const result = await request<{ data?: Array<Record<string, unknown>> }>(
         `/all?${qs}`
@@ -111,7 +111,7 @@ export async function getWindsorClient(orgId: string) {
       dateTo: string
     ): Promise<WindsorResult<GA4PageData[]>> {
       // Build query string manually — URLSearchParams encodes commas which Windsor rejects
-      const qs = `connector=googleanalytics4&fields=page_path,sessions,users,engagement_rate,bounce_rate&date_from=${dateFrom}&date_to=${dateTo}&account_id=${ga4AccountId}`;
+      const qs = `connector=googleanalytics4&fields=page_path,sessions,users,engagement_rate,bounce_rate&date_from=${dateFrom}&date_to=${dateTo}&account_id=${encodeURIComponent(ga4AccountId)}`;
 
       const result = await request<{ data?: Array<Record<string, unknown>> }>(
         `/all?${qs}`

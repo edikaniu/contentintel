@@ -63,13 +63,52 @@ function ValidateTopicPageInner() {
   const [adding, setAdding] = useState(false);
   const autoSubmitDone = useRef(false);
 
-  // Pre-fill keyword from URL query param (e.g. ?keyword=best+loans)
+  // Pre-fill keyword from URL query param and auto-submit (e.g. ?keyword=best+loans)
   useEffect(() => {
     const kw = searchParams.get("keyword");
     if (kw && !autoSubmitDone.current) {
+      autoSubmitDone.current = true;
       setTopic(kw);
     }
   }, [searchParams]);
+
+  // Auto-submit when topic is set from URL param and domain is ready
+  useEffect(() => {
+    if (autoSubmitDone.current && topic && selectedDomain && status === "idle") {
+      // Trigger validation programmatically
+      setStatus("loading");
+      setProgressStep(0);
+      setBrief(null);
+      setErrorMessage("");
+
+      const interval = setInterval(() => {
+        setProgressStep((prev) => (prev < PROGRESS_STEPS.length - 1 ? prev + 1 : prev));
+      }, 2000);
+
+      fetch("/api/topics/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ topic: topic.trim(), domainId: selectedDomain.id }),
+      })
+        .then(async (res) => {
+          clearInterval(interval);
+          if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            setErrorMessage(data.error || "Validation failed. Please try again.");
+            setStatus("error");
+            return;
+          }
+          const data = await res.json();
+          setBrief(data.brief);
+          setStatus("done");
+        })
+        .catch(() => {
+          clearInterval(interval);
+          setErrorMessage("Network error. Please try again.");
+          setStatus("error");
+        });
+    }
+  }, [topic, selectedDomain, status]);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
