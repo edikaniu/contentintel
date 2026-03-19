@@ -1,4 +1,4 @@
-import { eq, and, count } from "drizzle-orm";
+import { eq, and, count, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { organisations, domains, weeklyBatches, contentSnapshots, contentInventory } from "@/lib/db/schema";
 import { syncContentInventory, seedContentFromGSC } from "./content-sync";
@@ -98,15 +98,18 @@ async function runDomainBatch(
       .where(eq(contentInventory.domainId, domain.id))
       .limit(1);
 
-    const existingSnapCount = inventoryItems.length > 0
+    // Check how many distinct snapshot dates exist — if only 1 day, we need to backfill history
+    const distinctDatesResult = inventoryItems.length > 0
       ? await db
-          .select({ count: count() })
+          .select({ distinctDates: sql<number>`COUNT(DISTINCT DATE(${contentSnapshots.snapshotDate}))` })
           .from(contentSnapshots)
-          .where(eq(contentSnapshots.contentId, inventoryItems[0].id))
-          .then((rows) => rows[0]?.count ?? 0)
+          .innerJoin(contentInventory, eq(contentSnapshots.contentId, contentInventory.id))
+          .where(eq(contentInventory.domainId, domain.id))
+          .then((rows) => rows[0]?.distinctDates ?? 0)
       : 0;
 
-    const needsBackfill = existingSnapCount <= 1;
+    const needsBackfill = distinctDatesResult <= 1;
+    console.log(`[Batch] ${domain.domain}: ${distinctDatesResult} distinct snapshot dates, needsBackfill=${needsBackfill}`);
     const now = new Date();
 
     // Current week GSC pull (always done)

@@ -159,11 +159,13 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [batchRunning, setBatchRunning] = useState(false);
   const [batchMessage, setBatchMessage] = useState<string | null>(null);
-  const [trendRange, setTrendRange] = useState<string>("56");
+  const [trendRange, setTrendRange] = useState<string>("90");
+  const [trendLoading, setTrendLoading] = useState(false);
 
   // Fetch dashboard data
   const [refreshKey, setRefreshKey] = useState(0);
 
+  // Main dashboard data fetch (does NOT depend on trendRange)
   useEffect(() => {
     if (!selectedDomainId) {
       setLoading(false);
@@ -174,7 +176,7 @@ export default function DashboardPage() {
     let cancelled = false;
     setLoading(true);
 
-    fetch(`/api/dashboard/stats?domainId=${selectedDomainId}&trendRange=${trendRange}`)
+    fetch(`/api/dashboard/stats?domainId=${selectedDomainId}&trendRange=90`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to load");
         return res.json();
@@ -192,7 +194,34 @@ export default function DashboardPage() {
     return () => {
       cancelled = true;
     };
-  }, [selectedDomainId, refreshKey, trendRange]);
+  }, [selectedDomainId, refreshKey]);
+
+  // Separate trend-only fetch when date selector changes
+  useEffect(() => {
+    if (!selectedDomainId || !data) return;
+
+    let cancelled = false;
+    setTrendLoading(true);
+
+    fetch(`/api/dashboard/stats?domainId=${selectedDomainId}&trendRange=${trendRange}`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to load");
+        return res.json();
+      })
+      .then((json) => {
+        if (!cancelled) {
+          setData((prev) => prev ? { ...prev, organicTrend: json.organicTrend } : prev);
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setTrendLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedDomainId, trendRange]);
 
   const runBatch = useCallback(async () => {
     setBatchRunning(true);
@@ -432,7 +461,14 @@ export default function DashboardPage() {
                   </span>
                 </div>
               </div>
-              <TrendChart data={data.organicTrend} />
+              {trendLoading ? (
+                <div className="flex items-center justify-center h-[280px] text-slate-400 text-sm">
+                  <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                  Loading trend data...
+                </div>
+              ) : (
+                <TrendChart data={data.organicTrend} />
+              )}
             </div>
 
             {/* Alerts by Type */}
