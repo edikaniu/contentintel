@@ -159,6 +159,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [batchRunning, setBatchRunning] = useState(false);
   const [batchMessage, setBatchMessage] = useState<string | null>(null);
+  const [trendRange, setTrendRange] = useState<string>("56");
 
   // Fetch dashboard data
   const [refreshKey, setRefreshKey] = useState(0);
@@ -173,7 +174,7 @@ export default function DashboardPage() {
     let cancelled = false;
     setLoading(true);
 
-    fetch(`/api/dashboard/stats?domainId=${selectedDomainId}`)
+    fetch(`/api/dashboard/stats?domainId=${selectedDomainId}&trendRange=${trendRange}`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to load");
         return res.json();
@@ -191,7 +192,7 @@ export default function DashboardPage() {
     return () => {
       cancelled = true;
     };
-  }, [selectedDomainId, refreshKey]);
+  }, [selectedDomainId, refreshKey, trendRange]);
 
   const runBatch = useCallback(async () => {
     setBatchRunning(true);
@@ -410,12 +411,22 @@ export default function DashboardPage() {
                   </h2>
                   <p className="text-xs text-slate-500">Track clicks and impressions across all content.</p>
                 </div>
-                <div className="flex items-center gap-4 text-xs text-slate-500">
-                  <span className="flex items-center gap-1.5">
+                <div className="flex items-center gap-4">
+                  <select
+                    value={trendRange}
+                    onChange={(e) => setTrendRange(e.target.value)}
+                    className="text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-[#3730A3]/20"
+                  >
+                    <option value="7">Last 7 days</option>
+                    <option value="30">Last 30 days</option>
+                    <option value="56">Last 8 weeks</option>
+                    <option value="90">Last 3 months</option>
+                  </select>
+                  <span className="flex items-center gap-1.5 text-xs text-slate-500">
                     <span className="w-2.5 h-2.5 rounded-full bg-[#3730A3]" />
                     Clicks
                   </span>
-                  <span className="flex items-center gap-1.5">
+                  <span className="flex items-center gap-1.5 text-xs text-slate-500">
                     <span className="w-2.5 h-2.5 rounded-full bg-slate-400" />
                     Impressions
                   </span>

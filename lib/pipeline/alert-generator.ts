@@ -90,7 +90,7 @@ export async function generateAlerts(
       const positionDrop = currentSnap.avgPosition - prevSnap.avgPosition;
       if (positionDrop >= 3) {
         const priority = calculatePriority(currentSnap.sessions ?? 0, positionDrop * 10, currentSnap.avgPosition, currentSnap.conversionsJson);
-        await insertAlert(content.id, batchDate, "position_slipping", priority, currentSnap, prevSnap,
+        await insertAlert(content.id, batchDate, "position_drop", priority, currentSnap, prevSnap,
           `Average position dropped by ${positionDrop.toFixed(1)} places (${prevSnap.avgPosition.toFixed(1)} → ${currentSnap.avgPosition.toFixed(1)}) for "${currentSnap.primaryQuery}". Refresh content to recover ranking.`
         );
         generated++;

@@ -15,6 +15,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Info,
+  ShoppingCart,
 } from "lucide-react";
 import { ContentAlertCard } from "@/components/content-alert-card";
 
@@ -44,7 +45,7 @@ const ALERT_TYPE_CONFIG: Record<string, { label: string }> = {
   striking_distance: { label: "Striking Distance" },
   stale_content: { label: "Stale Content" },
   low_ctr: { label: "Low CTR" },
-  high_bounce: { label: "High Bounce Rate" },
+  conversion_drop: { label: "Conversion Drop" },
 };
 
 function formatDate(dateStr: string): string {
@@ -180,6 +181,7 @@ export default function ContentHealthPage() {
     { key: "striking_distance", icon: Target, color: "text-green-500", iconBg: "bg-green-100", tooltip: "Pages ranking positions 5–20 that could reach page 1 with targeted optimisation" },
     { key: "stale_content", icon: Clock, color: "text-slate-500", iconBg: "bg-slate-100", tooltip: "" },
     { key: "low_ctr", icon: MousePointer, color: "text-blue-500", iconBg: "bg-blue-100", tooltip: "" },
+    { key: "conversion_drop", icon: ShoppingCart, color: "text-purple-500", iconBg: "bg-purple-100", tooltip: "" },
   ];
 
   if (!selectedDomainId) {
@@ -223,7 +225,7 @@ export default function ContentHealthPage() {
       </div>
 
       {/* Summary grid */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
         {summaryTypes.map((st) => {
           const config = ALERT_TYPE_CONFIG[st.key];
           const count = typeCounts[st.key] ?? 0;

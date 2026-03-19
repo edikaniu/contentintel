@@ -158,6 +158,7 @@ export async function POST(req: NextRequest) {
 
     const anthropicCreds = await getCredentials(orgId, "anthropic");
     if (anthropicCreds) {
+      console.log(`[Validator] Anthropic credentials found for org ${orgId}, running AI analysis`);
       aiAnalysis = await generateValidationAnalysis(
         anthropicCreds.api_key,
         keyword,
@@ -169,6 +170,8 @@ export async function POST(req: NextRequest) {
         overlappingContent,
         domain.vertical ?? "general"
       );
+    } else {
+      console.log(`[Validator] No Anthropic credentials found for org ${orgId}, using fallback`);
     }
 
     // Build the full brief
@@ -262,13 +265,14 @@ Respond in exactly this JSON format (no markdown, no code blocks):
       },
       body: JSON.stringify({
         model: "claude-haiku-4-5-20251001",
-        max_tokens: 800,
+        max_tokens: 1500,
         messages: [{ role: "user", content: prompt }],
       }),
     });
 
     if (!res.ok) {
-      console.error(`Anthropic API error in validator: ${res.status}`);
+      const errBody = await res.text().catch(() => "");
+      console.error(`Anthropic API error in validator: ${res.status} ${errBody}`);
       return fallbackAnalysis(metrics);
     }
 

@@ -7,6 +7,7 @@ import {
   contentInventory,
   contentSnapshots,
   domains,
+  users,
 } from "@/lib/db/schema";
 import { eq, and, gte, desc, sql, count, avg } from "drizzle-orm";
 
@@ -44,7 +45,11 @@ export async function GET(req: NextRequest) {
     const now = new Date();
     const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-    const eightWeeksAgo = new Date(now.getTime() - 56 * 24 * 60 * 60 * 1000);
+
+    // Configurable trend range: 7d, 30d, 90d (default 56 days / 8 weeks)
+    const trendRange = searchParams.get("trendRange") ?? "56";
+    const trendDays = Math.min(Math.max(parseInt(trendRange) || 56, 7), 365);
+    const trendStartDate = new Date(now.getTime() - trendDays * 24 * 60 * 60 * 1000);
 
     // Run all queries in parallel
     const [
@@ -114,16 +119,17 @@ export async function GET(req: NextRequest) {
         .orderBy(desc(topicRecommendations.opportunityScore))
         .limit(5),
 
-      // 6. Recent activity: last 5 status changes
+      // 6. Recent activity: last 5 status changes (join users for name)
       db
         .select({
           id: topicRecommendations.id,
           primaryKeyword: topicRecommendations.primaryKeyword,
           status: topicRecommendations.status,
-          statusChangedBy: topicRecommendations.statusChangedBy,
+          statusChangedBy: users.name,
           updatedAt: topicRecommendations.updatedAt,
         })
         .from(topicRecommendations)
+        .leftJoin(users, eq(topicRecommendations.statusChangedBy, users.id))
         .where(
           and(
             eq(topicRecommendations.domainId, domainId),
@@ -169,7 +175,7 @@ export async function GET(req: NextRequest) {
         .where(
           and(
             eq(contentInventory.domainId, domainId),
-            gte(contentSnapshots.snapshotDate, eightWeeksAgo)
+            gte(contentSnapshots.snapshotDate, trendStartDate)
           )
         )
         .groupBy(

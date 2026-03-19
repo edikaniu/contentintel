@@ -594,7 +594,7 @@ export default function TopicsPage() {
                             <tr className="text-xs text-slate-400 uppercase tracking-wider">
                               <th className="text-left pb-2 font-medium">Variant Keyword</th>
                               <th className="text-right pb-2 font-medium">Volume</th>
-                              <th className="text-right pb-2 font-medium">CPC</th>
+                              <th className="text-right pb-2 font-medium">KD</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-slate-50">
@@ -603,10 +603,10 @@ export default function TopicsPage() {
                                 <tr key={i}>
                                   <td className="py-2 text-slate-700">{sk.keyword}</td>
                                   <td className="py-2 text-right text-slate-600">
-                                    {(sk.volume ?? sk.searchVolume) !== undefined ? (sk.volume ?? sk.searchVolume)!.toLocaleString() : "--"}
+                                    {(sk.searchVolume ?? sk.volume) != null ? (sk.searchVolume ?? sk.volume)!.toLocaleString() : "--"}
                                   </td>
                                   <td className="py-2 text-right text-slate-600">
-                                    {(sk.kd ?? sk.keywordDifficulty) !== undefined ? `${(sk.kd ?? sk.keywordDifficulty)}` : "--"}
+                                    {(sk.keywordDifficulty ?? sk.kd) != null ? `${(sk.keywordDifficulty ?? sk.kd)}` : "--"}
                                   </td>
                                 </tr>
                               ))

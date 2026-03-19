@@ -8,7 +8,7 @@ interface PerformanceChartProps {
 
 const alertTypeLabels: Record<string, string> = {
   declining_traffic: "Declining traffic",
-  position_slipping: "Position slipping",
+  position_drop: "Position slipping",
   striking_distance: "Striking distance",
   stale_content: "Stale content",
   low_ctr: "Low CTR",
@@ -17,7 +17,7 @@ const alertTypeLabels: Record<string, string> = {
 
 const alertTypeColors: Record<string, string> = {
   declining_traffic: "#DC2626",
-  position_slipping: "#F59E0B",
+  position_drop: "#F59E0B",
   striking_distance: "#3730A3",
   stale_content: "#6B7280",
   low_ctr: "#D97706",
