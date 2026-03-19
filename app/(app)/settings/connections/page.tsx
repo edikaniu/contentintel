@@ -50,6 +50,7 @@ export default function ConnectionsPage() {
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState<string | null>(null);
   const [testResult, setTestResult] = useState<{ provider: string; success: boolean; error?: string } | null>(null);
+  const [disconnecting, setDisconnecting] = useState<string | null>(null);
 
   useEffect(() => { fetchCredentials(); }, []);
 
@@ -96,6 +97,23 @@ export default function ConnectionsPage() {
     } catch {
       setTestResult({ provider, success: false, error: "Connection failed" });
     } finally { setTesting(null); }
+  }
+
+  async function handleDisconnect(provider: string) {
+    if (!confirm(`Are you sure you want to disconnect ${provider}? This will delete the saved credentials.`)) return;
+    setDisconnecting(provider);
+    try {
+      const res = await fetch("/api/connections", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ provider }),
+      });
+      if (res.ok) {
+        setTestResult(null);
+        await fetchCredentials();
+      }
+    } catch { /* ignore */ }
+    finally { setDisconnecting(null); }
   }
 
   function getCredInfo(provider: string): CredentialInfo | undefined {
@@ -242,12 +260,14 @@ export default function ConnectionsPage() {
                             onClick={() => { setEditingProvider(provider.key); setFormValues({}); }}
                             className="px-4 py-2 text-sm font-bold text-white rounded-lg transition-colors shadow-sm bg-indigo-700 hover:bg-indigo-800"
                           >
-                            Save
+                            Edit
                           </button>
                           <button
-                            className="px-4 py-2 text-sm font-bold text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                            onClick={() => handleDisconnect(provider.key)}
+                            disabled={disconnecting === provider.key}
+                            className="px-4 py-2 text-sm font-bold text-rose-600 hover:bg-rose-50 rounded-lg transition-colors disabled:opacity-50"
                           >
-                            Disconnect
+                            {disconnecting === provider.key ? "Disconnecting..." : "Disconnect"}
                           </button>
                         </>
                       ) : status === "error" ? (

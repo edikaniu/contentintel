@@ -272,12 +272,13 @@ Respond in exactly this JSON format (no markdown, no code blocks):
 
     if (!res.ok) {
       const errBody = await res.text().catch(() => "");
-      console.error(`Anthropic API error in validator: ${res.status} ${errBody}`);
+      console.error(`[Validator] Anthropic API error: ${res.status} ${errBody.slice(0, 500)}`);
       return fallbackAnalysis(metrics);
     }
 
     const json = await res.json();
     const text = json.content?.[0]?.text ?? "";
+    console.log(`[Validator] Anthropic response received, ${text.length} chars`);
 
     const parsed = JSON.parse(text);
     return {
@@ -287,7 +288,8 @@ Respond in exactly this JSON format (no markdown, no code blocks):
       opportunityScore: Math.min(100, Math.max(0, parsed.opportunity_score ?? 0)),
       verdict: parsed.verdict ?? "",
     };
-  } catch {
+  } catch (err) {
+    console.error(`[Validator] AI analysis error:`, err instanceof Error ? err.message : err);
     return fallbackAnalysis(metrics);
   }
 }

@@ -44,10 +44,14 @@ export async function getDataForSEOClient(orgId: string) {
       });
 
       if (!res.ok) {
-        return {
-          success: false,
-          error: `DataForSEO API error: ${res.status} ${res.statusText}`,
-        };
+        const errBody = await res.text().catch(() => "");
+        let errMsg = `DataForSEO API error: ${res.status}`;
+        if (res.status === 402) {
+          errMsg = `DataForSEO: Insufficient credits (402). ${errBody.slice(0, 200)}`;
+        } else {
+          errMsg += ` ${res.statusText}. ${errBody.slice(0, 200)}`;
+        }
+        return { success: false, error: errMsg };
       }
 
       const json = await res.json();
