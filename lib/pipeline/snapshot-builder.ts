@@ -56,13 +56,16 @@ export async function buildSnapshots(
     // Only create snapshot if we have data from at least one source
     if (!gsc && !ga4) continue;
 
+    // Truncate primaryQuery to 500 chars max (varchar limit) — some GSC queries are full paragraphs
+    const primaryQuery = gsc?.primaryQuery ? gsc.primaryQuery.slice(0, 500) : null;
+
     await db.insert(contentSnapshots).values({
       contentId: content.id,
       snapshotDate,
       organicClicks: gsc?.totalClicks ?? null,
       organicImpressions: gsc?.totalImpressions ?? null,
       avgPosition: gsc?.avgPosition ?? null,
-      primaryQuery: gsc?.primaryQuery ?? null,
+      primaryQuery,
       ctr: gsc?.avgCtr ?? null,
       sessions: ga4?.sessions ?? null,
       users: ga4?.users ?? null,

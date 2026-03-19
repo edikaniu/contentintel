@@ -73,15 +73,22 @@ export async function generateAlerts(
       .limit(1)
       .then((rows) => rows[0] ?? null);
 
-    // 1. Declining traffic: >20% drop in organic sessions over 4-week window
-    if (oldSnap && currentSnap.sessions != null && oldSnap.sessions != null && oldSnap.sessions > 0) {
-      const dropPct = ((oldSnap.sessions - currentSnap.sessions) / oldSnap.sessions) * 100;
-      if (dropPct > 20) {
-        const priority = calculatePriority(oldSnap.sessions, dropPct, currentSnap.avgPosition, currentSnap.conversionsJson);
-        await insertAlert(content.id, batchDate, "declining_traffic", priority, currentSnap, oldSnap,
-          `Organic sessions dropped ${dropPct.toFixed(0)}% over 4 weeks (${oldSnap.sessions} → ${currentSnap.sessions}). Review and update content.`
-        );
-        generated++;
+    // 1. Declining traffic: >20% drop over 4-week window
+    // Use sessions (GA4) if available, otherwise fall back to organicClicks (GSC)
+    if (oldSnap) {
+      const currentTraffic = currentSnap.sessions ?? currentSnap.organicClicks ?? null;
+      const oldTraffic = oldSnap.sessions ?? oldSnap.organicClicks ?? null;
+      const trafficMetric = currentSnap.sessions != null ? "sessions" : "clicks";
+
+      if (currentTraffic != null && oldTraffic != null && oldTraffic > 0) {
+        const dropPct = ((oldTraffic - currentTraffic) / oldTraffic) * 100;
+        if (dropPct > 20) {
+          const priority = calculatePriority(oldTraffic, dropPct, currentSnap.avgPosition, currentSnap.conversionsJson);
+          await insertAlert(content.id, batchDate, "declining_traffic", priority, currentSnap, oldSnap,
+            `Organic ${trafficMetric} dropped ${dropPct.toFixed(0)}% over 4 weeks (${oldTraffic} → ${currentTraffic}). Review and update content.`
+          );
+          generated++;
+        }
       }
     }
 
@@ -109,16 +116,18 @@ export async function generateAlerts(
     }
 
     // 4. Stale content: Published >12 months ago, never updated, still getting traffic
-    if (content.publishDate) {
+    const pubDate = content.publishDate;
+    if (pubDate) {
       const twelveMonthsAgo = new Date(batchDate);
       twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
-      const neverUpdated = !content.lastUpdated || content.lastUpdated.getTime() === content.publishDate.getTime();
-      const hasTraffic = (currentSnap.sessions ?? 0) > 0;
+      const neverUpdated = !content.lastUpdated || (content.publishDate && content.lastUpdated.getTime() === content.publishDate.getTime());
+      const hasTraffic = (currentSnap.sessions ?? currentSnap.organicClicks ?? 0) > 0;
 
-      if (content.publishDate < twelveMonthsAgo && neverUpdated && hasTraffic) {
-        const priority = calculatePriority(currentSnap.sessions ?? 0, 0, currentSnap.avgPosition, currentSnap.conversionsJson);
+      if (pubDate < twelveMonthsAgo && neverUpdated && hasTraffic) {
+        const traffic = currentSnap.sessions ?? currentSnap.organicClicks ?? 0;
+        const priority = calculatePriority(traffic, 0, currentSnap.avgPosition, currentSnap.conversionsJson);
         await insertAlert(content.id, batchDate, "stale_content", priority, currentSnap, null,
-          `Published ${formatMonthsAgo(content.publishDate, batchDate)} months ago and never updated, but still receiving ${currentSnap.sessions} sessions/week. Refresh to maintain or improve performance.`
+          `Published ${formatMonthsAgo(pubDate, batchDate)} months ago and never updated, but still receiving ${traffic} ${currentSnap.sessions != null ? "sessions" : "clicks"}/week. Refresh to maintain or improve performance.`
         );
         generated++;
       }
