@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { domains, competitors, contentInventory } from "@/lib/db/schema";
 import { eq, and, ilike } from "drizzle-orm";
 import { getDataForSEOClient } from "@/lib/data-sources/dataforseo";
+import { getKeywordSuggestions, getRelatedKeywords, hasKeywordProvider } from "@/lib/data-sources/keyword-provider";
 import { getCredentials } from "@/lib/credentials/credential-store";
 
 export async function POST(req: NextRequest) {
@@ -49,21 +50,32 @@ export async function POST(req: NextRequest) {
     const locationCode = domain.dataforseoLocation ?? 2566;
     const languageCode = domain.dataforseoLanguage ?? 1000;
 
-    // Step 1: Get DataforSEO client
-    const dfsClient = await getDataForSEOClient(orgId);
-    if (!dfsClient) {
+    // Step 1: Check keyword provider availability
+    const providerAvailable = await hasKeywordProvider(orgId);
+    if (!providerAvailable) {
       return NextResponse.json(
-        { error: "DataforSEO is not configured. Please add credentials in Settings." },
+        { error: "Neither DataforSEO nor SEMrush is configured. Please add credentials in Settings." },
         { status: 422 }
       );
     }
 
-    // Step 2: Fetch keyword data + SERP results in parallel
-    const [keywordResult, serpResult, relatedResult] = await Promise.all([
-      dfsClient.getKeywordSuggestions(keyword, locationCode, languageCode, 10),
-      dfsClient.getSerpResults(keyword, locationCode, languageCode),
-      dfsClient.getRelatedKeywords(keyword, locationCode, languageCode, 10),
+    const semrushDb = domain.semrushDatabase;
+
+    // Step 2: Fetch keyword data + SERP results
+    // Keyword suggestions and related use the failover provider
+    // SERP uses DataforSEO directly (no SEMrush equivalent yet)
+    const dfsClient = await getDataForSEOClient(orgId);
+
+    const [keywordResult, relatedResult] = await Promise.all([
+      getKeywordSuggestions(orgId, keyword, locationCode, languageCode, 10, semrushDb),
+      getRelatedKeywords(orgId, keyword, locationCode, languageCode, 10, semrushDb),
     ]);
+
+    // SERP via DataforSEO only (if available)
+    let serpResult: { success: boolean; data?: { topResults: Array<{ title: string; url: string; domain: string; position: number }>; serpFeatures: string[] } } = { success: false };
+    if (dfsClient) {
+      serpResult = await dfsClient.getSerpResults(keyword, locationCode, languageCode);
+    }
 
     // Extract primary keyword metrics from suggestions (first match or manual)
     let primaryMetrics = {
@@ -158,7 +170,7 @@ export async function POST(req: NextRequest) {
 
     const anthropicCreds = await getCredentials(orgId, "anthropic");
     if (anthropicCreds) {
-      console.log(`[Validator] Anthropic credentials found for org ${orgId}, running AI analysis`);
+      console.log(`[Validator] Anthropic credentials found for org ${orgId}, key starts with: ${anthropicCreds.api_key.slice(0, 10)}...`);
       aiAnalysis = await generateValidationAnalysis(
         anthropicCreds.api_key,
         keyword,
@@ -255,7 +267,9 @@ Respond in exactly this JSON format (no markdown, no code blocks):
   "verdict": "1-2 sentence plain-language assessment of the opportunity"
 }`;
 
+  const modelId = "claude-haiku-4-5-20251001";
   try {
+    console.log(`[Validator] Calling Anthropic API with model=${modelId}, max_tokens=1500`);
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -264,7 +278,7 @@ Respond in exactly this JSON format (no markdown, no code blocks):
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "claude-haiku-4-5-20251001",
+        model: modelId,
         max_tokens: 1500,
         messages: [{ role: "user", content: prompt }],
       }),
@@ -272,13 +286,13 @@ Respond in exactly this JSON format (no markdown, no code blocks):
 
     if (!res.ok) {
       const errBody = await res.text().catch(() => "");
-      console.error(`[Validator] Anthropic API error: ${res.status} ${errBody.slice(0, 500)}`);
+      console.error(`[Validator] Anthropic API error: HTTP ${res.status} ${res.statusText}. Body: ${errBody.slice(0, 500)}`);
       return fallbackAnalysis(metrics);
     }
 
     const json = await res.json();
     const text = json.content?.[0]?.text ?? "";
-    console.log(`[Validator] Anthropic response received, ${text.length} chars`);
+    console.log(`[Validator] Anthropic response received (model=${json.model ?? modelId}), ${text.length} chars, stop_reason=${json.stop_reason ?? "unknown"}`);
 
     const parsed = JSON.parse(text);
     return {

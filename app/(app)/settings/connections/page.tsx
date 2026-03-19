@@ -111,8 +111,13 @@ export default function ConnectionsPage() {
       if (res.ok) {
         setTestResult(null);
         await fetchCredentials();
+      } else {
+        const data = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
+        setTestResult({ provider, success: false, error: data.error ?? `Failed to disconnect (${res.status})` });
       }
-    } catch { /* ignore */ }
+    } catch {
+      setTestResult({ provider, success: false, error: "Network error while disconnecting" });
+    }
     finally { setDisconnecting(null); }
   }
 

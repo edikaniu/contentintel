@@ -92,12 +92,13 @@ Respond in exactly this JSON format (no markdown, no code blocks):
 
   if (!res.ok) {
     const body = await res.text().catch(() => "");
-    console.error(`Anthropic API error: ${res.status} ${body}`);
+    console.error(`[TopicGenerator] Anthropic API error: HTTP ${res.status} ${res.statusText}. Body: ${body.slice(0, 500)}`);
     return null;
   }
 
   const json = await res.json();
   const text = json.content?.[0]?.text ?? "";
+  console.log(`[TopicGenerator] AI response for "${topic.primaryKeyword}": ${text.length} chars, model=${json.model ?? "unknown"}`);
 
   try {
     const parsed = JSON.parse(text);

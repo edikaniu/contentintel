@@ -2,6 +2,7 @@ import { eq, and } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { domains, topicRecommendations } from "@/lib/db/schema";
 import { getDataForSEOClient } from "@/lib/data-sources/dataforseo";
+import { getKeywordSuggestions, getRelatedKeywords, hasKeywordProvider } from "@/lib/data-sources/keyword-provider";
 import { extractSeedKeywords, groupSeedsByClusters } from "@/lib/analysis/seed-extractor";
 import { scoreKeywords } from "@/lib/analysis/topic-scorer";
 import { clusterKeywords } from "@/lib/analysis/keyword-clusterer";
@@ -36,12 +37,13 @@ export async function runTopicDiscovery(
     return { topicsGenerated: 0, skipped: true, error: seedResult.error ?? "No seed keywords" };
   }
 
-  // Step 2: Keyword expansion via DataforSEO
-  const dfClient = await getDataForSEOClient(orgId);
-  if (!dfClient) {
-    return { topicsGenerated: 0, skipped: true, error: "DataforSEO not configured" };
+  // Step 2: Keyword expansion via DataforSEO → SEMrush failover
+  const hasProvider = await hasKeywordProvider(orgId);
+  if (!hasProvider) {
+    return { topicsGenerated: 0, skipped: true, error: "Neither DataforSEO nor SEMrush is configured" };
   }
 
+  const semrushDb = domain.semrushDatabase;
   const seedClusters = groupSeedsByClusters(seedResult.seeds, categories);
   const allExpandedKeywords: Array<{
     keyword: string;
@@ -63,9 +65,9 @@ export async function runTopicDiscovery(
       .slice(0, 3);
 
     for (const seed of topSeeds) {
-      // Get keyword suggestions
-      const suggestions = await dfClient.getKeywordSuggestions(
-        seed.keyword, locationCode, languageCode, 30
+      // Get keyword suggestions (with DataforSEO → SEMrush failover)
+      const suggestions = await getKeywordSuggestions(
+        orgId, seed.keyword, locationCode, languageCode, 30, semrushDb
       );
       if (suggestions.success && suggestions.data) {
         let added = 0;
@@ -76,14 +78,14 @@ export async function runTopicDiscovery(
             added++;
           }
         }
-        console.log(`[Topic Discovery] Suggestions for "${seed.keyword}": ${suggestions.data.length} returned, ${added} passed volume filter`);
+        console.log(`[Topic Discovery] Suggestions for "${seed.keyword}" (${suggestions.source}): ${suggestions.data.length} returned, ${added} passed volume filter`);
       } else {
         console.log(`[Topic Discovery] Suggestions for "${seed.keyword}" failed: ${suggestions.error ?? "no data"}`);
       }
 
-      // Get related keywords
-      const related = await dfClient.getRelatedKeywords(
-        seed.keyword, locationCode, languageCode, 30
+      // Get related keywords (with DataforSEO → SEMrush failover)
+      const related = await getRelatedKeywords(
+        orgId, seed.keyword, locationCode, languageCode, 30, semrushDb
       );
       if (related.success && related.data) {
         let added = 0;
@@ -94,7 +96,7 @@ export async function runTopicDiscovery(
             added++;
           }
         }
-        console.log(`[Topic Discovery] Related for "${seed.keyword}": ${related.data.length} returned, ${added} passed volume filter`);
+        console.log(`[Topic Discovery] Related for "${seed.keyword}" (${related.source}): ${related.data.length} returned, ${added} passed volume filter`);
       } else {
         console.log(`[Topic Discovery] Related for "${seed.keyword}" failed: ${related.error ?? "no data"}`);
       }
@@ -155,15 +157,20 @@ export async function runTopicDiscovery(
     return { topicsGenerated: 0, skipped: false, error: `No topic clusters generated (${allExpandedKeywords.length} expanded, ${scored.length} scored)` };
   }
 
-  // Step 6: SERP analysis for top clusters
+  // Step 6: SERP analysis for top clusters (DataforSEO only — SEMrush SERP not implemented)
   const serpDataMap = new Map<string, { topResults: Array<{ title: string; url: string; domain: string; position: number }>; serpFeatures: string[] }>();
-  for (const cluster of clusters.slice(0, 30)) {
-    const serpResult = await dfClient.getSerpResults(
-      cluster.primaryKeyword, locationCode, languageCode
-    );
-    if (serpResult.success && serpResult.data) {
-      serpDataMap.set(cluster.primaryKeyword, serpResult.data);
+  const dfClient = await getDataForSEOClient(orgId);
+  if (dfClient) {
+    for (const cluster of clusters.slice(0, 30)) {
+      const serpResult = await dfClient.getSerpResults(
+        cluster.primaryKeyword, locationCode, languageCode
+      );
+      if (serpResult.success && serpResult.data) {
+        serpDataMap.set(cluster.primaryKeyword, serpResult.data);
+      }
     }
+  } else {
+    console.log(`[Topic Discovery] Skipping SERP analysis — DataforSEO not available`);
   }
 
   // Step 7: AI angle generation for top clusters
