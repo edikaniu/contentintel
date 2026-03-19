@@ -12,6 +12,9 @@ import {
   Download,
   RefreshCw,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Info,
 } from "lucide-react";
 import { ContentAlertCard } from "@/components/content-alert-card";
 
@@ -62,6 +65,8 @@ export default function ContentHealthPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [rescanning, setRescanning] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 20;
 
   const fetchAlerts = useCallback(async () => {
     if (!selectedDomainId) return;
@@ -126,6 +131,11 @@ export default function ContentHealthPage() {
     }
   };
 
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [statusFilter, typeFilter, priorityFilter, searchQuery]);
+
   // Client-side filters for priority and search
   const filteredAlerts = alerts.filter((row) => {
     if (priorityFilter !== "all" && row.alert.severity !== priorityFilter) {
@@ -139,6 +149,13 @@ export default function ContentHealthPage() {
     }
     return true;
   });
+
+  // Pagination
+  const totalPages = Math.max(1, Math.ceil(filteredAlerts.length / pageSize));
+  const paginatedAlerts = filteredAlerts.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
 
   // Summary counts
   const openAlerts = alerts.filter((r) => r.alert.status === "open");
@@ -158,11 +175,11 @@ export default function ContentHealthPage() {
       : "Never";
 
   const summaryTypes = [
-    { key: "declining_traffic", icon: TrendingDown, color: "text-red-500", iconBg: "bg-red-100" },
-    { key: "position_drop", icon: ArrowDown, color: "text-amber-500", iconBg: "bg-amber-100" },
-    { key: "striking_distance", icon: Target, color: "text-green-500", iconBg: "bg-green-100" },
-    { key: "stale_content", icon: Clock, color: "text-slate-500", iconBg: "bg-slate-100" },
-    { key: "low_ctr", icon: MousePointer, color: "text-blue-500", iconBg: "bg-blue-100" },
+    { key: "declining_traffic", icon: TrendingDown, color: "text-red-500", iconBg: "bg-red-100", tooltip: "" },
+    { key: "position_drop", icon: ArrowDown, color: "text-amber-500", iconBg: "bg-amber-100", tooltip: "" },
+    { key: "striking_distance", icon: Target, color: "text-green-500", iconBg: "bg-green-100", tooltip: "Pages ranking positions 5–20 that could reach page 1 with targeted optimisation" },
+    { key: "stale_content", icon: Clock, color: "text-slate-500", iconBg: "bg-slate-100", tooltip: "" },
+    { key: "low_ctr", icon: MousePointer, color: "text-blue-500", iconBg: "bg-blue-100", tooltip: "" },
   ];
 
   if (!selectedDomainId) {
@@ -228,6 +245,14 @@ export default function ContentHealthPage() {
                 <span className="text-xs font-bold uppercase tracking-wider">
                   {config?.label ?? st.key}
                 </span>
+                {st.tooltip && (
+                  <span className="relative group">
+                    <Info className="w-3.5 h-3.5 text-slate-300 hover:text-slate-500 cursor-help" />
+                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 px-3 py-2 bg-slate-800 text-white text-[11px] leading-snug rounded-lg shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity z-20">
+                      {st.tooltip}
+                    </span>
+                  </span>
+                )}
               </div>
               <div className="flex items-baseline gap-3">
                 <span className="text-3xl font-black text-slate-900">{count}</span>
@@ -323,18 +348,64 @@ export default function ContentHealthPage() {
           </p>
         </div>
       ) : (
-        <div className="space-y-4">
-          {filteredAlerts.map((row) => (
-            <ContentAlertCard
-              key={row.alert.id}
-              alert={row.alert}
-              contentTitle={row.contentTitle}
-              contentUrl={row.contentUrl}
-              actionLoading={actionLoading}
-              onAction={handleAction}
-            />
-          ))}
-        </div>
+        <>
+          <div className="space-y-4">
+            {paginatedAlerts.map((row) => (
+              <ContentAlertCard
+                key={row.alert.id}
+                alert={row.alert}
+                contentTitle={row.contentTitle}
+                contentUrl={row.contentUrl}
+                actionLoading={actionLoading}
+                onAction={handleAction}
+              />
+            ))}
+          </div>
+
+          {/* Pagination controls */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between mt-6 bg-white rounded-xl border border-slate-100 p-4">
+              <p className="text-sm text-slate-500">
+                Showing {(currentPage - 1) * pageSize + 1}–{Math.min(currentPage * pageSize, filteredAlerts.length)} of {filteredAlerts.length} alerts
+              </p>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                >
+                  <ChevronLeft className="w-4 h-4 text-slate-600" />
+                </button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter((p) => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1)
+                  .map((page, idx, arr) => (
+                    <span key={page}>
+                      {idx > 0 && arr[idx - 1] !== page - 1 && (
+                        <span className="text-slate-400 px-1">…</span>
+                      )}
+                      <button
+                        onClick={() => setCurrentPage(page)}
+                        className={`w-8 h-8 rounded-lg text-sm font-medium transition-all ${
+                          currentPage === page
+                            ? "bg-[#3730A3] text-white shadow"
+                            : "text-slate-600 hover:bg-slate-100"
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    </span>
+                  ))}
+                <button
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                >
+                  <ChevronRight className="w-4 h-4 text-slate-600" />
+                </button>
+              </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

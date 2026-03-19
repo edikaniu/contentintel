@@ -147,10 +147,10 @@ export async function GET(req: NextRequest) {
         .where(eq(contentInventory.domainId, domainId))
         .groupBy(contentAlerts.alertType),
 
-      // 8. Organic trend: aggregate clicks/impressions over last 8 weeks
+      // 8. Organic trend: aggregate clicks/impressions by day over last 8 weeks
       db
         .select({
-          week: sql<string>`date_trunc('week', ${contentSnapshots.snapshotDate})`.as(
+          week: sql<string>`date_trunc('day', ${contentSnapshots.snapshotDate})`.as(
             "week"
           ),
           totalClicks: sql<number>`COALESCE(SUM(${contentSnapshots.organicClicks}), 0)`.as(
@@ -173,10 +173,10 @@ export async function GET(req: NextRequest) {
           )
         )
         .groupBy(
-          sql`date_trunc('week', ${contentSnapshots.snapshotDate})`
+          sql`date_trunc('day', ${contentSnapshots.snapshotDate})`
         )
         .orderBy(
-          sql`date_trunc('week', ${contentSnapshots.snapshotDate})`
+          sql`date_trunc('day', ${contentSnapshots.snapshotDate})`
         ),
     ]);
 

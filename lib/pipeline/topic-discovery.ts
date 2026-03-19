@@ -54,10 +54,10 @@ export async function runTopicDiscovery(
   }> = [];
 
   const seenKeywords = new Set<string>();
-  const minVolume = 100;
+  const minVolume = 10;
 
   // Expand each seed cluster (pick top seeds per cluster to limit API calls)
-  for (const [, clusterSeeds] of seedClusters) {
+  for (const [clusterName, clusterSeeds] of seedClusters) {
     const topSeeds = clusterSeeds
       .sort((a, b) => b.searchVolume - a.searchVolume)
       .slice(0, 3);
@@ -68,12 +68,17 @@ export async function runTopicDiscovery(
         seed.keyword, locationCode, languageCode, 30
       );
       if (suggestions.success && suggestions.data) {
+        let added = 0;
         for (const kw of suggestions.data) {
           if (kw.searchVolume >= minVolume && !seenKeywords.has(kw.keyword.toLowerCase())) {
             seenKeywords.add(kw.keyword.toLowerCase());
             allExpandedKeywords.push(kw);
+            added++;
           }
         }
+        console.log(`[Topic Discovery] Suggestions for "${seed.keyword}": ${suggestions.data.length} returned, ${added} passed volume filter`);
+      } else {
+        console.log(`[Topic Discovery] Suggestions for "${seed.keyword}" failed: ${suggestions.error ?? "no data"}`);
       }
 
       // Get related keywords
@@ -81,12 +86,34 @@ export async function runTopicDiscovery(
         seed.keyword, locationCode, languageCode, 30
       );
       if (related.success && related.data) {
+        let added = 0;
         for (const kw of related.data) {
           if (kw.searchVolume >= minVolume && !seenKeywords.has(kw.keyword.toLowerCase())) {
             seenKeywords.add(kw.keyword.toLowerCase());
             allExpandedKeywords.push(kw);
+            added++;
           }
         }
+        console.log(`[Topic Discovery] Related for "${seed.keyword}": ${related.data.length} returned, ${added} passed volume filter`);
+      } else {
+        console.log(`[Topic Discovery] Related for "${seed.keyword}" failed: ${related.error ?? "no data"}`);
+      }
+    }
+  }
+
+  // Fallback: if expansion returned nothing, use seeds directly as keywords
+  if (allExpandedKeywords.length === 0 && seedResult.seeds.length > 0) {
+    console.log(`[Topic Discovery] ${domain.domain}: Expansion returned 0 keywords, falling back to ${seedResult.seeds.length} seeds`);
+    for (const seed of seedResult.seeds) {
+      if (!seenKeywords.has(seed.keyword.toLowerCase())) {
+        seenKeywords.add(seed.keyword.toLowerCase());
+        allExpandedKeywords.push({
+          keyword: seed.keyword,
+          searchVolume: seed.searchVolume > 0 ? seed.searchVolume : 50,
+          keywordDifficulty: 50,
+          cpc: 0,
+          trendData: [],
+        });
       }
     }
   }
