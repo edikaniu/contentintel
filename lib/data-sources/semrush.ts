@@ -58,7 +58,7 @@ export async function getSemrushClient(orgId: string) {
 
   const apiKey = creds.api_key;
   const baseUrl = "https://api.semrush.com/";
-  const unitsUrl = `https://api.semrush.com/management/v1/units?key=${apiKey}`;
+  const unitsUrl = `https://www.semrush.com/users/countapiunits.html?key=${apiKey}`;
 
   async function semrushGet(params: Record<string, string>): Promise<SemrushResult<string>> {
     try {

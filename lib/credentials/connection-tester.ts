@@ -193,26 +193,32 @@ export async function testSemrush(creds: {
 }): Promise<TestResult> {
   try {
     const res = await fetch(
-      `https://api.semrush.com/management/v1/units?key=${encodeURIComponent(creds.api_key)}`,
+      `https://www.semrush.com/users/countapiunits.html?key=${encodeURIComponent(creds.api_key)}`,
       { method: "GET" }
     );
 
     const text = await res.text();
 
     if (res.ok) {
-      const units = parseInt(text, 10);
+      // Response contains API units remaining (may include extra fields separated by semicolons)
+      const firstLine = text.trim().split("\n")[0] ?? "";
+      const units = parseInt(firstLine, 10);
       if (!isNaN(units)) {
         return {
           success: true,
           metadata: { unitsRemaining: units },
         };
       }
-      return { success: true, metadata: { raw: text } };
+      // If response is not a number, check for error text
+      if (text.includes("ERROR") || text.includes("WRONG API KEY")) {
+        return { success: false, error: "Invalid API key" };
+      }
+      return { success: true, metadata: { raw: text.slice(0, 200) } };
     }
 
     return {
       success: false,
-      error: text || `HTTP ${res.status}`,
+      error: text.slice(0, 200) || `HTTP ${res.status}`,
     };
   } catch (err) {
     return {
