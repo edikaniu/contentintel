@@ -103,3 +103,58 @@ export async function syncContentInventory(
 
   return { synced: posts.length, created, updated, skipped: false };
 }
+
+/**
+ * Seed content inventory from GSC page URLs when HubSpot is not available.
+ * Creates minimal inventory entries so the snapshot builder can match GSC/GA4 data.
+ */
+export async function seedContentFromGSC(
+  domainId: string,
+  gscPages: Array<{ page: string; primaryQuery: string }>
+): Promise<{ seeded: number }> {
+  if (gscPages.length === 0) return { seeded: 0 };
+
+  // Get existing URLs to avoid duplicates
+  const existing = await db
+    .select({ url: contentInventory.url })
+    .from(contentInventory)
+    .where(eq(contentInventory.domainId, domainId));
+
+  const existingUrls = new Set(existing.map((e) => e.url));
+  const existingPaths = new Set(existing.map((e) => {
+    try { return new URL(e.url).pathname; } catch { return e.url; }
+  }));
+
+  let seeded = 0;
+  const now = new Date();
+
+  for (const page of gscPages) {
+    if (!page.page) continue;
+
+    // Skip if URL or path already in inventory
+    const pagePath = (() => {
+      try { return new URL(page.page).pathname; } catch { return page.page; }
+    })();
+    if (existingUrls.has(page.page) || existingPaths.has(pagePath)) continue;
+
+    // Derive title from URL path
+    const title = pagePath
+      .replace(/^\//, "")
+      .replace(/\/$/, "")
+      .split("/")
+      .pop()
+      ?.replace(/[-_]/g, " ")
+      .replace(/\b\w/g, (c) => c.toUpperCase()) || page.page;
+
+    await db.insert(contentInventory).values({
+      domainId,
+      url: page.page,
+      title,
+      slug: pagePath,
+      syncedAt: now,
+    });
+    seeded++;
+  }
+
+  return { seeded };
+}

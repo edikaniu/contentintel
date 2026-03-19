@@ -61,18 +61,19 @@ async function generateSingleTopic(
     ? `Competitors ranking for this topic: ${topic.competitorData.map((c) => `${c.domain} (position ${c.position})`).join(", ")}`
     : "No direct competitors currently ranking for this topic.";
 
-  const prompt = `You are a content strategist for a ${topic.vertical} website. Generate a content recommendation for the following topic.
+  const prompt = `You are a senior content strategist specialising in the ${topic.vertical} space. Your job is to turn keyword data into a specific, actionable content brief that a writer can immediately use.
 
 Primary keyword: "${topic.primaryKeyword}"
 Supporting keywords: ${topic.supportingKeywords.join(", ") || "none"}
-Vertical: ${topic.vertical}
 ${competitorContext}
+
+Generate a content recommendation. Be specific and strategic — not generic. The angle should explain WHY this piece will rank and what unique value it offers readers. The outline should have descriptive section titles that reflect real subtopics, not just "Section 1".
 
 Respond in exactly this JSON format (no markdown, no code blocks):
 {
-  "angle": "1-2 sentence recommended approach for this content piece",
-  "content_type": "one of: blog post, comparison page, guide, tool, listicle, how-to",
-  "outline": "Section 1: ...\\nSection 2: ...\\nSection 3: ...\\nSection 4: ...\\nSection 5: ..."
+  "angle": "2-3 sentence strategic angle explaining the unique approach, target reader, and why this will outperform existing content",
+  "content_type": "one of: blog post, comparison page, ultimate guide, interactive tool, listicle, how-to tutorial, case study, data-driven analysis",
+  "outline": "Introduction: [specific hook]\\n[Descriptive heading 1]: [what this covers]\\n[Descriptive heading 2]: [what this covers]\\n[Descriptive heading 3]: [what this covers]\\n[Descriptive heading 4]: [what this covers]\\n[Descriptive heading 5]: [what this covers]\\nConclusion: [specific takeaway]"
 }`;
 
   const res = await fetch("https://api.anthropic.com/v1/messages", {
@@ -84,7 +85,7 @@ Respond in exactly this JSON format (no markdown, no code blocks):
     },
     body: JSON.stringify({
       model: "claude-haiku-4-5-20251001",
-      max_tokens: 500,
+      max_tokens: 1000,
       messages: [{ role: "user", content: prompt }],
     }),
   });

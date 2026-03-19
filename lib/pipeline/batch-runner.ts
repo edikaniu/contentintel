@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { organisations, domains, weeklyBatches } from "@/lib/db/schema";
-import { syncContentInventory } from "./content-sync";
+import { syncContentInventory, seedContentFromGSC } from "./content-sync";
 import { pullGSCData } from "./gsc-pull";
 import { pullGA4Data } from "./ga4-pull";
 import { buildSnapshots } from "./snapshot-builder";
@@ -111,6 +111,14 @@ async function runDomainBatch(
       skippedSources.push(`GA4: ${ga4Result.error}`);
     } else if (ga4Result.error) {
       errors.push(`GA4 pull error: ${ga4Result.error}`);
+    }
+
+    // Step 3b: If HubSpot was skipped, seed content inventory from GSC pages
+    if (syncResult.skipped && gscResult.pages.length > 0) {
+      const seedResult = await seedContentFromGSC(domain.id, gscResult.pages);
+      if (seedResult.seeded > 0) {
+        console.log(`[Batch] ${domain.domain}: Seeded ${seedResult.seeded} content items from GSC`);
+      }
     }
 
     // Step 4: Build snapshots combining GSC + GA4 data
