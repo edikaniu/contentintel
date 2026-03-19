@@ -1,6 +1,6 @@
-import { eq } from "drizzle-orm";
+import { eq, and, count } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { organisations, domains, weeklyBatches } from "@/lib/db/schema";
+import { organisations, domains, weeklyBatches, contentSnapshots, contentInventory } from "@/lib/db/schema";
 import { syncContentInventory, seedContentFromGSC } from "./content-sync";
 import { pullGSCData } from "./gsc-pull";
 import { pullGA4Data } from "./ga4-pull";
@@ -91,12 +91,27 @@ async function runDomainBatch(
       errors.push(`HubSpot sync error: ${syncResult.error}`);
     }
 
-    // Step 2: GSC data pull (last 7 days for current week, plus 4 weeks back for trends)
+    // Step 2: Check if we have historical snapshots — if not, backfill 90 days
+    const inventoryItems = await db
+      .select({ id: contentInventory.id })
+      .from(contentInventory)
+      .where(eq(contentInventory.domainId, domain.id))
+      .limit(1);
+
+    const existingSnapCount = inventoryItems.length > 0
+      ? await db
+          .select({ count: count() })
+          .from(contentSnapshots)
+          .where(eq(contentSnapshots.contentId, inventoryItems[0].id))
+          .then((rows) => rows[0]?.count ?? 0)
+      : 0;
+
+    const needsBackfill = existingSnapCount <= 1;
     const now = new Date();
+
+    // Current week GSC pull (always done)
     const weekStart = new Date(now);
     weekStart.setDate(weekStart.getDate() - 7);
-    const fourWeeksStart = new Date(now);
-    fourWeeksStart.setDate(fourWeeksStart.getDate() - 28);
 
     const gscResult = await pullGSCData(orgId, domain, weekStart, now);
     if (gscResult.skipped) {
@@ -105,7 +120,7 @@ async function runDomainBatch(
       errors.push(`GSC pull error: ${gscResult.error}`);
     }
 
-    // Step 3: GA4 data pull
+    // Step 3: GA4 data pull (current week)
     const ga4Result = await pullGA4Data(orgId, domain, weekStart, now);
     if (ga4Result.skipped) {
       skippedSources.push(`GA4: ${ga4Result.error}`);
@@ -121,7 +136,7 @@ async function runDomainBatch(
       }
     }
 
-    // Step 4: Build snapshots combining GSC + GA4 data
+    // Step 4: Build snapshots combining GSC + GA4 data (current week)
     const gscMap = new Map(
       gscResult.pages.map((p) => [
         p.page,
@@ -151,6 +166,41 @@ async function runDomainBatch(
     const snapshotResult = await buildSnapshots(domain, batchDate, gscMap, ga4Map);
     if (snapshotResult.error) {
       errors.push(`Snapshot build error: ${snapshotResult.error}`);
+    }
+
+    // Step 4b: Historical backfill — pull GSC in weekly buckets for past 90 days
+    if (needsBackfill && !gscResult.skipped) {
+      console.log(`[Batch] ${domain.domain}: Backfilling 90 days of GSC history...`);
+      const BACKFILL_WEEKS = 12; // 12 weeks ≈ 84 days
+      let backfillSnapshots = 0;
+
+      for (let w = 2; w <= BACKFILL_WEEKS; w++) {
+        const wEnd = new Date(now);
+        wEnd.setDate(wEnd.getDate() - (w - 1) * 7);
+        const wStart = new Date(wEnd);
+        wStart.setDate(wStart.getDate() - 7);
+        const weekDate = new Date(wEnd); // snapshot date = end of that week
+
+        const histGsc = await pullGSCData(orgId, domain, wStart, wEnd);
+        if (!histGsc.skipped && histGsc.pages.length > 0) {
+          const histMap = new Map(
+            histGsc.pages.map((p) => [
+              p.page,
+              {
+                primaryQuery: p.primaryQuery,
+                totalClicks: p.totalClicks,
+                totalImpressions: p.totalImpressions,
+                avgCtr: p.avgCtr,
+                avgPosition: p.avgPosition,
+              },
+            ])
+          );
+          const histSnap = await buildSnapshots(domain, weekDate, histMap, new Map());
+          backfillSnapshots += histSnap.created;
+        }
+      }
+
+      console.log(`[Batch] ${domain.domain}: Backfilled ${backfillSnapshots} historical snapshots across ${BACKFILL_WEEKS - 1} weeks`);
     }
 
     // Step 5: Generate alerts
