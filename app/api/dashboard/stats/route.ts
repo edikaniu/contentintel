@@ -191,35 +191,44 @@ export async function GET(req: NextRequest) {
     // Format alerts by type as an object
     const alertsByType: Record<string, number> = {};
     for (const row of alertsByTypeResult) {
-      alertsByType[row.alertType] = row.count;
+      alertsByType[row.alertType] = Number(row.count);
     }
 
-    // Diagnostic metadata: helps frontend explain why data might be empty
-    const [credentials, lastBatch] = await Promise.all([
-      listCredentials(session!.user.orgId),
-      db.select()
-        .from(weeklyBatches)
-        .where(eq(weeklyBatches.domainId, domainId))
-        .orderBy(desc(weeklyBatches.batchDate))
-        .limit(1)
-        .then((rows) => rows[0] ?? null),
-    ]);
-
-    const windsorCred = credentials.find((c) => c.provider === "windsor");
-    const dataStatus = {
-      windsorConfigured: !!windsorCred?.isConnected,
+    // Diagnostic metadata: non-blocking — must not crash the main response
+    let dataStatus: { windsorConfigured: boolean; hasSnapshots: boolean; lastBatchDate: unknown; lastBatchStatus: string | null } = {
+      windsorConfigured: false,
       hasSnapshots: organicTrendResult.length > 0,
-      lastBatchDate: lastBatch?.batchDate ?? null,
-      lastBatchStatus: lastBatch?.status ?? null,
+      lastBatchDate: null,
+      lastBatchStatus: null,
     };
+    try {
+      const [credentials, lastBatch] = await Promise.all([
+        listCredentials(session!.user.orgId),
+        db.select()
+          .from(weeklyBatches)
+          .where(eq(weeklyBatches.domainId, domainId))
+          .orderBy(desc(weeklyBatches.batchDate))
+          .limit(1)
+          .then((rows) => rows[0] ?? null),
+      ]);
+      const windsorCred = credentials.find((c) => c.provider === "windsor");
+      dataStatus = {
+        windsorConfigured: !!windsorCred?.isConnected,
+        hasSnapshots: organicTrendResult.length > 0,
+        lastBatchDate: lastBatch?.batchDate ?? null,
+        lastBatchStatus: lastBatch?.status ?? null,
+      };
+    } catch (diagErr) {
+      console.error("Dashboard diagnostic query error (non-fatal):", diagErr);
+    }
 
     return NextResponse.json({
-      newTopicsThisWeek: newTopicsResult[0]?.count ?? 0,
-      contentAlertsCount: openAlertsResult[0]?.count ?? 0,
+      newTopicsThisWeek: Number(newTopicsResult[0]?.count ?? 0),
+      contentAlertsCount: Number(openAlertsResult[0]?.count ?? 0),
       avgOpportunityScore: avgScoreResult[0]?.avg
         ? parseFloat(String(avgScoreResult[0].avg))
         : 0,
-      topicsApprovedThisMonth: approvedThisMonthResult[0]?.count ?? 0,
+      topicsApprovedThisMonth: Number(approvedThisMonthResult[0]?.count ?? 0),
       topRecommendations,
       recentActivity,
       alertsByType,

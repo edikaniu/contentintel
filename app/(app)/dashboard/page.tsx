@@ -165,6 +165,7 @@ export default function DashboardPage() {
 
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [batchRunning, setBatchRunning] = useState(false);
   const [batchMessage, setBatchMessage] = useState<string | null>(null);
   const [trendRange, setTrendRange] = useState<string>("90");
@@ -183,17 +184,25 @@ export default function DashboardPage() {
 
     let cancelled = false;
     setLoading(true);
+    setError(null);
 
-    fetch(`/api/dashboard/stats?domainId=${selectedDomainId}&trendRange=90`)
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to load");
+    fetch(`/api/dashboard/stats?domainId=${selectedDomainId}&trendRange=90&_t=${Date.now()}`)
+      .then(async (res) => {
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          throw new Error(body.error ?? `API returned ${res.status}`);
+        }
         return res.json();
       })
       .then((json) => {
         if (!cancelled) setData(json);
       })
-      .catch(() => {
-        if (!cancelled) setData(null);
+      .catch((err) => {
+        console.error("Dashboard fetch error:", err);
+        if (!cancelled) {
+          setData(null);
+          setError(err instanceof Error ? err.message : "Failed to load dashboard");
+        }
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -319,9 +328,22 @@ export default function DashboardPage() {
         <DashboardSkeleton />
       ) : !data ? (
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-12 text-center">
-          <p className="text-slate-500">
-            No data available yet. Run a batch to start collecting insights.
-          </p>
+          {error ? (
+            <>
+              <p className="text-red-600 font-medium mb-2">Failed to load dashboard</p>
+              <p className="text-slate-500 text-sm">{error}</p>
+              <button
+                onClick={() => setRefreshKey((k) => k + 1)}
+                className="mt-4 inline-flex items-center gap-2 text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+              >
+                <RefreshCw className="w-4 h-4" /> Try Again
+              </button>
+            </>
+          ) : (
+            <p className="text-slate-500">
+              No data available yet. Run a batch to start collecting insights.
+            </p>
+          )}
         </div>
       ) : (
         <>
