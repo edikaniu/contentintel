@@ -91,10 +91,10 @@ function timeAgo(dateStr: string): string {
 
 const statusColors: Record<string, string> = {
   new: "bg-blue-500",
-  approved: "bg-emerald-500",
+  approved: "bg-[#A3E635]",
   rejected: "bg-red-500",
   in_progress: "bg-amber-500",
-  published: "bg-indigo-500",
+  published: "bg-[#8B5CF6]",
 };
 
 const statusLabels: Record<string, string> = {
@@ -112,11 +112,11 @@ const statusLabels: Record<string, string> = {
 function getActivityIcon(status: string) {
   switch (status) {
     case "approved":
-      return { bg: "bg-[#3730A3]", icon: <Check className="w-3 h-3 text-white" /> };
+      return { bg: "bg-[#8B5CF6]", icon: <Check className="w-3 h-3 text-white" /> };
     case "rejected":
       return { bg: "bg-red-500", icon: <X className="w-3 h-3 text-white" /> };
     case "new":
-      return { bg: "bg-slate-400", icon: <RefreshCw className="w-3 h-3 text-white" /> };
+      return { bg: "bg-gray-400", icon: <RefreshCw className="w-3 h-3 text-white" /> };
     default:
       return { bg: "bg-amber-500", icon: <Pencil className="w-3 h-3 text-white" /> };
   }
@@ -128,13 +128,13 @@ function getActivityIcon(status: string) {
 
 function SkeletonCard() {
   return (
-    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 animate-pulse">
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 animate-pulse">
       <div className="flex items-center gap-3 mb-4">
-        <div className="w-9 h-9 rounded-xl bg-slate-100" />
-        <div className="h-3 w-24 rounded bg-slate-100" />
+        <div className="w-9 h-9 rounded-xl bg-gray-100" />
+        <div className="h-3 w-24 rounded bg-gray-100" />
       </div>
-      <div className="h-8 w-16 rounded bg-slate-100 mb-2" />
-      <div className="h-3 w-32 rounded bg-slate-100" />
+      <div className="h-8 w-16 rounded bg-gray-100 mb-2" />
+      <div className="h-3 w-32 rounded bg-gray-100" />
     </div>
   );
 }
@@ -148,12 +148,17 @@ function DashboardSkeleton() {
         ))}
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-100 shadow-sm p-6 animate-pulse h-72" />
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 animate-pulse h-72" />
+        <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm p-6 animate-pulse h-72" />
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 animate-pulse h-72" />
       </div>
     </div>
   );
 }
+
+// ---------------------------------------------------------------------------
+// Granularity type (must match TrendChart)
+// ---------------------------------------------------------------------------
+type Granularity = "daily" | "weekly" | "monthly";
 
 // ---------------------------------------------------------------------------
 // Main Component
@@ -170,6 +175,7 @@ export default function DashboardPage() {
   const [batchMessage, setBatchMessage] = useState<string | null>(null);
   const [trendRange, setTrendRange] = useState<string>("90");
   const [trendLoading, setTrendLoading] = useState(false);
+  const [granularity, setGranularity] = useState<Granularity>("daily");
 
   // Fetch dashboard data
   const [refreshKey, setRefreshKey] = useState(0);
@@ -284,8 +290,8 @@ export default function DashboardPage() {
   if (!selectedDomainId) {
     return (
       <div className="p-8">
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-12 text-center">
-          <p className="text-slate-500 text-lg">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-12 text-center">
+          <p className="font-body text-gray-400 text-lg">
             Select a domain from the dropdown above to view your dashboard.
           </p>
         </div>
@@ -294,25 +300,25 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
+    <div className="p-6 lg:p-8 space-y-6 bg-[#F9FAFB]">
       {/* Welcome strip */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">
+          <h1 className="text-2xl font-headline font-bold text-gray-900">
             {getGreeting()}, {userName}
           </h1>
-          <p className="text-slate-500 text-sm mt-0.5">
+          <p className="font-body text-gray-500 text-sm mt-0.5">
             Here&apos;s what&apos;s happening with your content performance today.
           </p>
         </div>
         <div className="flex items-center gap-3">
           {batchMessage && (
-            <span className="text-xs text-slate-500">{batchMessage}</span>
+            <span className="text-xs font-body text-gray-400">{batchMessage}</span>
           )}
           <button
             onClick={runBatch}
             disabled={batchRunning}
-            className="inline-flex items-center gap-2 bg-[#3730A3] hover:bg-[#4F46E5] disabled:opacity-60 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors shadow-lg shadow-[#3730A3]/20"
+            className="inline-flex items-center gap-2 bg-[#8B5CF6] hover:bg-[#7C3AED] disabled:opacity-60 text-white text-sm font-semibold font-body px-5 py-2.5 rounded-xl transition-colors shadow-lg shadow-[#8B5CF6]/20"
           >
             {batchRunning ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -327,20 +333,20 @@ export default function DashboardPage() {
       {loading ? (
         <DashboardSkeleton />
       ) : !data ? (
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-12 text-center">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-12 text-center">
           {error ? (
             <>
-              <p className="text-red-600 font-medium mb-2">Failed to load dashboard</p>
-              <p className="text-slate-500 text-sm">{error}</p>
+              <p className="text-red-600 font-headline font-medium mb-2">Failed to load dashboard</p>
+              <p className="font-body text-gray-500 text-sm">{error}</p>
               <button
                 onClick={() => setRefreshKey((k) => k + 1)}
-                className="mt-4 inline-flex items-center gap-2 text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+                className="mt-4 inline-flex items-center gap-2 text-sm text-[#8B5CF6] hover:text-[#7C3AED] font-body font-medium"
               >
                 <RefreshCw className="w-4 h-4" /> Try Again
               </button>
             </>
           ) : (
-            <p className="text-slate-500">
+            <p className="font-body text-gray-400">
               No data available yet. Run a batch to start collecting insights.
             </p>
           )}
@@ -350,38 +356,38 @@ export default function DashboardPage() {
           {/* KPI Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {/* New Topics */}
-            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 flex flex-col gap-4">
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:border-[#8B5CF6]/20 hover:shadow-md transition-all p-6 flex flex-col gap-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-slate-500 text-sm font-medium">
+                  <span className="font-body text-gray-500 text-sm font-medium">
                     New Topics
                   </span>
                 </div>
-                <div className="bg-indigo-50 p-2 rounded-xl text-indigo-600">
+                <div className="bg-[#8B5CF6]/10 p-2 rounded-xl text-[#8B5CF6]">
                   <Lightbulb className="w-5 h-5" />
                 </div>
               </div>
               <div className="flex items-end gap-2">
-                <span className="text-3xl font-extrabold text-slate-900">
+                <span className="font-headline font-extrabold text-2xl text-gray-900">
                   {data.newTopicsThisWeek}
                 </span>
                 {data.newTopicsThisWeek > 0 && (
-                  <span className="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full text-[10px] font-bold mb-1 flex items-center gap-0.5">
+                  <span className="bg-[#A3E635]/10 text-[#A3E635] px-2 py-0.5 rounded-full text-[10px] font-bold font-body mb-1 flex items-center gap-0.5">
                     <ArrowUp className="w-3 h-3" />
                     {data.newTopicsThisWeek}
                   </span>
                 )}
               </div>
-              <p className="text-emerald-600 text-xs font-semibold">
+              <p className="text-[#A3E635] text-xs font-semibold font-body">
                 +{data.newTopicsThisWeek} vs last week
               </p>
             </div>
 
             {/* Content Alerts */}
-            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 flex flex-col gap-4">
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:border-[#8B5CF6]/20 hover:shadow-md transition-all p-6 flex flex-col gap-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-slate-500 text-sm font-medium">
+                  <span className="font-body text-gray-500 text-sm font-medium">
                     Content Alerts
                   </span>
                 </div>
@@ -390,70 +396,70 @@ export default function DashboardPage() {
                 </div>
               </div>
               <div className="flex items-end gap-2">
-                <span className="text-3xl font-extrabold text-slate-900">
+                <span className="font-headline font-extrabold text-2xl text-gray-900">
                   {data.contentAlertsCount}
                 </span>
                 {data.contentAlertsCount > 0 && (
-                  <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded-full text-[10px] font-bold mb-1 flex items-center gap-0.5">
+                  <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded-full text-[10px] font-bold font-body mb-1 flex items-center gap-0.5">
                     <ArrowDown className="w-3 h-3" />
                     {data.contentAlertsCount}
                   </span>
                 )}
               </div>
-              <p className="text-red-600 text-xs font-semibold">
+              <p className="text-red-400 text-xs font-semibold font-body">
                 {data.contentAlertsCount} alerts require attention
               </p>
             </div>
 
             {/* Avg Opportunity Score */}
-            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 flex flex-col gap-4">
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:border-[#8B5CF6]/20 hover:shadow-md transition-all p-6 flex flex-col gap-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-slate-500 text-sm font-medium">
+                  <span className="font-body text-gray-500 text-sm font-medium">
                     Avg Opportunity Score
                   </span>
                 </div>
-                <div className="bg-emerald-50 p-2 rounded-xl text-emerald-600">
+                <div className="bg-[#A3E635]/10 p-2 rounded-xl text-[#A3E635]">
                   <TrendingUp className="w-5 h-5" />
                 </div>
               </div>
               <div className="flex items-end gap-2">
-                <span className="text-3xl font-extrabold text-slate-900">
+                <span className="font-headline font-extrabold text-2xl text-gray-900">
                   {Math.round(data.avgOpportunityScore)}
                 </span>
-                <span className="text-lg font-medium text-slate-400 mb-0.5">
+                <span className="text-lg font-medium text-gray-400 mb-0.5 font-body">
                   /100
                 </span>
                 {data.avgOpportunityScore >= 50 && (
-                  <span className="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full text-[10px] font-bold mb-1 flex items-center gap-0.5">
+                  <span className="bg-[#A3E635]/10 text-[#A3E635] px-2 py-0.5 rounded-full text-[10px] font-bold font-body mb-1 flex items-center gap-0.5">
                     <ArrowUp className="w-3 h-3" />
                     Good
                   </span>
                 )}
               </div>
-              <p className="text-emerald-600 text-xs font-semibold">
+              <p className="text-[#A3E635] text-xs font-semibold font-body">
                 +5 pts than last week
               </p>
             </div>
 
             {/* Topics Approved */}
-            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 flex flex-col gap-4">
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:border-[#8B5CF6]/20 hover:shadow-md transition-all p-6 flex flex-col gap-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-slate-500 text-sm font-medium">
+                  <span className="font-body text-gray-500 text-sm font-medium">
                     Topics Approved
                   </span>
                 </div>
-                <div className="bg-indigo-50 p-2 rounded-xl text-indigo-600">
+                <div className="bg-[#8B5CF6]/10 p-2 rounded-xl text-[#8B5CF6]">
                   <CheckCircle2 className="w-5 h-5" />
                 </div>
               </div>
               <div className="flex items-end gap-2">
-                <span className="text-3xl font-extrabold text-slate-900">
+                <span className="font-headline font-extrabold text-2xl text-gray-900">
                   {data.topicsApprovedThisMonth}
                 </span>
               </div>
-              <p className="text-slate-400 text-xs font-medium">
+              <p className="font-body text-gray-400 text-xs font-medium">
                 of {data.topicsApprovedThisMonth + data.newTopicsThisWeek} total
               </p>
             </div>
@@ -462,43 +468,63 @@ export default function DashboardPage() {
           {/* Charts Section */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
             {/* Organic Performance Trend */}
-            <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-              <div className="flex items-center justify-between mb-8">
+            <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
                 <div>
-                  <h2 className="font-bold text-lg text-slate-900">
+                  <h2 className="font-headline font-bold text-lg text-gray-900">
                     Organic Performance Trend
                   </h2>
-                  <p className="text-xs text-slate-500">Track clicks and impressions across all content.</p>
+                  <p className="text-xs text-gray-500 font-body mt-0.5">Track clicks and impressions across all content.</p>
                 </div>
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3 flex-wrap">
+                  {/* Granularity toggle */}
+                  <div className="inline-flex rounded-xl bg-gray-50 border border-gray-100 p-1">
+                    {(["daily", "weekly", "monthly"] as const).map((g) => (
+                      <button
+                        key={g}
+                        onClick={() => setGranularity(g)}
+                        className={`px-3 py-1.5 text-xs font-medium font-body rounded-lg transition-all ${
+                          granularity === g
+                            ? "bg-[#8B5CF6] text-white shadow-sm"
+                            : "text-gray-500 hover:text-gray-900"
+                        }`}
+                      >
+                        {g.charAt(0).toUpperCase() + g.slice(1)}
+                      </button>
+                    ))}
+                  </div>
+                  {/* Date range selector */}
                   <select
                     value={trendRange}
                     onChange={(e) => setTrendRange(e.target.value)}
-                    className="text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-[#3730A3]/20"
+                    className="text-xs font-medium font-body text-gray-600 bg-white border border-gray-100 rounded-xl px-3 py-1.5 focus:outline-none focus:border-[#8B5CF6] focus:ring-1 focus:ring-[#8B5CF6]/20"
                   >
                     <option value="7">Last 7 days</option>
                     <option value="30">Last 30 days</option>
                     <option value="56">Last 8 weeks</option>
                     <option value="90">Last 3 months</option>
                   </select>
-                  <span className="flex items-center gap-1.5 text-xs text-slate-500">
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#3730A3]" />
-                    Clicks
-                  </span>
-                  <span className="flex items-center gap-1.5 text-xs text-slate-500">
-                    <span className="w-2.5 h-2.5 rounded-full bg-slate-400" />
-                    Impressions
-                  </span>
                 </div>
               </div>
+              {/* Chart legends */}
+              <div className="flex items-center gap-5 mb-4">
+                <span className="flex items-center gap-1.5 text-xs text-gray-500 font-body">
+                  <span className="w-3 h-0.5 rounded-full bg-[#8B5CF6] inline-block" />
+                  Clicks
+                </span>
+                <span className="flex items-center gap-1.5 text-xs text-gray-500 font-body">
+                  <span className="w-3 h-0.5 rounded-full bg-[#A3E635] inline-block" style={{ borderTop: "2px dashed #A3E635", background: "none" }} />
+                  Impressions
+                </span>
+              </div>
               {trendLoading ? (
-                <div className="flex items-center justify-center h-[280px] text-slate-400 text-sm">
+                <div className="flex items-center justify-center h-[280px] text-gray-400 text-sm font-body">
                   <Loader2 className="w-5 h-5 animate-spin mr-2" />
                   Loading trend data...
                 </div>
               ) : data.organicTrend.length === 0 && data.dataStatus ? (
-                <div className="flex flex-col items-center justify-center h-[280px] text-slate-400 text-sm gap-2">
-                  <p className="font-medium text-slate-500">No organic data yet</p>
+                <div className="flex flex-col items-center justify-center h-[280px] text-gray-400 text-sm font-body gap-2">
+                  <p className="font-medium text-gray-500 font-headline">No organic data yet</p>
                   {!data.dataStatus.windsorConfigured && (
                     <p>Windsor.ai is not connected. Connect it in Settings &gt; Connections.</p>
                   )}
@@ -510,13 +536,17 @@ export default function DashboardPage() {
                   )}
                 </div>
               ) : (
-                <TrendChart data={data.organicTrend} />
+                <TrendChart
+                  data={data.organicTrend}
+                  granularity={granularity}
+                  onGranularityChange={setGranularity}
+                />
               )}
             </div>
 
             {/* Alerts by Type */}
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-              <h2 className="font-bold text-lg text-slate-900 mb-6">
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+              <h2 className="font-headline font-bold text-lg text-gray-900 mb-6">
                 Alerts by Type
               </h2>
               <PerformanceChart alertsByType={data.alertsByType} />
@@ -526,26 +556,26 @@ export default function DashboardPage() {
           {/* Bottom Section */}
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
             {/* Top Recommendations */}
-            <div className="lg:col-span-3 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-              <div className="p-6 flex items-center justify-between border-b border-slate-100">
-                <h2 className="font-bold text-lg text-slate-900">
+            <div className="lg:col-span-3 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+              <div className="p-6 flex items-center justify-between border-b border-gray-100">
+                <h2 className="font-headline font-bold text-lg text-gray-900">
                   Top Recommendations
                 </h2>
                 <Link
                   href="/topics"
-                  className="text-indigo-600 hover:text-indigo-700 text-sm font-medium"
+                  className="text-[#8B5CF6] hover:text-[#7C3AED] text-sm font-medium font-body"
                 >
                   View All
                 </Link>
               </div>
               {data.topRecommendations.length === 0 ? (
-                <p className="text-sm text-slate-400 py-6 text-center">
+                <p className="text-sm text-gray-400 font-body py-6 text-center">
                   No recommendations yet. Run a batch to discover topics.
                 </p>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
-                    <thead className="bg-slate-50 text-slate-500 font-semibold uppercase text-[11px] tracking-wider">
+                    <thead className="bg-gray-50/50 text-gray-500 font-body font-semibold uppercase text-[11px] tracking-wider">
                       <tr>
                         <th className="px-6 py-4 text-left">Topic / Keyword</th>
                         <th className="px-6 py-4 text-left">Opp. Score</th>
@@ -553,21 +583,21 @@ export default function DashboardPage() {
                         <th className="px-6 py-4 text-left">Status</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody className="divide-y divide-gray-100">
                       {data.topRecommendations.map((rec) => (
                         <tr
                           key={rec.id}
-                          className="hover:bg-slate-50 transition-colors"
+                          className="hover:bg-gray-50/50 transition-colors"
                         >
                           <td className="px-6 py-4">
                             <Link
                               href="/topics"
-                              className="hover:text-indigo-600 transition-colors"
+                              className="hover:text-[#8B5CF6] transition-colors"
                             >
-                              <span className="font-semibold text-slate-900">
+                              <span className="font-semibold font-body text-gray-900">
                                 {rec.primaryKeyword}
                               </span>
-                              <p className="text-xs text-slate-500">
+                              <p className="text-xs text-gray-500 font-body">
                                 {rec.status === "approved" ? "Approved topic" : rec.status === "rejected" ? "Rejected topic" : "Pending review"}
                               </p>
                             </Link>
@@ -575,19 +605,19 @@ export default function DashboardPage() {
                           <td className="px-6 py-4">
                             <ScoreBadge score={rec.opportunityScore} showMax />
                           </td>
-                          <td className="px-6 py-4 text-center text-slate-600 font-medium">
+                          <td className="px-6 py-4 text-center text-gray-600 font-medium font-body">
                             {rec.searchVolume != null
                               ? rec.searchVolume.toLocaleString()
                               : "--"}
                           </td>
                           <td className="px-6 py-4">
-                            <span className="flex items-center gap-1.5 text-xs font-medium">
+                            <span className="flex items-center gap-1.5 text-xs font-medium font-body">
                               <span
                                 className={`size-1.5 rounded-full ${
-                                  statusColors[rec.status] ?? "bg-slate-400"
+                                  statusColors[rec.status] ?? "bg-gray-400"
                                 }`}
                               />
-                              <span className="text-slate-600">
+                              <span className="text-gray-600">
                                 {statusLabels[rec.status] ?? rec.status}
                               </span>
                             </span>
@@ -601,16 +631,16 @@ export default function DashboardPage() {
             </div>
 
             {/* Recent Activity */}
-            <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm p-6 flex flex-col">
-              <h2 className="font-bold text-lg text-slate-900 mb-6">
+            <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col">
+              <h2 className="font-headline font-bold text-lg text-gray-900 mb-6">
                 Recent Activity
               </h2>
               {data.recentActivity.length === 0 ? (
-                <p className="text-sm text-slate-400 py-6 text-center">
+                <p className="text-sm text-gray-400 font-body py-6 text-center">
                   No recent activity.
                 </p>
               ) : (
-                <div className="space-y-6 relative before:absolute before:left-4 before:top-2 before:bottom-2 before:w-px before:bg-slate-200">
+                <div className="space-y-6 relative before:absolute before:left-4 before:top-2 before:bottom-2 before:w-px before:bg-gray-100">
                   {data.recentActivity.map((item) => {
                     const { bg, icon } = getActivityIcon(item.status);
                     return (
@@ -619,18 +649,18 @@ export default function DashboardPage() {
                           {icon}
                         </div>
                         <div>
-                          <p className="text-sm font-semibold text-slate-900">
+                          <p className="text-sm font-semibold font-body text-gray-900">
                             {item.statusChangedBy ?? "System"}{" "}
-                            <span className="font-normal text-slate-500">
+                            <span className="font-normal text-gray-500">
                               changed{" "}
                             </span>
                             {item.primaryKeyword}{" "}
-                            <span className="font-normal text-slate-500">
+                            <span className="font-normal text-gray-500">
                               to{" "}
                             </span>
                             {statusLabels[item.status] ?? item.status}
                           </p>
-                          <p className="text-xs text-slate-400 mt-1 flex items-center gap-1">
+                          <p className="text-xs text-gray-400 font-body mt-1 flex items-center gap-1">
                             <Clock className="w-3 h-3" />
                             {timeAgo(item.updatedAt)}
                           </p>
@@ -640,10 +670,10 @@ export default function DashboardPage() {
                   })}
                 </div>
               )}
-              <div className="mt-auto pt-6 border-t border-slate-100">
+              <div className="mt-auto pt-6 border-t border-gray-100">
                 <Link
                   href="/topics"
-                  className="text-sm text-slate-500 font-medium hover:text-[#3730A3]"
+                  className="text-sm text-gray-500 font-medium font-body hover:text-[#8B5CF6] transition-colors"
                 >
                   View Full History
                 </Link>

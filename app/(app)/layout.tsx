@@ -76,10 +76,10 @@ function NavItem({
     <Link
       href={href}
       onClick={onClick}
-      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium font-body transition-colors ${
         active
-          ? "bg-[#3730A3] text-white"
-          : "text-slate-400 hover:bg-slate-800/50 hover:text-white"
+          ? "text-white bg-[#8B5CF6]/10 border-l-2 border-[#8B5CF6]"
+          : "text-gray-500 hover:text-white hover:bg-white/5"
       }`}
     >
       <Icon className="w-5 h-5" />
@@ -102,10 +102,8 @@ function SidebarContent({
       {/* Logo */}
       <div className="p-4">
         <Link href="/dashboard" className="flex items-center gap-3 px-2">
-          <div className="w-8 h-8 rounded-lg bg-[#3730A3] flex items-center justify-center">
-            <LayoutDashboard className="w-4 h-4 text-white" />
-          </div>
-          <span className="text-white font-semibold text-lg">ContentIntel</span>
+          <div className="w-2 h-2 rounded-full bg-[#8B5CF6]" />
+          <span className="font-headline font-bold text-white text-lg tracking-tight">ContentIntel</span>
         </Link>
       </div>
 
@@ -118,7 +116,7 @@ function SidebarContent({
       <nav className="flex-1 px-4 space-y-6 overflow-y-auto">
         {/* MAIN section */}
         <div>
-          <p className="px-3 mb-2 text-[10px] text-slate-500 uppercase tracking-widest font-semibold">
+          <p className="px-3 mb-2 text-xs text-gray-600 uppercase tracking-wider font-body">
             Main
           </p>
           <div className="space-y-1">
@@ -141,7 +139,7 @@ function SidebarContent({
 
         {/* MANAGE section */}
         <div>
-          <p className="px-3 mb-2 text-[10px] text-slate-500 uppercase tracking-widest font-semibold">
+          <p className="px-3 mb-2 text-xs text-gray-600 uppercase tracking-wider font-body">
             Manage
           </p>
           <div className="space-y-1">
@@ -164,22 +162,22 @@ function SidebarContent({
       </nav>
 
       {/* User area */}
-      <div className="p-4 border-t border-slate-700">
-        <div className="flex items-center gap-3 px-2 py-3 bg-slate-800/30 rounded-xl">
-          <div className="w-9 h-9 rounded-full bg-slate-500 flex items-center justify-center text-white text-xs font-semibold shrink-0 ring-2 ring-slate-700">
+      <div className="p-4 border-t border-[#222]">
+        <div className="flex items-center gap-3 px-2 py-3">
+          <div className="w-9 h-9 rounded-full bg-[#8B5CF6]/20 flex items-center justify-center text-white text-xs font-semibold shrink-0 ring-2 ring-[#222]">
             {session.user.name?.charAt(0).toUpperCase() ?? "U"}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-white text-xs font-semibold truncate">
+            <p className="text-white text-xs font-semibold font-body truncate">
               {session.user.name}
             </p>
-            <p className="text-slate-400 text-[10px] uppercase tracking-wider truncate">
+            <p className="text-gray-600 text-[10px] uppercase tracking-wider font-body truncate">
               {session.user.role}
             </p>
           </div>
           <button
             onClick={() => signOut({ callbackUrl: "/login" })}
-            className="ml-auto text-slate-400 hover:text-white transition-colors"
+            className="ml-auto text-gray-500 hover:text-red-400 transition-colors"
           >
             <LogOut className="w-5 h-5" />
           </button>
@@ -212,8 +210,8 @@ function AppShell({
 
   if (status === "loading") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="text-slate-500">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-[#F9FAFB]">
+        <div className="text-gray-500 font-body">Loading...</div>
       </div>
     );
   }
@@ -224,9 +222,9 @@ function AppShell({
   const settingsSubPage = getSettingsSubPage(pathname);
 
   return (
-    <div className="min-h-screen flex bg-slate-50">
+    <div className="min-h-screen flex bg-[#F9FAFB]">
       {/* Desktop sidebar */}
-      <aside className="hidden lg:flex w-64 bg-[#1E293B] flex-col shrink-0 border-r border-slate-700">
+      <aside className="hidden lg:flex w-64 bg-[#050505] flex-col shrink-0 border-r border-[#222]">
         <SidebarContent
           pathname={pathname}
           session={session}
@@ -240,10 +238,10 @@ function AppShell({
             className="absolute inset-0 bg-black/50"
             onClick={() => setMobileOpen(false)}
           />
-          <aside className="relative w-64 h-full bg-[#1E293B] flex flex-col z-50">
+          <aside className="relative w-64 h-full bg-[#050505] flex flex-col z-50">
             <button
               onClick={() => setMobileOpen(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white"
+              className="absolute top-4 right-4 text-gray-500 hover:text-white"
             >
               <X className="w-5 h-5" />
             </button>
@@ -259,43 +257,43 @@ function AppShell({
       {/* Main area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top header */}
-        <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 lg:px-8 shrink-0">
+        <header className="h-16 bg-white border-b border-gray-100 flex items-center justify-between px-4 lg:px-8 shrink-0">
           {/* Left: hamburger + breadcrumb */}
           <div className="flex items-center gap-3">
             <button
               onClick={() => setMobileOpen(true)}
-              className="lg:hidden text-slate-500 hover:text-slate-700"
+              className="lg:hidden text-gray-500 hover:text-gray-700"
             >
               <Menu className="w-6 h-6" />
             </button>
             {settingsSubPage ? (
-              <div className="flex items-center gap-2 text-sm font-medium">
-                <span className="font-bold text-slate-800">Settings</span>
-                <span className="text-slate-300">/</span>
-                <span className="text-indigo-600 font-medium">{settingsSubPage}</span>
+              <div className="flex items-center gap-2 text-sm font-body">
+                <span className="font-headline font-bold text-gray-900">Settings</span>
+                <span className="text-gray-300">/</span>
+                <span className="text-[#8B5CF6] font-medium">{settingsSubPage}</span>
               </div>
             ) : (
-              <h1 className="text-lg font-semibold text-slate-900">{pageName}</h1>
+              <h1 className="text-lg font-headline font-semibold text-gray-900">{pageName}</h1>
             )}
           </div>
 
           {/* Right: date pill, bell, avatar */}
           <div className="flex items-center gap-4">
-            <span className="hidden sm:inline-flex items-center px-3 py-1.5 rounded-full bg-slate-100 text-xs font-medium text-slate-600">
+            <span className="hidden sm:inline-flex items-center px-3 py-1.5 rounded-full bg-gray-50 border border-gray-100 text-xs font-medium font-body text-gray-500">
               Last 4 weeks
             </span>
-            <button className="relative text-slate-400 hover:text-slate-600">
+            <button className="relative text-gray-400 hover:text-gray-600">
               <Bell className="w-5 h-5" />
               <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full" />
             </button>
-            <div className="w-8 h-8 rounded-full bg-[#3730A3] flex items-center justify-center text-white text-xs font-medium">
+            <div className="w-8 h-8 rounded-full bg-[#8B5CF6] flex items-center justify-center text-white text-xs font-medium">
               {session.user.name?.charAt(0).toUpperCase() ?? "U"}
             </div>
           </div>
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-auto">{children}</main>
+        <main className="flex-1 overflow-auto font-body">{children}</main>
       </div>
     </div>
   );

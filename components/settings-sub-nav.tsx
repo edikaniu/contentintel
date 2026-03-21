@@ -14,7 +14,7 @@ export function SettingsSubNav() {
   const pathname = usePathname();
 
   return (
-    <div className="bg-white px-8 border-b border-slate-200">
+    <div className="bg-white px-8 border-b border-gray-100">
       <div className="flex gap-8">
         {TABS.map((tab) => {
           const isActive = pathname === tab.href || pathname.startsWith(tab.href + "/");
@@ -22,10 +22,10 @@ export function SettingsSubNav() {
             <Link
               key={tab.href}
               href={tab.href}
-              className={`py-4 border-b-2 text-sm font-medium transition-all ${
+              className={`py-4 border-b-2 text-sm font-medium font-body transition-all ${
                 isActive
-                  ? "border-indigo-600 text-indigo-600 font-bold"
-                  : "border-transparent text-slate-500 hover:text-slate-700"
+                  ? "border-[#8B5CF6] text-[#8B5CF6] font-bold"
+                  : "border-transparent text-gray-500 hover:text-gray-900"
               }`}
             >
               {tab.label}

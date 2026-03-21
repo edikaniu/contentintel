@@ -63,14 +63,14 @@ const ALERT_TYPE_CONFIG: Record<
   },
   stale_content: {
     label: "Stale Content",
-    borderColor: "border-slate-400",
-    bgColor: "bg-slate-50",
-    textColor: "text-slate-600",
-    iconBg: "bg-slate-100",
-    accentColor: "text-slate-600",
-    actionBg: "bg-slate-50/50",
-    actionBorder: "border-slate-100/50",
-    badgeBorder: "border-slate-100",
+    borderColor: "border-gray-400",
+    bgColor: "bg-gray-50",
+    textColor: "text-gray-600",
+    iconBg: "bg-gray-100",
+    accentColor: "text-gray-600",
+    actionBg: "bg-gray-50/50",
+    actionBorder: "border-gray-100/50",
+    badgeBorder: "border-gray-100",
     icon: Clock,
   },
   low_ctr: {
@@ -100,23 +100,23 @@ const ALERT_TYPE_CONFIG: Record<
 };
 
 const SEVERITY_BORDER: Record<string, string> = {
-  high: "border-red-600",
+  high: "border-red-500",
   medium: "border-amber-500",
-  low: "border-green-600",
+  low: "border-[#8B5CF6]",
 };
 
 function getTypeConfig(alertType: string) {
   return (
     ALERT_TYPE_CONFIG[alertType] ?? {
       label: alertType,
-      borderColor: "border-slate-300",
-      bgColor: "bg-slate-50",
-      textColor: "text-slate-600",
-      iconBg: "bg-slate-100",
-      accentColor: "text-slate-600",
-      actionBg: "bg-slate-50/50",
-      actionBorder: "border-slate-100/50",
-      badgeBorder: "border-slate-100",
+      borderColor: "border-gray-300",
+      bgColor: "bg-gray-50",
+      textColor: "text-gray-600",
+      iconBg: "bg-gray-100",
+      accentColor: "text-gray-600",
+      actionBg: "bg-gray-50/50",
+      actionBorder: "border-gray-100/50",
+      badgeBorder: "border-gray-100",
       icon: Clock,
     }
   );
@@ -172,8 +172,8 @@ export function ContentAlertCard({ alert, contentTitle, contentUrl, actionLoadin
   const isAcknowledged = alert.status === "acknowledged";
   const borderColor =
     isAcknowledged
-      ? "border-slate-300"
-      : SEVERITY_BORDER[alert.severity] ?? "border-slate-300";
+      ? "border-gray-300"
+      : SEVERITY_BORDER[alert.severity] ?? "border-gray-300";
   const currentMetrics = alert.currentMetricsJson as Record<string, unknown> | null;
   const previousMetrics = alert.previousMetricsJson as Record<string, unknown> | null;
 
@@ -190,9 +190,9 @@ export function ContentAlertCard({ alert, contentTitle, contentUrl, actionLoadin
 
   return (
     <div
-      className={`rounded-xl shadow-sm overflow-hidden border-l-4 ${borderColor} ${
-        isAcknowledged ? "bg-slate-50/80" : "bg-white"
-      }`}
+      className={`rounded-2xl shadow-sm overflow-hidden border-l-4 ${borderColor} border border-gray-100 ${
+        isAcknowledged ? "bg-gray-50/80" : "bg-white hover:border-[#8B5CF6]/20 hover:shadow-md"
+      } transition-all`}
     >
       <div className={`p-5 ${isAcknowledged ? "opacity-70" : ""}`}>
         {/* Header row */}
@@ -200,26 +200,26 @@ export function ContentAlertCard({ alert, contentTitle, contentUrl, actionLoadin
           <div className="space-y-1">
             <div className="flex items-center gap-3">
               {isAcknowledged ? (
-                <span className="px-2 py-0.5 bg-slate-200 text-slate-600 text-[10px] font-bold uppercase tracking-wider rounded border border-slate-300">
+                <span className="px-2 py-0.5 bg-gray-200 text-gray-600 text-[10px] font-body font-bold uppercase tracking-wider rounded-lg border border-gray-300">
                   Acknowledged
                 </span>
               ) : (
                 <span
-                  className={`px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded border ${config.bgColor} ${config.textColor} ${config.badgeBorder}`}
+                  className={`px-2 py-0.5 text-[10px] font-body font-bold uppercase tracking-wider rounded-lg border ${config.bgColor} ${config.textColor} ${config.badgeBorder}`}
                 >
                   {config.label}
                 </span>
               )}
-              <span className="text-slate-400 text-xs font-medium">
+              <span className="font-body text-gray-400 text-xs font-medium">
                 {isAcknowledged
                   ? `Detected ${formatTimeAgo(alert.createdAt)}`
                   : `Detected ${formatTimeAgo(alert.createdAt)}`}
               </span>
             </div>
-            <h3 className={`text-lg font-bold ${isAcknowledged ? "text-slate-500" : "text-slate-900"}`}>
+            <h3 className={`text-lg font-headline font-bold ${isAcknowledged ? "text-gray-500" : "text-gray-900"}`}>
               {contentTitle || "Untitled Content"}
             </h3>
-            <p className={`text-xs font-medium truncate ${isAcknowledged ? "text-slate-400" : "text-slate-500"}`}>
+            <p className={`text-xs font-body font-medium truncate ${isAcknowledged ? "text-gray-400" : "text-gray-500"}`}>
               {contentUrl || ""}
             </p>
           </div>
@@ -229,9 +229,9 @@ export function ContentAlertCard({ alert, contentTitle, contentUrl, actionLoadin
             <div className="flex items-center gap-6">
               {sessions !== null && (
                 <div className="text-right">
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-tighter">Sessions</p>
+                  <p className="text-xs font-body font-bold text-gray-400 uppercase tracking-tighter">Sessions</p>
                   <div className="flex items-center gap-2">
-                    <span className="text-slate-900 font-bold">
+                    <span className="text-gray-900 font-bold">
                       {sessions.toLocaleString()}
                     </span>
                     {sessionsChange && (
@@ -255,9 +255,9 @@ export function ContentAlertCard({ alert, contentTitle, contentUrl, actionLoadin
               )}
               {position !== null && (
                 <div className="text-right">
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-tighter">Avg Pos.</p>
+                  <p className="text-xs font-body font-bold text-gray-400 uppercase tracking-tighter">Avg Pos.</p>
                   <div className="flex items-center gap-2">
-                    <span className="text-slate-900 font-bold">
+                    <span className="text-gray-900 font-bold">
                       #{position.toFixed(0)}
                     </span>
                     {positionChange && (
@@ -291,7 +291,7 @@ export function ContentAlertCard({ alert, contentTitle, contentUrl, actionLoadin
         >
           <div className="flex items-center gap-3">
             <Lightbulb className={`w-[18px] h-[18px] ${config.accentColor}`} />
-            <p className="text-sm font-medium text-slate-700">
+            <p className="text-sm font-body font-medium text-gray-700">
               {alert.suggestedAction || "Review this content for potential improvements."}
             </p>
           </div>
@@ -300,7 +300,7 @@ export function ContentAlertCard({ alert, contentTitle, contentUrl, actionLoadin
               <button
                 onClick={() => onAction(alert.id, "acknowledged")}
                 disabled={actionLoading === alert.id}
-                className="px-3 py-1.5 text-xs font-bold text-slate-600 hover:bg-white rounded-lg transition-all border border-transparent hover:border-slate-200 disabled:opacity-50"
+                className="px-3 py-1.5 text-xs font-body font-bold text-gray-500 hover:text-gray-900 hover:bg-white rounded-lg transition-all border border-transparent hover:border-gray-100 disabled:opacity-50"
               >
                 Dismiss
               </button>
@@ -308,7 +308,7 @@ export function ContentAlertCard({ alert, contentTitle, contentUrl, actionLoadin
             <button
               onClick={() => onAction(alert.id, "resolved")}
               disabled={actionLoading === alert.id}
-              className="px-4 py-1.5 text-xs font-bold text-white bg-[#3730A3] rounded-lg hover:bg-indigo-700 transition-all shadow shadow-indigo-200 disabled:opacity-50"
+              className="px-4 py-1.5 text-xs font-body font-semibold text-white bg-[#8B5CF6] rounded-lg hover:bg-[#7C3AED] transition-all shadow shadow-[#8B5CF6]/20 disabled:opacity-50"
             >
               Fix Now
             </button>
@@ -318,10 +318,10 @@ export function ContentAlertCard({ alert, contentTitle, contentUrl, actionLoadin
 
       {/* Acknowledged action bar - resolve only */}
       {alert.status === "acknowledged" && (
-        <div className="px-5 py-4 bg-slate-50/50 border-t border-slate-100/50 flex items-center justify-between">
+        <div className="px-5 py-4 bg-gray-50/50 border-t border-gray-100/50 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Lightbulb className="w-[18px] h-[18px] text-slate-400" />
-            <p className="text-sm font-medium text-slate-700">
+            <Lightbulb className="w-[18px] h-[18px] text-gray-400" />
+            <p className="text-sm font-body font-medium text-gray-700">
               {alert.suggestedAction || "Review this content for potential improvements."}
             </p>
           </div>
@@ -329,7 +329,7 @@ export function ContentAlertCard({ alert, contentTitle, contentUrl, actionLoadin
             <button
               onClick={() => onAction(alert.id, "resolved")}
               disabled={actionLoading === alert.id}
-              className="px-4 py-1.5 text-xs font-bold text-white bg-[#3730A3] rounded-lg hover:bg-indigo-700 transition-all shadow shadow-indigo-200 disabled:opacity-50"
+              className="px-4 py-1.5 text-xs font-body font-semibold text-white bg-[#8B5CF6] rounded-lg hover:bg-[#7C3AED] transition-all shadow shadow-[#8B5CF6]/20 disabled:opacity-50"
             >
               Resolve
             </button>

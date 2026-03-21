@@ -111,7 +111,7 @@ export default function TeamPage() {
     } catch { /* ignore */ }
   }
 
-  if (loading) return <div className="p-8 text-slate-500">Loading...</div>;
+  if (loading) return <div className="p-8 font-body text-gray-500">Loading...</div>;
 
   const isCurrentUser = (m: Member) => m.id === session?.user.id;
   const isPending = (m: Member) => m.status === "pending";
@@ -122,18 +122,18 @@ export default function TeamPage() {
       <SettingsSubNav />
 
       {/* Scrollable Content */}
-      <div className="flex-1 overflow-y-auto p-8 bg-slate-50">
+      <div className="flex-1 overflow-y-auto p-8 bg-gray-50">
         <div className="max-w-5xl mx-auto space-y-6">
           {/* Section Header */}
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-2 gap-4">
             <div className="flex flex-col gap-1">
-              <h2 className="text-xl font-bold">Team</h2>
-              <p className="text-slate-500 text-sm">Manage your team members and their access permissions.</p>
+              <h2 className="text-xl font-headline font-bold text-gray-900">Team</h2>
+              <p className="font-body text-gray-500 text-sm">Manage your team members and their access permissions.</p>
             </div>
             {isAdminOrOwner && (
               <button
                 onClick={() => setShowInvite(!showInvite)}
-                className="px-4 py-2 bg-[#3730A3] text-white text-sm font-bold rounded-lg flex items-center gap-2 hover:bg-indigo-800 transition-colors shadow-sm"
+                className="px-4 py-2 bg-[#8B5CF6] text-white text-sm font-body font-semibold rounded-xl flex items-center gap-2 hover:bg-[#7C3AED] transition-colors shadow-sm"
               >
                 <UserPlus className="w-[18px] h-[18px]" />
                 Invite Member
@@ -143,146 +143,148 @@ export default function TeamPage() {
 
           {/* Invite Form */}
           {showInvite && (
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
-              <h3 className="font-medium text-slate-900 mb-4">Send Invite</h3>
-              <div className="flex gap-3 mb-3">
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+              <h3 className="font-headline font-bold text-gray-900 mb-4">Send Invite</h3>
+              <div className="flex flex-col sm:flex-row gap-3 mb-3">
                 <input
                   type="email" value={inviteEmail}
                   onChange={(e) => setInviteEmail(e.target.value)}
                   placeholder="team@example.com"
-                  className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#3730A3]"
+                  className="flex-1 bg-white border border-gray-100 rounded-xl px-4 py-2.5 font-body text-gray-900 placeholder:text-gray-400 focus:border-[#8B5CF6] focus:ring-1 focus:ring-[#8B5CF6]/20 outline-none transition-all text-sm"
                 />
-                <select value={inviteRole} onChange={(e) => setInviteRole(e.target.value)} className="px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#3730A3]">
+                <select value={inviteRole} onChange={(e) => setInviteRole(e.target.value)} className="bg-white border border-gray-100 rounded-xl px-4 py-2.5 font-body text-gray-900 focus:border-[#8B5CF6] focus:ring-1 focus:ring-[#8B5CF6]/20 outline-none transition-all text-sm">
                   <option value="admin">Admin</option>
                   <option value="editor">Editor</option>
                   <option value="viewer">Viewer</option>
                 </select>
-                <button onClick={handleInvite} disabled={inviting} className="px-4 py-2 bg-[#3730A3] text-white rounded-lg text-sm font-medium hover:bg-indigo-800 disabled:opacity-50">
+                <button onClick={handleInvite} disabled={inviting} className="px-4 py-2 bg-[#8B5CF6] text-white rounded-xl text-sm font-body font-semibold hover:bg-[#7C3AED] disabled:opacity-50 shadow-sm">
                   {inviting ? "Sending..." : "Send"}
                 </button>
               </div>
-              {inviteError && <p className="text-sm text-red-600">{inviteError}</p>}
-              {inviteSuccess && <p className="text-sm text-[#059669]">{inviteSuccess}</p>}
+              {inviteError && <p className="font-body text-sm text-red-500">{inviteError}</p>}
+              {inviteSuccess && <p className="font-body text-sm text-[#A3E635]">{inviteSuccess}</p>}
             </div>
           )}
 
           {/* Team Table */}
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-slate-100 bg-slate-50/50">
-                  <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Member</th>
-                  <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Email</th>
-                  <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Role</th>
-                  <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Joined Date</th>
-                  <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {members.map((m) => {
-                  const isSelf = isCurrentUser(m);
-                  const memberIsPending = isPending(m);
-                  const memberIsActive = isActive(m);
-                  const isOwnerOrSelf = m.role === "owner" || isSelf;
-                  const canChangeRole = isAdminOrOwner && memberIsActive && !isOwnerOrSelf;
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-gray-100 bg-gray-50/50">
+                    <th className="px-6 py-4 font-body text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Member</th>
+                    <th className="px-6 py-4 font-body text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Email</th>
+                    <th className="px-6 py-4 font-body text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Role</th>
+                    <th className="px-6 py-4 font-body text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Joined Date</th>
+                    <th className="px-6 py-4 font-body text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-4 font-body text-[11px] font-semibold text-gray-500 uppercase tracking-wider text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {members.map((m) => {
+                    const isSelf = isCurrentUser(m);
+                    const memberIsPending = isPending(m);
+                    const memberIsActive = isActive(m);
+                    const isOwnerOrSelf = m.role === "owner" || isSelf;
+                    const canChangeRole = isAdminOrOwner && memberIsActive && !isOwnerOrSelf;
 
-                  return (
-                    <tr key={m.id}>
-                      {/* Member */}
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          {isSelf ? (
-                            <div className="size-8 rounded-full bg-[#3730A3] flex items-center justify-center">
-                              <span className="text-xs font-bold text-white">{getInitials(m.name)}</span>
+                    return (
+                      <tr key={m.id}>
+                        {/* Member */}
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            {isSelf ? (
+                              <div className="size-8 rounded-full bg-[#8B5CF6] flex items-center justify-center">
+                                <span className="text-xs font-bold text-white font-body">{getInitials(m.name)}</span>
+                              </div>
+                            ) : memberIsPending ? (
+                              <div className="size-8 rounded-full bg-gray-100 flex items-center justify-center">
+                                <span className="text-xs font-bold text-gray-400 font-body">{getInitials(m.name)}</span>
+                              </div>
+                            ) : (
+                              <div className="size-8 rounded-full bg-violet-100 flex items-center justify-center">
+                                <span className="text-xs font-bold text-violet-600 font-body">{getInitials(m.name)}</span>
+                              </div>
+                            )}
+                            <div>
+                              <p className="font-body text-sm font-semibold text-gray-900">{m.name}</p>
+                              {isSelf && <p className="font-body text-xs text-[#8B5CF6] font-medium">You</p>}
                             </div>
-                          ) : memberIsPending ? (
-                            <div className="size-8 rounded-full bg-slate-100 flex items-center justify-center">
-                              <span className="text-xs font-bold text-slate-400">{getInitials(m.name)}</span>
-                            </div>
-                          ) : (
-                            <div className="size-8 rounded-full bg-indigo-100 flex items-center justify-center">
-                              <span className="text-xs font-bold text-indigo-600">{getInitials(m.name)}</span>
-                            </div>
-                          )}
-                          <div>
-                            <p className="text-sm font-semibold">{m.name}</p>
-                            {isSelf && <p className="text-xs text-indigo-600 font-medium">You</p>}
                           </div>
-                        </div>
-                      </td>
+                        </td>
 
-                      {/* Email */}
-                      <td className="px-6 py-4 text-sm text-slate-600">{m.email}</td>
+                        {/* Email */}
+                        <td className="px-6 py-4 font-body text-sm text-gray-600">{m.email}</td>
 
-                      {/* Role */}
-                      <td className="px-6 py-4">
-                        {canChangeRole ? (
-                          <select
-                            defaultValue={m.role}
-                            onChange={(e) => handleChangeRole(m.id, e.target.value)}
-                            className="bg-transparent border-none text-sm text-slate-700 focus:ring-0 p-0 cursor-pointer"
-                          >
-                            <option value="admin">Administrator</option>
-                            <option value="editor">Editor</option>
-                            <option value="viewer">Viewer</option>
-                          </select>
-                        ) : (
-                          <span className="text-sm text-slate-700">{ROLE_LABELS[m.role] || m.role}</span>
-                        )}
-                      </td>
-
-                      {/* Joined Date */}
-                      <td className="px-6 py-4 text-sm text-slate-500">
-                        {memberIsPending ? "\u2014" : formatDate(m.createdAt)}
-                      </td>
-
-                      {/* Status */}
-                      <td className="px-6 py-4">
-                        {memberIsPending ? (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
-                            Pending
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
-                            Active
-                          </span>
-                        )}
-                      </td>
-
-                      {/* Actions */}
-                      <td className="px-6 py-4 text-right">
-                        {isAdminOrOwner && !isSelf && m.role !== "owner" && (
-                          memberIsPending ? (
-                            <div className="flex items-center justify-end gap-3">
-                              <button className="text-xs font-bold text-indigo-600 hover:underline">Resend Invite</button>
-                              <button
-                                onClick={() => handleRemove(m.id)}
-                                className="text-xs font-bold text-slate-400 hover:text-slate-600"
-                              >
-                                Cancel
-                              </button>
-                            </div>
-                          ) : confirmRemove === m.id ? (
-                            <div className="flex items-center justify-end gap-3">
-                              <button onClick={() => handleRemove(m.id)} className="text-xs font-bold text-rose-600 hover:text-rose-700">Confirm</button>
-                              <button onClick={() => setConfirmRemove(null)} className="text-xs font-bold text-slate-400 hover:text-slate-600">Cancel</button>
-                            </div>
-                          ) : (
-                            <button
-                              onClick={() => setConfirmRemove(m.id)}
-                              className="text-xs font-bold text-rose-600 hover:text-rose-700"
+                        {/* Role */}
+                        <td className="px-6 py-4">
+                          {canChangeRole ? (
+                            <select
+                              defaultValue={m.role}
+                              onChange={(e) => handleChangeRole(m.id, e.target.value)}
+                              className="bg-transparent border-none font-body text-sm text-gray-700 focus:ring-0 p-0 cursor-pointer"
                             >
-                              Remove
-                            </button>
-                          )
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                              <option value="admin">Administrator</option>
+                              <option value="editor">Editor</option>
+                              <option value="viewer">Viewer</option>
+                            </select>
+                          ) : (
+                            <span className="font-body text-sm text-gray-700">{ROLE_LABELS[m.role] || m.role}</span>
+                          )}
+                        </td>
+
+                        {/* Joined Date */}
+                        <td className="px-6 py-4 font-body text-sm text-gray-500">
+                          {memberIsPending ? "\u2014" : formatDate(m.createdAt)}
+                        </td>
+
+                        {/* Status */}
+                        <td className="px-6 py-4">
+                          {memberIsPending ? (
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-lg text-xs font-medium font-body bg-amber-100 text-amber-800">
+                              Pending
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-lg text-xs font-medium font-body bg-lime-100 text-lime-800">
+                              Active
+                            </span>
+                          )}
+                        </td>
+
+                        {/* Actions */}
+                        <td className="px-6 py-4 text-right">
+                          {isAdminOrOwner && !isSelf && m.role !== "owner" && (
+                            memberIsPending ? (
+                              <div className="flex items-center justify-end gap-3">
+                                <button className="text-xs font-bold font-body text-[#8B5CF6] hover:underline">Resend Invite</button>
+                                <button
+                                  onClick={() => handleRemove(m.id)}
+                                  className="text-xs font-bold font-body text-gray-400 hover:text-gray-600"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            ) : confirmRemove === m.id ? (
+                              <div className="flex items-center justify-end gap-3">
+                                <button onClick={() => handleRemove(m.id)} className="text-xs font-bold font-body text-red-500 hover:text-red-600">Confirm</button>
+                                <button onClick={() => setConfirmRemove(null)} className="text-xs font-bold font-body text-gray-400 hover:text-gray-600">Cancel</button>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() => setConfirmRemove(m.id)}
+                                className="text-xs font-bold font-body text-red-500 hover:text-red-600"
+                              >
+                                Remove
+                              </button>
+                            )
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>

@@ -304,33 +304,33 @@ export default function DomainsPage() {
     } catch { /* ignore */ }
   }
 
-  if (loading) return <div className="p-8 text-slate-500">Loading...</div>;
+  if (loading) return <div className="p-8 font-body text-gray-500">Loading...</div>;
 
   return (
     <div className="flex flex-col h-full">
       <SettingsSubNav />
 
       {/* Scrollable Content */}
-      <div className="flex-1 overflow-y-auto p-8 bg-slate-50">
+      <div className="flex-1 overflow-y-auto p-8 bg-gray-50">
         <div className="max-w-5xl mx-auto space-y-6">
           {/* Section Header */}
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-2 gap-4">
             <div className="flex flex-col gap-1">
-              <h2 className="text-xl font-bold text-slate-900">Domains</h2>
-              <p className="text-slate-500 text-sm">Manage your tracked domains and their associated data sources.</p>
+              <h2 className="text-xl font-headline font-bold text-gray-900">Domains</h2>
+              <p className="font-body text-gray-500 text-sm">Manage your tracked domains and their associated data sources.</p>
             </div>
             <div className="flex items-center gap-3">
               <button
                 onClick={handleSync}
                 disabled={syncing}
-                className="px-4 py-2 bg-white border border-slate-200 text-slate-700 text-sm font-bold rounded-lg flex items-center gap-2 hover:bg-slate-50 transition-colors disabled:opacity-50"
+                className="px-4 py-2 bg-white border border-gray-100 text-gray-600 text-sm font-body font-semibold rounded-xl flex items-center gap-2 hover:bg-gray-50 transition-colors disabled:opacity-50"
               >
                 {syncing ? <Loader2 className="w-[18px] h-[18px] animate-spin" /> : <RefreshCw className="w-[18px] h-[18px]" />}
                 {syncing ? "Syncing..." : "Sync Now"}
               </button>
               <button
                 onClick={() => setShowAdd(!showAdd)}
-                className="px-4 py-2 bg-[#3730A3] text-white text-sm font-bold rounded-lg flex items-center gap-2 hover:bg-indigo-800 transition-colors shadow-sm"
+                className="px-4 py-2 bg-[#8B5CF6] text-white text-sm font-body font-semibold rounded-xl flex items-center gap-2 hover:bg-[#7C3AED] transition-colors shadow-sm"
               >
                 <Plus className="w-[18px] h-[18px]" />
                 Add Domain
@@ -340,35 +340,35 @@ export default function DomainsPage() {
 
           {/* Sync Result Banner */}
           {syncResult && (
-            <div className={`px-4 py-3 rounded-lg text-sm font-medium ${syncResult.success ? "bg-emerald-50 text-emerald-800 border border-emerald-200" : "bg-red-50 text-red-700 border border-red-200"}`}>
+            <div className={`px-4 py-3 rounded-xl text-sm font-medium font-body ${syncResult.success ? "bg-lime-50 text-lime-800 border border-lime-200" : "bg-red-50 text-red-700 border border-red-200"}`}>
               {syncResult.message}
             </div>
           )}
 
           {/* Add Domain Form */}
           {showAdd && (
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-              <h3 className="text-base font-semibold text-slate-900 mb-4">Add New Domain</h3>
-              <div className="grid grid-cols-3 gap-4 mb-4">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+              <h3 className="text-base font-headline font-bold text-gray-900 mb-4">Add New Domain</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Domain URL</label>
-                  <input type="text" value={domainUrl} onChange={(e) => setDomainUrl(e.target.value)} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#3730A3]" placeholder="example.com" />
+                  <label className="block font-body text-sm font-medium text-gray-600 mb-1">Domain URL</label>
+                  <input type="text" value={domainUrl} onChange={(e) => setDomainUrl(e.target.value)} className="w-full bg-white border border-gray-100 rounded-xl px-4 py-2.5 font-body text-gray-900 placeholder:text-gray-400 focus:border-[#8B5CF6] focus:ring-1 focus:ring-[#8B5CF6]/20 outline-none transition-all text-sm" placeholder="example.com" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Display Name</label>
-                  <input type="text" value={displayName} onChange={(e) => setDisplayName(e.target.value)} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#3730A3]" />
+                  <label className="block font-body text-sm font-medium text-gray-600 mb-1">Display Name</label>
+                  <input type="text" value={displayName} onChange={(e) => setDisplayName(e.target.value)} className="w-full bg-white border border-gray-100 rounded-xl px-4 py-2.5 font-body text-gray-900 placeholder:text-gray-400 focus:border-[#8B5CF6] focus:ring-1 focus:ring-[#8B5CF6]/20 outline-none transition-all text-sm" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Vertical</label>
-                  <input type="text" value={vertical} onChange={(e) => setVertical(e.target.value)} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#3730A3]" placeholder="finance" />
+                  <label className="block font-body text-sm font-medium text-gray-600 mb-1">Vertical</label>
+                  <input type="text" value={vertical} onChange={(e) => setVertical(e.target.value)} className="w-full bg-white border border-gray-100 rounded-xl px-4 py-2.5 font-body text-gray-900 placeholder:text-gray-400 focus:border-[#8B5CF6] focus:ring-1 focus:ring-[#8B5CF6]/20 outline-none transition-all text-sm" placeholder="finance" />
                 </div>
               </div>
-              {error && <p className="text-sm text-red-600 mb-3">{error}</p>}
+              {error && <p className="text-sm font-body text-red-600 mb-3">{error}</p>}
               <div className="flex gap-2">
-                <button onClick={handleAddDomain} disabled={saving} className="px-4 py-2 bg-[#3730A3] text-white rounded-lg text-sm font-bold hover:bg-indigo-800 disabled:opacity-50">
+                <button onClick={handleAddDomain} disabled={saving} className="px-4 py-2 bg-[#8B5CF6] text-white rounded-xl text-sm font-body font-semibold hover:bg-[#7C3AED] disabled:opacity-50 shadow-sm">
                   {saving ? "Adding..." : "Add Domain"}
                 </button>
-                <button onClick={() => setShowAdd(false)} className="px-4 py-2 text-slate-600 text-sm hover:text-slate-900">Cancel</button>
+                <button onClick={() => setShowAdd(false)} className="px-4 py-2 text-gray-600 text-sm font-body hover:text-gray-900">Cancel</button>
               </div>
             </div>
           )}
@@ -376,40 +376,40 @@ export default function DomainsPage() {
           {/* Domain Cards */}
           <div className="space-y-4">
             {domains.map((d) => (
-              <div key={d.id} className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+              <div key={d.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                 {/* Card Header */}
-                <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+                <div className="p-6 border-b border-gray-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <div className="flex items-center gap-4">
-                    <div className="size-12 rounded-xl bg-indigo-50 flex items-center justify-center shrink-0 border border-indigo-100">
-                      <Globe className="w-7 h-7 text-indigo-600" />
+                    <div className="size-12 rounded-xl bg-violet-50 flex items-center justify-center shrink-0 border border-violet-100">
+                      <Globe className="w-7 h-7 text-violet-600" />
                     </div>
                     <div>
-                      <h4 className="text-base font-semibold text-slate-900">{d.displayName}</h4>
-                      <p className="text-sm text-slate-500">{d.domain}</p>
+                      <h4 className="text-base font-headline font-bold text-gray-900">{d.displayName}</h4>
+                      <p className="text-sm font-body text-gray-500">{d.domain}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-6">
                     {d.vertical && (
-                      <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200 cursor-pointer">
-                        <span className="text-sm font-medium text-slate-700">{d.vertical}</span>
-                        <ChevronDown className="w-4 h-4 text-slate-400" />
+                      <div className="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100 cursor-pointer">
+                        <span className="text-sm font-medium font-body text-gray-700">{d.vertical}</span>
+                        <ChevronDown className="w-4 h-4 text-gray-400" />
                       </div>
                     )}
                     <div className="flex items-center gap-3">
-                      <span className="text-xs font-bold text-slate-400 uppercase">Active</span>
-                      <div className="w-10 h-5 bg-indigo-600 rounded-full relative cursor-pointer">
+                      <span className="text-xs font-bold font-body text-gray-400 uppercase">Active</span>
+                      <div className="w-10 h-5 bg-[#8B5CF6] rounded-full relative cursor-pointer">
                         <div className="absolute right-0.5 top-0.5 size-4 bg-white rounded-full"></div>
                       </div>
                     </div>
                     <div className="relative">
-                      <button onClick={() => setMenuOpen(menuOpen === d.id ? null : d.id)} className="text-slate-400 hover:text-slate-600">
+                      <button onClick={() => setMenuOpen(menuOpen === d.id ? null : d.id)} className="text-gray-400 hover:text-gray-600">
                         <MoreVertical className="w-5 h-5" />
                       </button>
                       {menuOpen === d.id && (
-                        <div className="absolute right-0 top-8 z-10 bg-white border border-slate-200 rounded-lg shadow-lg py-1 w-40">
+                        <div className="absolute right-0 top-8 z-10 bg-white border border-gray-100 rounded-2xl shadow-xl py-1 w-40">
                           <button
                             onClick={() => handleDeleteDomain(d.id)}
-                            className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 font-medium"
+                            className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 font-body font-medium"
                           >
                             Delete Domain
                           </button>
@@ -423,62 +423,62 @@ export default function DomainsPage() {
                 <div className="p-6 space-y-8">
                   {/* Mapped Sources */}
                   <div className="space-y-4">
-                    <h5 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Mapped Sources</h5>
+                    <h5 className="text-xs font-bold font-body text-gray-400 uppercase tracking-wider">Mapped Sources</h5>
                     <div className="space-y-3">
                       {/* GA4 Property — with selector */}
                       {d.ga4AccountId && selectingGa4 !== d.id && (
-                        <div className="flex items-center justify-between py-2 px-3 bg-slate-50 rounded-lg">
+                        <div className="flex items-center justify-between py-2 px-3 bg-gray-50 rounded-lg">
                           <div className="flex items-center gap-3">
                             <CheckCircle className="w-[18px] h-[18px] text-emerald-500" />
-                            <span className="text-sm text-slate-700">GA4 Property: <span className="font-medium">
+                            <span className="text-sm font-body text-gray-700">GA4 Property: <span className="font-medium">
                               {ga4Accounts.find(a => a.id === d.ga4AccountId)?.name || d.ga4AccountId}
                             </span></span>
                           </div>
-                          <button onClick={() => openGa4Selector(d.id)} className="text-xs font-bold text-indigo-600 hover:underline">Change</button>
+                          <button onClick={() => openGa4Selector(d.id)} className="text-xs font-bold font-body text-[#8B5CF6] hover:underline">Change</button>
                         </div>
                       )}
                       {!d.ga4AccountId && selectingGa4 !== d.id && (
                         <button
                           onClick={() => openGa4Selector(d.id)}
-                          className="flex items-center gap-3 py-2 px-3 rounded-lg border border-dashed border-slate-300 hover:border-indigo-300 hover:bg-indigo-50/50 transition-colors w-full text-left"
+                          className="flex items-center gap-3 py-2 px-3 rounded-lg border border-dashed border-gray-300 hover:border-[#8B5CF6]/30 hover:bg-violet-50/50 transition-colors w-full text-left"
                         >
-                          <BarChart3 className="w-[18px] h-[18px] text-slate-400" />
-                          <span className="text-sm text-slate-500">Connect GA4 Property</span>
+                          <BarChart3 className="w-[18px] h-[18px] text-gray-400" />
+                          <span className="text-sm font-body text-gray-500">Connect GA4 Property</span>
                         </button>
                       )}
 
                       {/* GA4 selector dropdown */}
                       {selectingGa4 === d.id && (
-                        <div className="py-3 px-3 bg-indigo-50/50 rounded-lg border border-indigo-200 space-y-2">
+                        <div className="py-3 px-3 bg-violet-50/50 rounded-lg border border-violet-200 space-y-2">
                           <div className="flex items-center justify-between">
-                            <span className="text-xs font-bold text-slate-500 uppercase">Select GA4 Property</span>
-                            <button onClick={() => { setSelectingGa4(null); setWindsorError(""); }} className="text-xs text-slate-400 hover:text-slate-600">Cancel</button>
+                            <span className="text-xs font-bold font-body text-gray-500 uppercase">Select GA4 Property</span>
+                            <button onClick={() => { setSelectingGa4(null); setWindsorError(""); }} className="text-xs font-body text-gray-400 hover:text-gray-600">Cancel</button>
                           </div>
                           {loadingWindsor && (
-                            <div className="flex items-center gap-2 py-2 text-sm text-slate-500">
+                            <div className="flex items-center gap-2 py-2 text-sm font-body text-gray-500">
                               <Loader2 className="w-4 h-4 animate-spin" /> Loading accounts from Windsor...
                             </div>
                           )}
-                          {windsorError && <p className="text-xs text-red-600">{windsorError}</p>}
+                          {windsorError && <p className="text-xs font-body text-red-600">{windsorError}</p>}
                           {!loadingWindsor && ga4Accounts.length === 0 && !windsorError && (
-                            <p className="text-xs text-slate-500 py-1">No GA4 properties found. Make sure GA4 is connected in your Windsor account.</p>
+                            <p className="text-xs font-body text-gray-500 py-1">No GA4 properties found. Make sure GA4 is connected in your Windsor account.</p>
                           )}
                           {ga4Accounts.map((acct) => (
                             <button
                               key={acct.id}
                               onClick={() => handleSelectGa4(d.id, acct.id)}
-                              className={`w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-white transition-colors border ${
-                                d.ga4AccountId === acct.id ? "border-indigo-400 bg-white" : "border-transparent"
+                              className={`w-full text-left px-3 py-2 rounded-lg text-sm font-body hover:bg-white transition-colors border ${
+                                d.ga4AccountId === acct.id ? "border-[#8B5CF6] bg-white" : "border-transparent"
                               }`}
                             >
-                              <span className="font-medium text-slate-800">{acct.name}</span>
-                              <span className="text-slate-400 ml-2 text-xs">ID: {acct.id}</span>
+                              <span className="font-medium text-gray-800">{acct.name}</span>
+                              <span className="text-gray-400 ml-2 text-xs">ID: {acct.id}</span>
                             </button>
                           ))}
                           {d.ga4AccountId && (
                             <button
                               onClick={() => handleSelectGa4(d.id, "")}
-                              className="text-xs font-bold text-rose-600 hover:text-rose-700 mt-1"
+                              className="text-xs font-bold font-body text-rose-600 hover:text-rose-700 mt-1"
                             >
                               Disconnect GA4
                             </button>
@@ -488,56 +488,56 @@ export default function DomainsPage() {
 
                       {/* GSC Property — with selector */}
                       {d.gscProperty && selectingGsc !== d.id && (
-                        <div className="flex items-center justify-between py-2 px-3 bg-slate-50 rounded-lg">
+                        <div className="flex items-center justify-between py-2 px-3 bg-gray-50 rounded-lg">
                           <div className="flex items-center gap-3">
                             <CheckCircle className="w-[18px] h-[18px] text-emerald-500" />
-                            <span className="text-sm text-slate-700">Google Search Console: <span className="font-medium">{d.gscProperty}</span></span>
+                            <span className="text-sm font-body text-gray-700">Google Search Console: <span className="font-medium">{d.gscProperty}</span></span>
                           </div>
-                          <button onClick={() => openGscSelector(d.id)} className="text-xs font-bold text-indigo-600 hover:underline">Change</button>
+                          <button onClick={() => openGscSelector(d.id)} className="text-xs font-bold font-body text-[#8B5CF6] hover:underline">Change</button>
                         </div>
                       )}
                       {!d.gscProperty && selectingGsc !== d.id && (
                         <button
                           onClick={() => openGscSelector(d.id)}
-                          className="flex items-center gap-3 py-2 px-3 rounded-lg border border-dashed border-slate-300 hover:border-indigo-300 hover:bg-indigo-50/50 transition-colors w-full text-left"
+                          className="flex items-center gap-3 py-2 px-3 rounded-lg border border-dashed border-gray-300 hover:border-[#8B5CF6]/30 hover:bg-violet-50/50 transition-colors w-full text-left"
                         >
-                          <Search className="w-[18px] h-[18px] text-slate-400" />
-                          <span className="text-sm text-slate-500">Connect Google Search Console</span>
+                          <Search className="w-[18px] h-[18px] text-gray-400" />
+                          <span className="text-sm font-body text-gray-500">Connect Google Search Console</span>
                         </button>
                       )}
 
                       {/* GSC selector dropdown */}
                       {selectingGsc === d.id && (
-                        <div className="py-3 px-3 bg-indigo-50/50 rounded-lg border border-indigo-200 space-y-2">
+                        <div className="py-3 px-3 bg-violet-50/50 rounded-lg border border-violet-200 space-y-2">
                           <div className="flex items-center justify-between">
-                            <span className="text-xs font-bold text-slate-500 uppercase">Select GSC Property</span>
-                            <button onClick={() => { setSelectingGsc(null); setWindsorError(""); }} className="text-xs text-slate-400 hover:text-slate-600">Cancel</button>
+                            <span className="text-xs font-bold font-body text-gray-500 uppercase">Select GSC Property</span>
+                            <button onClick={() => { setSelectingGsc(null); setWindsorError(""); }} className="text-xs font-body text-gray-400 hover:text-gray-600">Cancel</button>
                           </div>
                           {loadingWindsor && (
-                            <div className="flex items-center gap-2 py-2 text-sm text-slate-500">
+                            <div className="flex items-center gap-2 py-2 text-sm font-body text-gray-500">
                               <Loader2 className="w-4 h-4 animate-spin" /> Loading accounts from Windsor...
                             </div>
                           )}
-                          {windsorError && <p className="text-xs text-red-600">{windsorError}</p>}
+                          {windsorError && <p className="text-xs font-body text-red-600">{windsorError}</p>}
                           {!loadingWindsor && gscAccounts.length === 0 && !windsorError && (
-                            <p className="text-xs text-slate-500 py-1">No GSC properties found. Make sure Search Console is connected in your Windsor account.</p>
+                            <p className="text-xs font-body text-gray-500 py-1">No GSC properties found. Make sure Search Console is connected in your Windsor account.</p>
                           )}
                           {gscAccounts.map((acct) => (
                             <button
                               key={acct.id}
                               onClick={() => handleSelectGsc(d.id, acct.id)}
-                              className={`w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-white transition-colors border ${
-                                d.gscProperty === acct.id ? "border-indigo-400 bg-white" : "border-transparent"
+                              className={`w-full text-left px-3 py-2 rounded-lg text-sm font-body hover:bg-white transition-colors border ${
+                                d.gscProperty === acct.id ? "border-[#8B5CF6] bg-white" : "border-transparent"
                               }`}
                             >
-                              <span className="font-medium text-slate-800">{acct.name}</span>
-                              {acct.id !== acct.name && <span className="text-slate-400 ml-2 text-xs">{acct.id}</span>}
+                              <span className="font-medium text-gray-800">{acct.name}</span>
+                              {acct.id !== acct.name && <span className="text-gray-400 ml-2 text-xs">{acct.id}</span>}
                             </button>
                           ))}
                           {d.gscProperty && (
                             <button
                               onClick={() => handleSelectGsc(d.id, "")}
-                              className="text-xs font-bold text-rose-600 hover:text-rose-700 mt-1"
+                              className="text-xs font-bold font-body text-rose-600 hover:text-rose-700 mt-1"
                             >
                               Disconnect GSC
                             </button>
@@ -547,58 +547,58 @@ export default function DomainsPage() {
 
                       {/* HubSpot Blog — with selector */}
                       {d.hubspotBlogId && selectingBlog !== d.id && (
-                        <div className="flex items-center justify-between py-2 px-3 bg-slate-50 rounded-lg">
+                        <div className="flex items-center justify-between py-2 px-3 bg-gray-50 rounded-lg">
                           <div className="flex items-center gap-3">
                             <CheckCircle className="w-[18px] h-[18px] text-emerald-500" />
-                            <span className="text-sm text-slate-700">HubSpot Blog: <span className="font-medium">
+                            <span className="text-sm font-body text-gray-700">HubSpot Blog: <span className="font-medium">
                               {hubspotBlogs.find(b => b.id === d.hubspotBlogId)?.name || d.hubspotBlogId}
                             </span></span>
                           </div>
-                          <button onClick={() => fetchHubSpotBlogs(d.id)} className="text-xs font-bold text-indigo-600 hover:underline">Change</button>
+                          <button onClick={() => fetchHubSpotBlogs(d.id)} className="text-xs font-bold font-body text-[#8B5CF6] hover:underline">Change</button>
                         </div>
                       )}
                       {!d.hubspotBlogId && selectingBlog !== d.id && (
                         <button
                           onClick={() => fetchHubSpotBlogs(d.id)}
-                          className="flex items-center gap-3 py-2 px-3 rounded-lg border border-dashed border-slate-300 hover:border-indigo-300 hover:bg-indigo-50/50 transition-colors w-full text-left"
+                          className="flex items-center gap-3 py-2 px-3 rounded-lg border border-dashed border-gray-300 hover:border-[#8B5CF6]/30 hover:bg-violet-50/50 transition-colors w-full text-left"
                         >
-                          <FileText className="w-[18px] h-[18px] text-slate-400" />
-                          <span className="text-sm text-slate-500">Connect HubSpot Blog</span>
+                          <FileText className="w-[18px] h-[18px] text-gray-400" />
+                          <span className="text-sm font-body text-gray-500">Connect HubSpot Blog</span>
                         </button>
                       )}
 
                       {/* Blog selector dropdown */}
                       {selectingBlog === d.id && (
-                        <div className="py-3 px-3 bg-indigo-50/50 rounded-lg border border-indigo-200 space-y-2">
+                        <div className="py-3 px-3 bg-violet-50/50 rounded-lg border border-violet-200 space-y-2">
                           <div className="flex items-center justify-between">
-                            <span className="text-xs font-bold text-slate-500 uppercase">Select HubSpot Blog</span>
-                            <button onClick={() => { setSelectingBlog(null); setBlogError(""); }} className="text-xs text-slate-400 hover:text-slate-600">Cancel</button>
+                            <span className="text-xs font-bold font-body text-gray-500 uppercase">Select HubSpot Blog</span>
+                            <button onClick={() => { setSelectingBlog(null); setBlogError(""); }} className="text-xs font-body text-gray-400 hover:text-gray-600">Cancel</button>
                           </div>
                           {loadingBlogs && (
-                            <div className="flex items-center gap-2 py-2 text-sm text-slate-500">
+                            <div className="flex items-center gap-2 py-2 text-sm font-body text-gray-500">
                               <Loader2 className="w-4 h-4 animate-spin" /> Loading blogs from HubSpot...
                             </div>
                           )}
-                          {blogError && <p className="text-xs text-red-600">{blogError}</p>}
+                          {blogError && <p className="text-xs font-body text-red-600">{blogError}</p>}
                           {!loadingBlogs && hubspotBlogs.length === 0 && !blogError && (
-                            <p className="text-xs text-slate-500 py-1">No blogs found. Make sure HubSpot is connected and your account has blog content.</p>
+                            <p className="text-xs font-body text-gray-500 py-1">No blogs found. Make sure HubSpot is connected and your account has blog content.</p>
                           )}
                           {hubspotBlogs.map((blog) => (
                             <button
                               key={blog.id}
                               onClick={() => handleSelectBlog(d.id, blog.id)}
-                              className={`w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-white transition-colors border ${
-                                d.hubspotBlogId === blog.id ? "border-indigo-400 bg-white" : "border-transparent"
+                              className={`w-full text-left px-3 py-2 rounded-lg text-sm font-body hover:bg-white transition-colors border ${
+                                d.hubspotBlogId === blog.id ? "border-[#8B5CF6] bg-white" : "border-transparent"
                               }`}
                             >
-                              <span className="font-medium text-slate-800">{blog.name}</span>
-                              {blog.absoluteUrl && <span className="text-slate-400 ml-2 text-xs">{blog.absoluteUrl}</span>}
+                              <span className="font-medium text-gray-800">{blog.name}</span>
+                              {blog.absoluteUrl && <span className="text-gray-400 ml-2 text-xs">{blog.absoluteUrl}</span>}
                             </button>
                           ))}
                           {d.hubspotBlogId && (
                             <button
                               onClick={() => handleSelectBlog(d.id, "")}
-                              className="text-xs font-bold text-rose-600 hover:text-rose-700 mt-1"
+                              className="text-xs font-bold font-body text-rose-600 hover:text-rose-700 mt-1"
                             >
                               Disconnect Blog
                             </button>
@@ -607,7 +607,7 @@ export default function DomainsPage() {
                       )}
 
                       {!d.ga4AccountId && !d.gscProperty && !d.hubspotBlogId && selectingBlog !== d.id && selectingGsc !== d.id && selectingGa4 !== d.id && (
-                        <p className="text-sm text-slate-400 italic py-2 px-3">No data sources mapped yet. Use the buttons above to connect your accounts.</p>
+                        <p className="text-sm font-body text-gray-400 italic py-2 px-3">No data sources mapped yet. Use the buttons above to connect your accounts.</p>
                       )}
                     </div>
                   </div>
@@ -616,10 +616,10 @@ export default function DomainsPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     {/* Competitors */}
                     <div className="space-y-3">
-                      <h5 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Competitors</h5>
+                      <h5 className="text-xs font-bold font-body text-gray-400 uppercase tracking-wider">Competitors</h5>
                       <div className="flex flex-wrap gap-2 items-center">
                         {d.competitors.map((c) => (
-                          <span key={c.id} className="inline-flex items-center gap-1 px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-xs font-medium border border-slate-200">
+                          <span key={c.id} className="inline-flex items-center gap-1 px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium font-body border border-gray-100">
                             {c.competitorDomain}
                             <button onClick={() => handleRemoveCompetitor(d.id, c.id)} className="hover:text-rose-500">
                               <X className="w-3.5 h-3.5" />
@@ -633,17 +633,17 @@ export default function DomainsPage() {
                                 type="text" value={compInput}
                                 onChange={(e) => setCompInput(e.target.value)}
                                 onKeyDown={(e) => e.key === "Enter" && handleAddCompetitor(d.id)}
-                                className="px-2 py-1 border border-slate-300 rounded-lg text-xs w-40 focus:outline-none focus:ring-1 focus:ring-[#3730A3]"
+                                className="px-2 py-1 border border-gray-200 rounded-xl text-xs font-body w-40 focus:outline-none focus:ring-1 focus:ring-[#8B5CF6]/20 focus:border-[#8B5CF6]"
                                 placeholder="competitor.com"
                                 autoFocus
                               />
-                              <button onClick={() => handleAddCompetitor(d.id)} className="text-xs font-bold text-indigo-600">Add</button>
-                              <button onClick={() => { setAddingComp(null); setCompInput(""); }} className="text-xs text-slate-400">Cancel</button>
+                              <button onClick={() => handleAddCompetitor(d.id)} className="text-xs font-bold font-body text-[#8B5CF6]">Add</button>
+                              <button onClick={() => { setAddingComp(null); setCompInput(""); }} className="text-xs font-body text-gray-400">Cancel</button>
                             </div>
                           ) : (
                             <button
                               onClick={() => setAddingComp(d.id)}
-                              className="text-xs font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1 ml-2"
+                              className="text-xs font-bold font-body text-[#8B5CF6] hover:text-[#7C3AED] flex items-center gap-1 ml-2"
                             >
                               <Plus className="w-3.5 h-3.5" /> Add competitor
                             </button>
@@ -654,10 +654,10 @@ export default function DomainsPage() {
 
                     {/* Content Categories */}
                     <div className="space-y-3">
-                      <h5 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Content Categories</h5>
+                      <h5 className="text-xs font-bold font-body text-gray-400 uppercase tracking-wider">Content Categories</h5>
                       <div className="flex flex-wrap gap-2 items-center">
                         {d.contentCategoriesJson && Array.isArray(d.contentCategoriesJson) && d.contentCategoriesJson.map((cat, i) => (
-                          <span key={i} className="inline-flex items-center gap-1 px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-medium border border-indigo-100">
+                          <span key={i} className="inline-flex items-center gap-1 px-3 py-1 bg-violet-50 text-violet-700 rounded-full text-xs font-medium font-body border border-violet-100">
                             {String(cat)}
                             <button onClick={() => handleRemoveCategory(d.id, i)}>
                               <X className="w-3.5 h-3.5 cursor-pointer hover:text-rose-500" />
@@ -670,17 +670,17 @@ export default function DomainsPage() {
                               type="text" value={categoryInput}
                               onChange={(e) => setCategoryInput(e.target.value)}
                               onKeyDown={(e) => e.key === "Enter" && handleAddCategory(d.id)}
-                              className="px-2 py-1 border border-slate-300 rounded-lg text-xs w-40 focus:outline-none focus:ring-1 focus:ring-[#3730A3]"
+                              className="px-2 py-1 border border-gray-200 rounded-xl text-xs font-body w-40 focus:outline-none focus:ring-1 focus:ring-[#8B5CF6]/20 focus:border-[#8B5CF6]"
                               placeholder="e.g. personal finance"
                               autoFocus
                             />
-                            <button onClick={() => handleAddCategory(d.id)} className="text-xs font-bold text-indigo-600">Add</button>
-                            <button onClick={() => { setAddingCategory(null); setCategoryInput(""); }} className="text-xs text-slate-400">Cancel</button>
+                            <button onClick={() => handleAddCategory(d.id)} className="text-xs font-bold font-body text-[#8B5CF6]">Add</button>
+                            <button onClick={() => { setAddingCategory(null); setCategoryInput(""); }} className="text-xs font-body text-gray-400">Cancel</button>
                           </div>
                         ) : (
                           <button
                             onClick={() => setAddingCategory(d.id)}
-                            className="text-xs font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1 ml-2"
+                            className="text-xs font-bold font-body text-[#8B5CF6] hover:text-[#7C3AED] flex items-center gap-1 ml-2"
                           >
                             <Plus className="w-3.5 h-3.5" /> Add category
                           </button>
@@ -691,15 +691,15 @@ export default function DomainsPage() {
                 </div>
 
                 {/* Card Footer */}
-                <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-3">
+                <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-end gap-3">
                   {savedDomainId === d.id && (
-                    <span className="text-sm text-emerald-600 font-medium flex items-center gap-1">
+                    <span className="text-sm text-emerald-600 font-medium font-body flex items-center gap-1">
                       <CheckCircle className="w-4 h-4" /> All changes saved
                     </span>
                   )}
                   <button
                     onClick={() => handleSaveChanges(d.id)}
-                    className="px-6 py-2 bg-[#3730A3] text-white text-sm font-bold rounded-lg hover:bg-indigo-800 transition-colors shadow-sm"
+                    className="px-6 py-2 bg-[#8B5CF6] text-white text-sm font-body font-semibold rounded-xl hover:bg-[#7C3AED] transition-colors shadow-sm"
                   >
                     Save Changes
                   </button>
@@ -708,22 +708,22 @@ export default function DomainsPage() {
             ))}
 
             {domains.length === 0 && (
-              <div className="text-center py-12 text-slate-500">
+              <div className="text-center py-12 font-body text-gray-400">
                 No domains configured yet. Add your first domain above.
               </div>
             )}
           </div>
 
           {/* Help Section */}
-          <div className="mt-8 border-2 border-dashed border-slate-200 rounded-xl p-12 flex flex-col items-center text-center bg-slate-50/50">
-            <div className="size-12 rounded-full bg-slate-100 flex items-center justify-center mb-4">
-              <HelpCircle className="w-6 h-6 text-slate-400" />
+          <div className="mt-8 border-2 border-dashed border-gray-200 rounded-2xl p-12 flex flex-col items-center text-center bg-gray-50/50">
+            <div className="size-12 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+              <HelpCircle className="w-6 h-6 text-gray-400" />
             </div>
-            <h3 className="text-lg font-bold text-slate-900 mb-2">Need help with mapping?</h3>
-            <p className="text-slate-500 text-sm max-w-md mb-4">
+            <h3 className="text-lg font-headline font-bold text-gray-900 mb-2">Need help with mapping?</h3>
+            <p className="font-body text-gray-500 text-sm max-w-md mb-4">
               Check out our guide on how to correctly map your data sources for maximum insights.
             </p>
-            <a className="text-indigo-600 font-bold text-sm flex items-center gap-1 hover:gap-2 transition-all" href="#">
+            <a className="text-[#8B5CF6] font-body font-bold text-sm flex items-center gap-1 hover:gap-2 transition-all" href="#">
               View Documentation <ArrowRight className="w-3.5 h-3.5" />
             </a>
           </div>

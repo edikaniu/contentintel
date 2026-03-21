@@ -179,7 +179,7 @@ export default function ContentHealthPage() {
     { key: "declining_traffic", icon: TrendingDown, color: "text-red-500", iconBg: "bg-red-100", tooltip: "" },
     { key: "position_drop", icon: ArrowDown, color: "text-amber-500", iconBg: "bg-amber-100", tooltip: "" },
     { key: "striking_distance", icon: Target, color: "text-green-500", iconBg: "bg-green-100", tooltip: "Pages ranking positions 5–20 that could reach page 1 with targeted optimisation" },
-    { key: "stale_content", icon: Clock, color: "text-slate-500", iconBg: "bg-slate-100", tooltip: "" },
+    { key: "stale_content", icon: Clock, color: "text-gray-500", iconBg: "bg-gray-100", tooltip: "" },
     { key: "low_ctr", icon: MousePointer, color: "text-blue-500", iconBg: "bg-blue-100", tooltip: "" },
     { key: "conversion_drop", icon: ShoppingCart, color: "text-purple-500", iconBg: "bg-purple-100", tooltip: "" },
   ];
@@ -187,8 +187,8 @@ export default function ContentHealthPage() {
   if (!selectedDomainId) {
     return (
       <div className="p-8">
-        <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Content Health</h1>
-        <p className="text-slate-500 mt-2">Select a domain to view content health alerts.</p>
+        <h1 className="text-3xl font-headline font-bold text-gray-900 tracking-tight">Content Health</h1>
+        <p className="text-gray-400 font-body mt-2">Select a domain to view content health alerts.</p>
       </div>
     );
   }
@@ -198,9 +198,9 @@ export default function ContentHealthPage() {
       {/* Page header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Content Health</h1>
-          <p className="mt-1 text-slate-500 font-medium flex items-center gap-2">
-            <span className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse" />
+          <h1 className="text-3xl font-headline font-bold text-gray-900 tracking-tight">Content Health</h1>
+          <p className="mt-1 text-gray-500 font-body font-medium flex items-center gap-2">
+            <span className="w-2 h-2 bg-[#8B5CF6] rounded-full animate-pulse" />
             {openAlerts.length} active alert{openAlerts.length !== 1 ? "s" : ""} &middot; Last
             scanned {lastScanned}
           </p>
@@ -208,7 +208,7 @@ export default function ContentHealthPage() {
         <div className="flex items-center gap-3">
           <button
             onClick={handleExport}
-            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold text-slate-600 border border-slate-300 hover:bg-slate-50 rounded-xl transition-all"
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-body font-semibold text-gray-600 border border-gray-100 hover:bg-gray-50 rounded-xl transition-all"
           >
             <Download className="w-4 h-4" />
             Export Alerts
@@ -216,7 +216,7 @@ export default function ContentHealthPage() {
           <button
             onClick={handleRescan}
             disabled={rescanning}
-            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold bg-[#3730A3] text-white hover:bg-indigo-700 rounded-xl transition-all shadow-lg shadow-indigo-600/20 disabled:opacity-60"
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-body font-semibold bg-[#8B5CF6] text-white hover:bg-[#7C3AED] rounded-xl transition-all shadow-lg shadow-[#8B5CF6]/20 disabled:opacity-60"
           >
             <RefreshCw className={`w-4 h-4 ${rescanning ? "animate-spin" : ""}`} />
             {rescanning ? "Scanning..." : "Rescan Now"}
@@ -225,7 +225,7 @@ export default function ContentHealthPage() {
       </div>
 
       {/* Summary grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
         {summaryTypes.map((st) => {
           const config = ALERT_TYPE_CONFIG[st.key];
           const count = typeCounts[st.key] ?? 0;
@@ -238,26 +238,26 @@ export default function ContentHealthPage() {
               onClick={() => setTypeFilter(isActive ? "all" : st.key)}
               className={`bg-white p-5 rounded-2xl shadow-sm border text-left transition-all flex flex-col gap-3 ${
                 isActive
-                  ? "border-[#3730A3] ring-2 ring-[#3730A3]/20"
-                  : "border-slate-100 hover:border-slate-200"
+                  ? "border-[#8B5CF6] ring-2 ring-[#8B5CF6]/20"
+                  : "border-gray-100 hover:border-[#8B5CF6]/20 hover:shadow-md"
               }`}
             >
-              <div className="flex items-center gap-2 text-slate-400">
+              <div className="flex items-center gap-2 text-gray-400">
                 <Icon className="w-[18px] h-[18px]" />
-                <span className="text-xs font-bold uppercase tracking-wider">
+                <span className="text-xs font-body font-semibold uppercase tracking-wider">
                   {config?.label ?? st.key}
                 </span>
                 {st.tooltip && (
                   <span className="relative group">
-                    <Info className="w-3.5 h-3.5 text-slate-300 hover:text-slate-500 cursor-help" />
-                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 px-3 py-2 bg-slate-800 text-white text-[11px] leading-snug rounded-lg shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity z-20">
+                    <Info className="w-3.5 h-3.5 text-gray-300 hover:text-gray-500 cursor-help" />
+                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 px-3 py-2 bg-gray-800 text-white text-[11px] leading-snug rounded-lg shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity z-20">
                       {st.tooltip}
                     </span>
                   </span>
                 )}
               </div>
               <div className="flex items-baseline gap-3">
-                <span className="text-3xl font-black text-slate-900">{count}</span>
+                <span className="text-3xl font-headline font-bold text-gray-900">{count}</span>
               </div>
             </button>
           );
@@ -267,7 +267,7 @@ export default function ContentHealthPage() {
       {/* Filter bar */}
       <div className="bg-white p-2 rounded-xl shadow-sm flex flex-wrap items-center justify-between gap-4 mb-8">
         {/* Status tabs */}
-        <div className="flex bg-slate-50 p-1 rounded-lg">
+        <div className="flex bg-gray-50 p-1 rounded-lg">
           {[
             { value: "all", label: "All" },
             { value: "open", label: "Open" },
@@ -276,10 +276,10 @@ export default function ContentHealthPage() {
             <button
               key={tab.value}
               onClick={() => setStatusFilter(tab.value)}
-              className={`px-4 py-1.5 text-sm rounded-md transition-all ${
+              className={`px-4 py-1.5 text-sm font-body rounded-md transition-all ${
                 statusFilter === tab.value
-                  ? "bg-white text-slate-900 shadow-sm font-semibold"
-                  : "text-slate-500 hover:text-slate-700 font-medium"
+                  ? "bg-white text-gray-900 shadow-sm font-semibold"
+                  : "text-gray-500 hover:text-gray-700 font-medium"
               }`}
             >
               {tab.label}
@@ -293,31 +293,31 @@ export default function ContentHealthPage() {
             <select
               value={priorityFilter}
               onChange={(e) => setPriorityFilter(e.target.value)}
-              className="appearance-none bg-white border border-slate-200 rounded-lg px-3 py-1.5 pr-8 text-sm font-medium text-slate-700 hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#3730A3]/20"
+              className="appearance-none bg-white border border-gray-100 rounded-xl px-3 py-1.5 pr-8 text-sm font-body font-medium text-gray-600 hover:border-gray-200 focus:outline-none focus:border-[#8B5CF6] focus:ring-1 focus:ring-[#8B5CF6]/20"
             >
               <option value="all">Priority: All</option>
               <option value="high">Priority: High</option>
               <option value="medium">Priority: Medium</option>
               <option value="low">Priority: Low</option>
             </select>
-            <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+            <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
           </div>
         </div>
 
         {/* Sort + Search */}
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 text-sm font-medium text-slate-500">
+          <div className="flex items-center gap-2 text-sm font-body font-medium text-gray-500">
             <span>Sort: Newest</span>
           </div>
-          <div className="h-6 w-px bg-slate-200" />
+          <div className="h-6 w-px bg-gray-100" />
           <div className="relative">
-            <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
               type="text"
               placeholder="Search pages..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-8 pr-4 py-1.5 text-xs bg-transparent border-none focus:ring-0 w-40"
+              className="pl-8 pr-4 py-1.5 text-xs font-body bg-transparent border-none focus:ring-0 w-40"
             />
           </div>
         </div>
@@ -329,21 +329,21 @@ export default function ContentHealthPage() {
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className="bg-white rounded-xl border border-slate-100 p-6 animate-pulse"
+              className="bg-white rounded-2xl border border-gray-100 p-6 animate-pulse"
             >
-              <div className="h-4 bg-slate-200 rounded w-1/4 mb-3" />
-              <div className="h-5 bg-slate-200 rounded w-1/2 mb-2" />
-              <div className="h-3 bg-slate-100 rounded w-1/3" />
+              <div className="h-4 bg-gray-200 rounded w-1/4 mb-3" />
+              <div className="h-5 bg-gray-200 rounded w-1/2 mb-2" />
+              <div className="h-3 bg-gray-100 rounded w-1/3" />
             </div>
           ))}
         </div>
       ) : filteredAlerts.length === 0 ? (
-        <div className="bg-white rounded-xl border border-slate-100 p-12 text-center">
-          <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Target className="w-6 h-6 text-slate-400" />
+        <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center">
+          <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Target className="w-6 h-6 text-gray-400" />
           </div>
-          <h3 className="text-lg font-semibold text-slate-900 mb-1">No alerts found</h3>
-          <p className="text-sm text-slate-500">
+          <h3 className="text-lg font-headline font-bold text-gray-900 mb-1">No alerts found</h3>
+          <p className="text-sm text-gray-400 font-body">
             {alerts.length === 0
               ? "No content health alerts have been generated yet. Run a scan to detect issues."
               : "No alerts match the current filters."}
@@ -366,31 +366,31 @@ export default function ContentHealthPage() {
 
           {/* Pagination controls */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between mt-6 bg-white rounded-xl border border-slate-100 p-4">
-              <p className="text-sm text-slate-500">
+            <div className="flex items-center justify-between mt-6 bg-white rounded-2xl border border-gray-100 p-4">
+              <p className="text-sm font-body text-gray-500">
                 Showing {(currentPage - 1) * pageSize + 1}–{Math.min(currentPage * pageSize, filteredAlerts.length)} of {filteredAlerts.length} alerts
               </p>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                  className="p-2 rounded-lg border border-gray-100 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                 >
-                  <ChevronLeft className="w-4 h-4 text-slate-600" />
+                  <ChevronLeft className="w-4 h-4 text-gray-600" />
                 </button>
                 {Array.from({ length: totalPages }, (_, i) => i + 1)
                   .filter((p) => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1)
                   .map((page, idx, arr) => (
                     <span key={page}>
                       {idx > 0 && arr[idx - 1] !== page - 1 && (
-                        <span className="text-slate-400 px-1">…</span>
+                        <span className="text-gray-400 px-1">…</span>
                       )}
                       <button
                         onClick={() => setCurrentPage(page)}
-                        className={`w-8 h-8 rounded-lg text-sm font-medium transition-all ${
+                        className={`w-8 h-8 rounded-lg text-sm font-body font-medium transition-all ${
                           currentPage === page
-                            ? "bg-[#3730A3] text-white shadow"
-                            : "text-slate-600 hover:bg-slate-100"
+                            ? "bg-[#8B5CF6] text-white shadow"
+                            : "text-gray-600 hover:bg-gray-100"
                         }`}
                       >
                         {page}
@@ -400,9 +400,9 @@ export default function ContentHealthPage() {
                 <button
                   onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
-                  className="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                  className="p-2 rounded-lg border border-gray-100 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                 >
-                  <ChevronRight className="w-4 h-4 text-slate-600" />
+                  <ChevronRight className="w-4 h-4 text-gray-600" />
                 </button>
               </div>
             </div>

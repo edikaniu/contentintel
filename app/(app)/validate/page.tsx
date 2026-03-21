@@ -191,22 +191,22 @@ function ValidateTopicPageInner() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-8 bg-[#F9FAFB] min-h-full">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Topic Validator</h1>
-        <p className="text-sm text-slate-500 mt-1">
+        <h1 className="text-2xl font-headline font-bold text-gray-900">Topic Validator</h1>
+        <p className="text-sm font-body text-gray-500 mt-1">
           Validate any topic idea against keyword metrics, competitor analysis, and AI-generated recommendations.
         </p>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-slate-100 rounded-lg p-1 w-fit">
+      <div className="flex gap-1 border-b border-gray-100 w-fit">
         <button
           onClick={() => setActiveTab("text")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold transition-colors ${
+          className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold font-body transition-colors border-b-2 ${
             activeTab === "text"
-              ? "bg-white text-slate-900 shadow-sm"
-              : "text-slate-500 hover:text-slate-700"
+              ? "text-[#8B5CF6] border-[#8B5CF6]"
+              : "text-gray-500 border-transparent hover:text-gray-900"
           }`}
         >
           <Search className="w-4 h-4" />
@@ -215,13 +215,13 @@ function ValidateTopicPageInner() {
         <button
           onClick={() => setActiveTab("url")}
           disabled
-          className="flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold text-slate-400 cursor-not-allowed relative group"
+          className="flex items-center gap-2 px-4 py-2 text-sm font-semibold font-body text-gray-400 cursor-not-allowed relative group border-b-2 border-transparent"
           title="Coming in v1.1"
         >
           <Link2 className="w-4 h-4" />
           URL Input
           <Lock className="w-3 h-3" />
-          <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+          <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
             Coming in v1.1
           </span>
         </button>
@@ -229,29 +229,29 @@ function ValidateTopicPageInner() {
 
       {/* Input Form */}
       {!selectedDomain ? (
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-6 text-center">
-          <p className="text-sm text-amber-800 font-medium">
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6 text-center">
+          <p className="text-sm font-body text-amber-800 font-medium">
             Please select a domain from the sidebar to use the Topic Validator.
           </p>
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-slate-200 p-5">
-          <label className="block text-sm font-semibold text-slate-700 mb-2">
+        <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+          <label className="block text-sm font-headline font-semibold text-gray-900 mb-2">
             Enter a topic or keyword
           </label>
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             <input
               type="text"
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
               placeholder='e.g. "best personal loans for salary earners in Nigeria"'
-              className="flex-1 px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#3730A3]/20 focus:border-[#3730A3] placeholder:text-slate-400"
+              className="flex-1 w-full px-4 py-3 rounded-xl border border-gray-100 font-body text-lg focus:outline-none focus:ring-1 focus:ring-[#8B5CF6]/20 focus:border-[#8B5CF6] placeholder:text-gray-400"
               disabled={status === "loading"}
             />
             <button
               type="submit"
               disabled={status === "loading" || !topic.trim()}
-              className="px-6 py-3 bg-[#3730A3] text-white text-sm font-bold rounded-xl hover:bg-[#3730A3]/90 disabled:opacity-50 transition-colors flex items-center gap-2 shrink-0"
+              className="px-6 py-3 bg-[#8B5CF6] text-white text-sm font-semibold font-body rounded-xl hover:bg-[#7C3AED] disabled:opacity-50 transition-colors flex items-center justify-center gap-2 shrink-0"
             >
               {status === "loading" ? (
                 <>
@@ -271,28 +271,28 @@ function ValidateTopicPageInner() {
 
       {/* Loading Progress */}
       {status === "loading" && (
-        <div className="bg-white rounded-xl border border-slate-200 p-6">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
           <div className="space-y-3">
             {PROGRESS_STEPS.map((step, i) => (
               <div key={i} className="flex items-center gap-3">
                 {i < progressStep ? (
-                  <div className="w-5 h-5 rounded-full bg-[#059669] flex items-center justify-center">
-                    <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                  <div className="w-5 h-5 rounded-full bg-[#A3E635] flex items-center justify-center">
+                    <svg className="w-3 h-3 text-green-800" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
                   </div>
                 ) : i === progressStep ? (
-                  <Loader2 className="w-5 h-5 text-[#3730A3] animate-spin" />
+                  <Loader2 className="w-5 h-5 text-[#8B5CF6] animate-spin" />
                 ) : (
-                  <div className="w-5 h-5 rounded-full border-2 border-slate-200" />
+                  <div className="w-5 h-5 rounded-full border-2 border-gray-100" />
                 )}
                 <span
-                  className={`text-sm ${
+                  className={`text-sm font-body ${
                     i < progressStep
-                      ? "text-slate-400 line-through"
+                      ? "text-gray-400 line-through"
                       : i === progressStep
-                      ? "text-[#3730A3] font-semibold"
-                      : "text-slate-300"
+                      ? "text-[#8B5CF6] font-semibold"
+                      : "text-gray-300"
                   }`}
                 >
                   {step}
@@ -305,11 +305,11 @@ function ValidateTopicPageInner() {
 
       {/* Error */}
       {status === "error" && (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-5">
-          <p className="text-sm text-red-700 font-medium">{errorMessage}</p>
+        <div className="bg-red-50 border border-red-200 rounded-2xl p-5">
+          <p className="text-sm font-body text-red-700 font-medium">{errorMessage}</p>
           <button
             onClick={() => setStatus("idle")}
-            className="mt-2 text-sm text-red-600 underline hover:no-underline"
+            className="mt-2 text-sm font-body text-red-600 underline hover:no-underline"
           >
             Try again
           </button>
