@@ -35,7 +35,7 @@ export function Navbar() {
           {/* Desktop CTAs */}
           <div className="hidden md:flex items-center gap-4 relative z-10">
             <Link href="/login" className="text-sm text-gray-500 hover:text-white transition-colors">Sign In</Link>
-            <Link href="/onboarding" className="landing-gradient-border-btn text-sm !py-2.5 !px-5">Get Started</Link>
+            <a href="/#waitlist" className="landing-gradient-border-btn text-sm !py-2.5 !px-5">Join the Waitlist</a>
           </div>
 
           {/* Hamburger */}
@@ -73,7 +73,7 @@ export function Navbar() {
         <a href="#pricing" onClick={() => setMenuOpen(false)} className="text-2xl font-headline font-bold text-white hover:text-[#8B5CF6] transition-colors">Pricing</a>
         <div className="mt-4 flex flex-col gap-4 items-center">
           <Link href="/login" onClick={() => setMenuOpen(false)} className="text-gray-400 hover:text-white transition-colors text-lg">Sign In</Link>
-          <Link href="/onboarding" onClick={() => setMenuOpen(false)} className="landing-gradient-border-btn text-lg !px-8 !py-3">Get Started</Link>
+          <a href="/#waitlist" onClick={() => setMenuOpen(false)} className="landing-gradient-border-btn text-lg !px-8 !py-3">Join the Waitlist</a>
         </div>
       </div>
     </>

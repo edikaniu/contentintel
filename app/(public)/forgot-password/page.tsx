@@ -37,32 +37,34 @@ export default function ForgotPasswordPage() {
 
   if (sent) {
     return (
-      <div className="min-h-screen flex flex-col bg-[#F8FAFC]">
-        <header className="flex items-center px-6 py-6 lg:px-10">
-          <Link href="/" className="flex items-center gap-2 text-slate-900">
-            <div className="w-8 h-8 bg-[#3730A3] rounded-lg flex items-center justify-center text-white">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 48 48">
-                <path clipRule="evenodd" d="M24 4H6V17.3333V30.6667H24V44H42V30.6667V17.3333H24V4Z" fill="currentColor" fillRule="evenodd" />
-              </svg>
-            </div>
-            <span className="text-xl font-bold tracking-tight">ContentIntel</span>
+      <div className="min-h-screen flex flex-col bg-[#050505] relative overflow-hidden">
+        {/* Radial glow */}
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(139,92,246,0.08),transparent_60%)]" />
+        {/* Noise overlay */}
+        <div className="pointer-events-none absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E\")", backgroundRepeat: "repeat" }} />
+
+        <header className="relative z-10 flex items-center px-6 py-6 lg:px-10">
+          <Link href="/" className="flex items-center gap-2.5 text-white">
+            <div className="w-2 h-2 rounded-full bg-[#8B5CF6]" />
+            <span className="text-xl font-headline tracking-tight">ContentIntel</span>
           </Link>
         </header>
-        <main className="flex-1 flex items-center justify-center px-4 pb-20">
-          <div className="w-full max-w-[420px] bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+
+        <main className="relative z-10 flex-1 flex items-center justify-center px-4 pb-20">
+          <div className="w-full max-w-[420px] bg-[#111111] border border-[#222222] rounded-2xl p-8">
             <div className="flex flex-col items-center text-center mb-8">
-              <div className="w-12 h-12 bg-[#059669]/10 rounded-full flex items-center justify-center text-[#059669] mb-4">
+              <div className="w-12 h-12 bg-[#A3E635]/10 rounded-full flex items-center justify-center text-[#A3E635] mb-4">
                 <Mail className="w-6 h-6" />
               </div>
-              <h1 className="text-slate-900 text-2xl font-bold mb-2">Check your email</h1>
-              <p className="text-slate-500 text-sm leading-relaxed">
+              <h1 className="font-headline text-white text-2xl font-bold mb-2">Check your email</h1>
+              <p className="font-body text-gray-500 text-sm leading-relaxed">
                 If an account exists with that email, we&apos;ve sent a password reset link.
               </p>
             </div>
             <div className="text-center">
               <Link
                 href="/login"
-                className="inline-flex items-center gap-2 text-sm font-medium text-[#3730A3] hover:text-[#3730A3]/80 transition-colors"
+                className="inline-flex items-center gap-2 text-sm font-medium text-[#8B5CF6] hover:text-[#8B5CF6]/80 transition-colors"
               >
                 <ArrowLeft className="w-4 h-4" />
                 Back to sign in
@@ -70,7 +72,8 @@ export default function ForgotPasswordPage() {
             </div>
           </div>
         </main>
-        <footer className="py-6 text-center text-slate-400 text-xs">
+
+        <footer className="relative z-10 py-6 text-center text-gray-600 text-xs">
           <p>&copy; {new Date().getFullYear()} ContentIntel. All rights reserved.</p>
         </footer>
       </div>
@@ -78,39 +81,40 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F8FAFC]">
-      <header className="flex items-center px-6 py-6 lg:px-10">
-        <Link href="/" className="flex items-center gap-2 text-slate-900">
-          <div className="w-8 h-8 bg-[#3730A3] rounded-lg flex items-center justify-center text-white">
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 48 48">
-              <path clipRule="evenodd" d="M24 4H6V17.3333V30.6667H24V44H42V30.6667V17.3333H24V4Z" fill="currentColor" fillRule="evenodd" />
-            </svg>
-          </div>
-          <span className="text-xl font-bold tracking-tight">ContentIntel</span>
+    <div className="min-h-screen flex flex-col bg-[#050505] relative overflow-hidden">
+      {/* Radial glow */}
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(139,92,246,0.08),transparent_60%)]" />
+      {/* Noise overlay */}
+      <div className="pointer-events-none absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E\")", backgroundRepeat: "repeat" }} />
+
+      <header className="relative z-10 flex items-center px-6 py-6 lg:px-10">
+        <Link href="/" className="flex items-center gap-2.5 text-white">
+          <div className="w-2 h-2 rounded-full bg-[#8B5CF6]" />
+          <span className="text-xl font-headline tracking-tight">ContentIntel</span>
         </Link>
       </header>
 
-      <main className="flex-1 flex items-center justify-center px-4 pb-20">
-        <div className="w-full max-w-[420px] bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+      <main className="relative z-10 flex-1 flex items-center justify-center px-4 pb-20">
+        <div className="w-full max-w-[420px] bg-[#111111] border border-[#222222] rounded-2xl p-8">
           <div className="flex flex-col items-center text-center mb-8">
-            <div className="w-12 h-12 bg-[#3730A3]/10 rounded-full flex items-center justify-center text-[#3730A3] mb-4">
+            <div className="w-12 h-12 bg-[#8B5CF6]/10 rounded-full flex items-center justify-center text-[#8B5CF6] mb-4">
               <Mail className="w-6 h-6" />
             </div>
-            <h1 className="text-slate-900 text-2xl font-bold mb-2">Reset your password</h1>
-            <p className="text-slate-500 text-sm leading-relaxed">
+            <h1 className="font-headline text-white text-2xl font-bold mb-2">Reset your password</h1>
+            <p className="font-body text-gray-500 text-sm leading-relaxed">
               Enter your email and we&apos;ll send you a reset link.
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
-              <div className="bg-red-50 text-red-700 px-4 py-3 rounded-lg text-sm">
+              <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-xl text-sm">
                 {error}
               </div>
             )}
 
             <div className="space-y-2">
-              <label htmlFor="email" className="block text-sm font-medium text-slate-700">
+              <label htmlFor="email" className="block text-sm font-medium font-body text-gray-500">
                 Email address
               </label>
               <input
@@ -119,7 +123,7 @@ export default function ForgotPasswordPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="block w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#3730A3]/20 focus:border-[#3730A3] transition-all text-sm"
+                className="block w-full px-4 py-3 rounded-xl border border-[#222] bg-[#0a0a0a] text-white placeholder-gray-600 focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/30 transition-all text-sm"
                 placeholder="you@company.com"
               />
             </div>
@@ -127,7 +131,7 @@ export default function ForgotPasswordPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center py-3 px-4 bg-[#3730A3] hover:bg-[#3730A3]/90 text-white text-sm font-semibold rounded-xl transition-colors shadow-md shadow-[#3730A3]/20 disabled:opacity-50"
+              className="landing-gradient-border-btn w-full !py-3 disabled:opacity-50"
             >
               {loading ? "Sending..." : "Send reset link"}
             </button>
@@ -136,7 +140,7 @@ export default function ForgotPasswordPage() {
           <div className="mt-8 text-center">
             <Link
               href="/login"
-              className="inline-flex items-center gap-2 text-sm font-medium text-[#3730A3] hover:text-[#3730A3]/80 transition-colors"
+              className="inline-flex items-center gap-2 text-sm font-medium text-[#8B5CF6] hover:text-[#8B5CF6]/80 transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
               Back to sign in
@@ -145,7 +149,7 @@ export default function ForgotPasswordPage() {
         </div>
       </main>
 
-      <footer className="py-6 text-center text-slate-400 text-xs">
+      <footer className="relative z-10 py-6 text-center text-gray-600 text-xs">
         <p>&copy; {new Date().getFullYear()} ContentIntel. All rights reserved.</p>
       </footer>
     </div>

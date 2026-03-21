@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 const checkLime = (
   <svg width="16" height="16" viewBox="0 0 16 16" className="mt-0.5 flex-shrink-0"><path d="M4 8l3 3 5-5" stroke="#A3E635" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" /></svg>
 );
@@ -36,7 +34,7 @@ export function Pricing() {
                 <li key={f} className="flex items-start gap-2.5 text-sm text-gray-400 font-body">{checkLime}{f}</li>
               ))}
             </ul>
-            <Link href="/onboarding" className="block text-center border border-[#222] hover:border-[#444] text-white font-semibold py-3 rounded-xl transition-colors">Get Started</Link>
+            <a href="/#waitlist" className="block text-center border border-[#222] hover:border-[#444] text-white font-semibold py-3 rounded-xl transition-colors">Join Waitlist</a>
           </div>
 
           {/* Growth (Popular) */}
@@ -54,7 +52,7 @@ export function Pricing() {
                 <li key={f} className="flex items-start gap-2.5 text-sm text-gray-400 font-body">{checkViolet}{f}</li>
               ))}
             </ul>
-            <Link href="/onboarding" className="landing-gradient-border-btn block text-center text-sm !py-3">Get Started</Link>
+            <a href="/#waitlist" className="landing-gradient-border-btn block text-center text-sm !py-3">Join Waitlist</a>
           </div>
 
           {/* Scale */}
@@ -69,7 +67,7 @@ export function Pricing() {
                 <li key={f} className="flex items-start gap-2.5 text-sm text-gray-400 font-body">{checkLime}{f}</li>
               ))}
             </ul>
-            <Link href="/onboarding" className="block text-center border border-[#222] hover:border-[#444] text-white font-semibold py-3 rounded-xl transition-colors">Get Started</Link>
+            <a href="/#waitlist" className="block text-center border border-[#222] hover:border-[#444] text-white font-semibold py-3 rounded-xl transition-colors">Join Waitlist</a>
           </div>
         </div>
 

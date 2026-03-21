@@ -6,7 +6,11 @@ import Link from "next/link";
 
 export default function ResetPasswordPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><p>Loading...</p></div>}>
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-[#050505]">
+        <p className="font-body text-gray-500">Loading...</p>
+      </div>
+    }>
       <ResetPasswordForm />
     </Suspense>
   );
@@ -24,16 +28,32 @@ function ResetPasswordForm() {
 
   if (!token) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-        <div className="w-full max-w-md text-center">
-          <div className="bg-white rounded-lg shadow-sm border p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-2">Invalid Link</h2>
-            <p className="text-gray-600 mb-4">This password reset link is invalid or has expired.</p>
-            <Link href="/forgot-password" className="text-blue-600 hover:underline text-sm">
+      <div className="min-h-screen flex flex-col bg-[#050505] relative overflow-hidden">
+        {/* Radial glow */}
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(139,92,246,0.08),transparent_60%)]" />
+        {/* Noise overlay */}
+        <div className="pointer-events-none absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E\")", backgroundRepeat: "repeat" }} />
+
+        <header className="relative z-10 flex items-center px-6 py-6 lg:px-10">
+          <Link href="/" className="flex items-center gap-2.5 text-white">
+            <div className="w-2 h-2 rounded-full bg-[#8B5CF6]" />
+            <span className="text-xl font-headline tracking-tight">ContentIntel</span>
+          </Link>
+        </header>
+
+        <main className="relative z-10 flex-1 flex items-center justify-center px-4 pb-20">
+          <div className="w-full max-w-[420px] bg-[#111111] border border-[#222222] rounded-2xl p-8 text-center">
+            <h2 className="font-headline text-white text-xl font-bold mb-2">Invalid Link</h2>
+            <p className="font-body text-gray-500 mb-4">This password reset link is invalid or has expired.</p>
+            <Link href="/forgot-password" className="text-[#8B5CF6] hover:text-[#8B5CF6]/80 text-sm transition-colors">
               Request a new reset link
             </Link>
           </div>
-        </div>
+        </main>
+
+        <footer className="relative z-10 py-6 text-center text-gray-600 text-xs">
+          <p>&copy; {new Date().getFullYear()} ContentIntel. All rights reserved.</p>
+        </footer>
       </div>
     );
   }
@@ -72,81 +92,113 @@ function ResetPasswordForm() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-        <div className="w-full max-w-md text-center">
-          <div className="bg-white rounded-lg shadow-sm border p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-2">Password Updated</h2>
-            <p className="text-gray-600 mb-4">Your password has been reset successfully.</p>
+      <div className="min-h-screen flex flex-col bg-[#050505] relative overflow-hidden">
+        {/* Radial glow */}
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(139,92,246,0.08),transparent_60%)]" />
+        {/* Noise overlay */}
+        <div className="pointer-events-none absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E\")", backgroundRepeat: "repeat" }} />
+
+        <header className="relative z-10 flex items-center px-6 py-6 lg:px-10">
+          <Link href="/" className="flex items-center gap-2.5 text-white">
+            <div className="w-2 h-2 rounded-full bg-[#8B5CF6]" />
+            <span className="text-xl font-headline tracking-tight">ContentIntel</span>
+          </Link>
+        </header>
+
+        <main className="relative z-10 flex-1 flex items-center justify-center px-4 pb-20">
+          <div className="w-full max-w-[420px] bg-[#111111] border border-[#222222] rounded-2xl p-8 text-center">
+            <h2 className="font-headline text-white text-xl font-bold mb-2">Password Updated</h2>
+            <p className="font-body text-gray-500 mb-6">Your password has been reset successfully.</p>
             <Link
               href="/login"
-              className="inline-block bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 font-medium"
+              className="landing-gradient-border-btn inline-block"
             >
               Sign In
             </Link>
           </div>
-        </div>
+        </main>
+
+        <footer className="relative z-10 py-6 text-center text-gray-600 text-xs">
+          <p>&copy; {new Date().getFullYear()} ContentIntel. All rights reserved.</p>
+        </footer>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">ContentIntel</h1>
-          <p className="text-gray-600 mt-2">Set a new password</p>
+    <div className="min-h-screen flex flex-col bg-[#050505] relative overflow-hidden">
+      {/* Radial glow */}
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(139,92,246,0.08),transparent_60%)]" />
+      {/* Noise overlay */}
+      <div className="pointer-events-none absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E\")", backgroundRepeat: "repeat" }} />
+
+      <header className="relative z-10 flex items-center px-6 py-6 lg:px-10">
+        <Link href="/" className="flex items-center gap-2.5 text-white">
+          <div className="w-2 h-2 rounded-full bg-[#8B5CF6]" />
+          <span className="text-xl font-headline tracking-tight">ContentIntel</span>
+        </Link>
+      </header>
+
+      <main className="relative z-10 flex-1 flex items-center justify-center px-4 pb-20">
+        <div className="w-full max-w-[420px]">
+          <div className="text-center mb-8">
+            <h1 className="font-headline text-white text-2xl font-bold">Set a new password</h1>
+          </div>
+
+          <div className="bg-[#111111] border border-[#222222] rounded-2xl p-8">
+            <form onSubmit={handleSubmit} className="space-y-5">
+              {error && (
+                <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-xl text-sm">
+                  {error}
+                </div>
+              )}
+
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium font-body text-gray-500 mb-2">
+                  New Password
+                </label>
+                <input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  minLength={8}
+                  className="w-full px-4 py-3 rounded-xl border border-[#222] bg-[#0a0a0a] text-white placeholder-gray-600 focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/30 transition-all text-sm"
+                  placeholder="Minimum 8 characters"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="confirmPassword" className="block text-sm font-medium font-body text-gray-500 mb-2">
+                  Confirm Password
+                </label>
+                <input
+                  id="confirmPassword"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  minLength={8}
+                  className="w-full px-4 py-3 rounded-xl border border-[#222] bg-[#0a0a0a] text-white placeholder-gray-600 focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/30 transition-all text-sm"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="landing-gradient-border-btn w-full !py-3 disabled:opacity-50"
+              >
+                {loading ? "Resetting..." : "Reset Password"}
+              </button>
+            </form>
+          </div>
         </div>
+      </main>
 
-        <form
-          onSubmit={handleSubmit}
-          className="bg-white rounded-lg shadow-sm border p-6 space-y-4"
-        >
-          {error && (
-            <div className="bg-red-50 text-red-700 px-4 py-3 rounded text-sm">
-              {error}
-            </div>
-          )}
-
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-              New Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={8}
-              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Minimum 8 characters"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
-              Confirm Password
-            </label>
-            <input
-              id="confirmPassword"
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              minLength={8}
-              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 font-medium"
-          >
-            {loading ? "Resetting..." : "Reset Password"}
-          </button>
-        </form>
-      </div>
+      <footer className="relative z-10 py-6 text-center text-gray-600 text-xs">
+        <p>&copy; {new Date().getFullYear()} ContentIntel. All rights reserved.</p>
+      </footer>
     </div>
   );
 }

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import Link from "next/link";
 
 export function Hero() {
   const typewriterRef = useRef<HTMLSpanElement>(null);
@@ -42,7 +41,7 @@ export function Hero() {
             Connect your existing tools. Get actionable recommendations. Stop guessing.
           </p>
           <div className="flex flex-wrap gap-4 mb-10">
-            <Link href="/onboarding" className="landing-gradient-border-btn text-base">Get Started Free</Link>
+            <a href="/#waitlist" className="landing-gradient-border-btn text-base">Join the Waitlist</a>
             <a href="#how-it-works" className="border border-[#222] hover:border-[#444] text-gray-400 hover:text-white font-medium px-7 py-3.5 rounded-xl text-base transition-colors">
               See how it works <span className="inline-block ml-1">&#8595;</span>
             </a>

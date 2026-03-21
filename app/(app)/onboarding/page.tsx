@@ -223,25 +223,25 @@ export default function OnboardingPage() {
 
   function StatusBadge({ status, error, successText }: { status: StepStatus; error?: string; successText?: string }) {
     if (status === "testing") return (
-      <div className="flex items-center gap-2 text-slate-400 text-sm">
+      <div className="flex items-center gap-2 text-gray-500 text-sm">
         <Loader2 className="w-4 h-4 animate-spin" />
         Testing connection...
       </div>
     );
     if (status === "success") return (
-      <div className="flex items-center gap-2 text-[#059669] text-sm font-medium">
+      <div className="flex items-center gap-2 text-[#A3E635] text-sm font-medium">
         <CheckCircle className="w-4 h-4" />
         {successText || "Connected successfully"}
       </div>
     );
     if (status === "error") return (
-      <div className="flex items-center gap-2 text-red-600 text-sm">
+      <div className="flex items-center gap-2 text-red-400 text-sm">
         <XCircle className="w-4 h-4" />
         {error || "Connection failed"}
       </div>
     );
     return (
-      <div className="flex items-center gap-2 text-slate-400 text-sm">
+      <div className="flex items-center gap-2 text-gray-600 text-sm">
         <Info className="w-4 h-4" />
         Not connected yet
       </div>
@@ -264,52 +264,51 @@ export default function OnboardingPage() {
   const isRequired = STEPS[currentStep].required;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-slate-900">
+    <div className="min-h-screen bg-[#050505] text-white">
+      {/* Radial violet glow */}
+      <div className="fixed pointer-events-none z-0" style={{ top: "-30%", left: "50%", transform: "translateX(-50%)", width: "1000px", height: "1000px", background: "radial-gradient(ellipse at center, rgba(45,27,105,0.25) 0%, rgba(45,27,105,0.05) 40%, transparent 70%)" }} />
+
       {/* Top Navigation Bar */}
-      <header className="w-full bg-white border-b border-slate-200 px-6 py-3 sticky top-0 z-50">
+      <header className="w-full bg-[#111111] border-b border-[#222] px-6 py-3 sticky top-0 z-50">
         <div className="max-w-[1200px] mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="bg-[#3730A3] p-1.5 rounded-lg flex items-center justify-center">
-              <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 48 48">
-                <path clipRule="evenodd" d="M24 4H6V17.3333V30.6667H24V44H42V30.6667V17.3333H24V4Z" fill="currentColor" fillRule="evenodd" />
-              </svg>
-            </div>
-            <h1 className="text-xl font-bold tracking-tight text-slate-900">ContentIntel</h1>
-            <div className="h-4 w-px bg-slate-300 mx-2" />
-            <span className="text-sm font-medium text-slate-500">{session?.user?.name || "Setup"}</span>
+            <div className="w-2 h-2 rounded-full bg-[#8B5CF6]" />
+            <h1 className="text-xl font-headline font-bold tracking-tight text-white">ContentIntel</h1>
+            <div className="h-4 w-px bg-[#333] mx-2" />
+            <span className="text-sm font-medium text-gray-500">{session?.user?.name || "Setup"}</span>
           </div>
         </div>
       </header>
 
-      <main className="py-12 px-4">
+      <main className="py-12 px-4 relative z-10">
         <div className="max-w-[680px] mx-auto">
           {/* Horizontal Stepper */}
           <div className="mb-10">
             <div className="flex items-center justify-between relative">
               {/* Progress Line Background */}
-              <div className="absolute top-4 left-0 w-full h-0.5 bg-slate-200 z-0" />
+              <div className="absolute top-4 left-0 w-full h-0.5 bg-[#222] z-0" />
               {/* Active Progress Line */}
-              <div className="absolute top-4 left-0 h-0.5 bg-[#3730A3] z-0 transition-all duration-500" style={{ width: progressWidth }} />
+              <div className="absolute top-4 left-0 h-0.5 bg-[#8B5CF6] z-0 transition-all duration-500" style={{ width: progressWidth }} />
               {/* Steps */}
               {STEPS.map((step, i) => (
                 <div key={i} className="relative z-10 flex flex-col items-center gap-2">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ring-4 ring-[#F8FAFC] ${
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ring-4 ring-[#050505] ${
                     i < currentStep
-                      ? "bg-[#3730A3] text-white"
+                      ? "bg-[#8B5CF6] text-white"
                       : i === currentStep
-                      ? "bg-white border-2 border-[#3730A3] text-[#3730A3]"
-                      : "bg-white border-2 border-slate-200 text-slate-400"
+                      ? "bg-[#050505] border-2 border-[#8B5CF6] text-[#8B5CF6]"
+                      : "bg-[#050505] border-2 border-[#333] text-gray-600"
                   }`}>
                     {i < currentStep ? (
                       <CheckCircle className="w-4 h-4" />
                     ) : i === currentStep ? (
-                      <div className="w-2 h-2 rounded-full bg-[#3730A3]" />
+                      <div className="w-2 h-2 rounded-full bg-[#8B5CF6]" />
                     ) : (
                       i + 1
                     )}
                   </div>
                   <span className={`text-[10px] font-bold uppercase tracking-wider ${
-                    i === currentStep ? "text-[#3730A3]" : "text-slate-400"
+                    i === currentStep ? "text-[#8B5CF6]" : "text-gray-600"
                   }`}>
                     {step.label}
                   </span>
@@ -319,18 +318,18 @@ export default function OnboardingPage() {
           </div>
 
           {/* Step Card */}
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+          <div className="bg-[#111111] rounded-xl border border-[#222] overflow-hidden">
             <div className="p-8">
               {/* Step Header */}
               <div className="flex justify-between items-start mb-6">
                 <div>
-                  <h2 className="text-xl font-semibold text-slate-900">{stepTitles[currentStep].title}</h2>
-                  <p className="text-slate-500 mt-1">{stepTitles[currentStep].desc}</p>
+                  <h2 className="text-xl font-headline font-semibold text-white">{stepTitles[currentStep].title}</h2>
+                  <p className="text-gray-500 font-body mt-1">{stepTitles[currentStep].desc}</p>
                 </div>
                 <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
                   isRequired
-                    ? "bg-amber-500/10 text-amber-600 border border-amber-500/20"
-                    : "bg-slate-100 text-slate-500 border border-slate-200"
+                    ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                    : "bg-[#1a1a1a] text-gray-600 border border-[#333]"
                 }`}>
                   {isRequired ? "Required" : "Optional"}
                 </span>
@@ -342,15 +341,15 @@ export default function OnboardingPage() {
                 {currentStep === 0 && (
                   <div className="space-y-4">
                     <div className="space-y-1.5">
-                      <label className="text-sm font-medium text-slate-700">Account Email</label>
-                      <input type="email" value={dfLogin} onChange={(e) => setDfLogin(e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-[#3730A3]/20 focus:border-[#3730A3] transition-all outline-none text-sm" placeholder="email@example.com" />
+                      <label className="text-sm font-medium text-gray-400 font-body">Account Email</label>
+                      <input type="email" value={dfLogin} onChange={(e) => setDfLogin(e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-[#222] bg-[#0a0a0a] text-white placeholder-gray-600 focus:ring-1 focus:ring-violet-500/30 focus:border-violet-500/50 transition-all outline-none text-sm" placeholder="email@example.com" />
                     </div>
                     <div className="space-y-1.5">
-                      <label className="text-sm font-medium text-slate-700">API Password</label>
-                      <input type="password" value={dfPassword} onChange={(e) => setDfPassword(e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-[#3730A3]/20 focus:border-[#3730A3] transition-all outline-none text-sm" placeholder="••••••••••••" />
+                      <label className="text-sm font-medium text-gray-400 font-body">API Password</label>
+                      <input type="password" value={dfPassword} onChange={(e) => setDfPassword(e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-[#222] bg-[#0a0a0a] text-white placeholder-gray-600 focus:ring-1 focus:ring-violet-500/30 focus:border-violet-500/50 transition-all outline-none text-sm" placeholder="••••••••••••" />
                     </div>
-                    <div className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200">
-                      <button type="button" onClick={() => saveAndTest("dataforseo", { login: dfLogin, password: dfPassword }, setDfStatus, setDfMeta, setDfError)} className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-semibold hover:bg-slate-50 transition-colors">
+                    <div className="flex items-center gap-4 p-4 rounded-xl bg-[#0a0a0a] border border-[#1a1a1a]">
+                      <button type="button" onClick={() => saveAndTest("dataforseo", { login: dfLogin, password: dfPassword }, setDfStatus, setDfMeta, setDfError)} className="flex items-center gap-2 px-4 py-2 bg-[#1a1a1a] border border-[#333] text-white rounded-lg text-sm font-semibold hover:bg-[#222] transition-colors">
                         <RefreshCw className="w-4 h-4" />Test Connection
                       </button>
                       <StatusBadge status={dfStatus} error={dfError} successText={dfMeta ? `Connected! Balance: $${String(dfMeta.balance ?? "N/A")}` : undefined} />
@@ -362,11 +361,11 @@ export default function OnboardingPage() {
                 {currentStep === 1 && (
                   <div className="space-y-4">
                     <div className="space-y-1.5">
-                      <label className="text-sm font-medium text-slate-700">API Key</label>
-                      <input type="text" value={windsorKey} onChange={(e) => setWindsorKey(e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-[#3730A3]/20 focus:border-[#3730A3] transition-all outline-none font-mono text-sm" placeholder="Enter your Windsor.ai API key" />
+                      <label className="text-sm font-medium text-gray-400 font-body">API Key</label>
+                      <input type="text" value={windsorKey} onChange={(e) => setWindsorKey(e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-[#222] bg-[#0a0a0a] text-white placeholder-gray-600 focus:ring-1 focus:ring-violet-500/30 focus:border-violet-500/50 transition-all outline-none font-mono text-sm" placeholder="Enter your Windsor.ai API key" />
                     </div>
-                    <div className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200">
-                      <button type="button" onClick={() => saveAndTest("windsor", { api_key: windsorKey }, setWindsorStatus, setWindsorMeta, setWindsorError)} className="flex items-center gap-2 px-4 py-2 bg-white border border-[#3730A3] text-[#3730A3] rounded-lg text-sm font-semibold hover:bg-indigo-50 transition-colors">
+                    <div className="flex items-center gap-4 p-4 rounded-xl bg-[#0a0a0a] border border-[#1a1a1a]">
+                      <button type="button" onClick={() => saveAndTest("windsor", { api_key: windsorKey }, setWindsorStatus, setWindsorMeta, setWindsorError)} className="flex items-center gap-2 px-4 py-2 bg-transparent border border-[#8B5CF6] text-[#8B5CF6] rounded-lg text-sm font-semibold hover:bg-[#8B5CF6]/10 transition-colors">
                         <RefreshCw className="w-4 h-4" />Test Connection
                       </button>
                       <StatusBadge status={windsorStatus} error={windsorError} successText={windsorMeta ? `Success! ${String(windsorMeta.connectors ?? 0)} connectors found` : undefined} />
@@ -378,12 +377,12 @@ export default function OnboardingPage() {
                 {currentStep === 2 && (
                   <div className="space-y-4">
                     <div className="space-y-1.5">
-                      <label className="text-sm font-medium text-slate-700">Private App Access Token</label>
-                      <input type="password" value={hubspotToken} onChange={(e) => setHubspotToken(e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-[#3730A3]/20 focus:border-[#3730A3] transition-all outline-none text-sm" placeholder="pat-na1-..." />
-                      <p className="text-xs text-slate-400 mt-1">Create a private app in HubSpot &gt; Settings &gt; Private Apps</p>
+                      <label className="text-sm font-medium text-gray-400 font-body">Private App Access Token</label>
+                      <input type="password" value={hubspotToken} onChange={(e) => setHubspotToken(e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-[#222] bg-[#0a0a0a] text-white placeholder-gray-600 focus:ring-1 focus:ring-violet-500/30 focus:border-violet-500/50 transition-all outline-none text-sm" placeholder="pat-na1-..." />
+                      <p className="text-xs text-gray-600 mt-1">Create a private app in HubSpot &gt; Settings &gt; Private Apps</p>
                     </div>
-                    <div className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200">
-                      <button type="button" onClick={() => saveAndTest("hubspot", { access_token: hubspotToken }, setHubspotStatus, setHubspotMeta, setHubspotError)} className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-semibold hover:bg-slate-50 transition-colors">
+                    <div className="flex items-center gap-4 p-4 rounded-xl bg-[#0a0a0a] border border-[#1a1a1a]">
+                      <button type="button" onClick={() => saveAndTest("hubspot", { access_token: hubspotToken }, setHubspotStatus, setHubspotMeta, setHubspotError)} className="flex items-center gap-2 px-4 py-2 bg-[#1a1a1a] border border-[#333] text-white rounded-lg text-sm font-semibold hover:bg-[#222] transition-colors">
                         <RefreshCw className="w-4 h-4" />Test Connection
                       </button>
                       <StatusBadge status={hubspotStatus} error={hubspotError} successText={hubspotMeta ? `Connected! Portal ID: ${String(hubspotMeta.portalId ?? "N/A")}` : undefined} />
@@ -395,11 +394,11 @@ export default function OnboardingPage() {
                 {currentStep === 3 && (
                   <div className="space-y-4">
                     <div className="space-y-1.5">
-                      <label className="text-sm font-medium text-slate-700">API Key</label>
-                      <input type="password" value={anthropicKey} onChange={(e) => setAnthropicKey(e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-[#3730A3]/20 focus:border-[#3730A3] transition-all outline-none text-sm" placeholder="sk-ant-..." />
+                      <label className="text-sm font-medium text-gray-400 font-body">API Key</label>
+                      <input type="password" value={anthropicKey} onChange={(e) => setAnthropicKey(e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-[#222] bg-[#0a0a0a] text-white placeholder-gray-600 focus:ring-1 focus:ring-violet-500/30 focus:border-violet-500/50 transition-all outline-none text-sm" placeholder="sk-ant-..." />
                     </div>
-                    <div className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200">
-                      <button type="button" onClick={() => saveAndTest("anthropic", { api_key: anthropicKey }, setAnthropicStatus, null, setAnthropicError)} className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-semibold hover:bg-slate-50 transition-colors">
+                    <div className="flex items-center gap-4 p-4 rounded-xl bg-[#0a0a0a] border border-[#1a1a1a]">
+                      <button type="button" onClick={() => saveAndTest("anthropic", { api_key: anthropicKey }, setAnthropicStatus, null, setAnthropicError)} className="flex items-center gap-2 px-4 py-2 bg-[#1a1a1a] border border-[#333] text-white rounded-lg text-sm font-semibold hover:bg-[#222] transition-colors">
                         <RefreshCw className="w-4 h-4" />Test Connection
                       </button>
                       <StatusBadge status={anthropicStatus} error={anthropicError} />
@@ -411,11 +410,11 @@ export default function OnboardingPage() {
                 {currentStep === 4 && (
                   <div className="space-y-4">
                     <div className="space-y-1.5">
-                      <label className="text-sm font-medium text-slate-700">API Key</label>
-                      <input type="password" value={semrushKey} onChange={(e) => setSemrushKey(e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-[#3730A3]/20 focus:border-[#3730A3] transition-all outline-none text-sm" placeholder="Leave empty to skip" />
+                      <label className="text-sm font-medium text-gray-400 font-body">API Key</label>
+                      <input type="password" value={semrushKey} onChange={(e) => setSemrushKey(e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-[#222] bg-[#0a0a0a] text-white placeholder-gray-600 focus:ring-1 focus:ring-violet-500/30 focus:border-violet-500/50 transition-all outline-none text-sm" placeholder="Leave empty to skip" />
                     </div>
-                    <div className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200">
-                      <button type="button" onClick={() => { if (semrushKey) saveAndTest("semrush", { api_key: semrushKey }, setSemrushStatus, setSemrushMeta, setSemrushError); }} className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-semibold hover:bg-slate-50 transition-colors">
+                    <div className="flex items-center gap-4 p-4 rounded-xl bg-[#0a0a0a] border border-[#1a1a1a]">
+                      <button type="button" onClick={() => { if (semrushKey) saveAndTest("semrush", { api_key: semrushKey }, setSemrushStatus, setSemrushMeta, setSemrushError); }} className="flex items-center gap-2 px-4 py-2 bg-[#1a1a1a] border border-[#333] text-white rounded-lg text-sm font-semibold hover:bg-[#222] transition-colors">
                         <RefreshCw className="w-4 h-4" />Test Connection
                       </button>
                       <StatusBadge status={semrushStatus} error={semrushError} successText={semrushMeta ? `Connected! Units: ${String(semrushMeta.unitsRemaining ?? "N/A")}` : undefined} />
@@ -428,64 +427,64 @@ export default function OnboardingPage() {
                   <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-1.5">
-                        <label className="text-sm font-medium text-slate-700">Domain URL</label>
-                        <input type="text" value={domainUrl} onChange={(e) => setDomainUrl(e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-[#3730A3]/20 focus:border-[#3730A3] transition-all outline-none text-sm" placeholder="example.com" />
+                        <label className="text-sm font-medium text-gray-400 font-body">Domain URL</label>
+                        <input type="text" value={domainUrl} onChange={(e) => setDomainUrl(e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-[#222] bg-[#0a0a0a] text-white placeholder-gray-600 focus:ring-1 focus:ring-violet-500/30 focus:border-violet-500/50 transition-all outline-none text-sm" placeholder="example.com" />
                       </div>
                       <div className="space-y-1.5">
-                        <label className="text-sm font-medium text-slate-700">Display Name</label>
-                        <input type="text" value={displayName} onChange={(e) => setDisplayName(e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-[#3730A3]/20 focus:border-[#3730A3] transition-all outline-none text-sm" placeholder="My Site" />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-3 gap-4">
-                      <div className="space-y-1.5">
-                        <label className="text-sm font-medium text-slate-700">Vertical</label>
-                        <input type="text" value={vertical} onChange={(e) => setVertical(e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-[#3730A3]/20 focus:border-[#3730A3] transition-all outline-none text-sm" placeholder="finance" />
-                      </div>
-                      <div className="space-y-1.5">
-                        <label className="text-sm font-medium text-slate-700">Location ID</label>
-                        <input type="text" value={location} onChange={(e) => setLocation(e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-[#3730A3]/20 focus:border-[#3730A3] transition-all outline-none text-sm" />
-                      </div>
-                      <div className="space-y-1.5">
-                        <label className="text-sm font-medium text-slate-700">Language ID</label>
-                        <input type="text" value={language} onChange={(e) => setLanguage(e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-[#3730A3]/20 focus:border-[#3730A3] transition-all outline-none text-sm" />
+                        <label className="text-sm font-medium text-gray-400 font-body">Display Name</label>
+                        <input type="text" value={displayName} onChange={(e) => setDisplayName(e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-[#222] bg-[#0a0a0a] text-white placeholder-gray-600 focus:ring-1 focus:ring-violet-500/30 focus:border-violet-500/50 transition-all outline-none text-sm" placeholder="My Site" />
                       </div>
                     </div>
                     <div className="grid grid-cols-3 gap-4">
                       <div className="space-y-1.5">
-                        <label className="text-sm font-medium text-slate-700">GSC Property</label>
-                        <input type="text" value={gscProperty} onChange={(e) => setGscProperty(e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-[#3730A3]/20 focus:border-[#3730A3] transition-all outline-none text-sm" placeholder="sc-domain:..." />
+                        <label className="text-sm font-medium text-gray-400 font-body">Vertical</label>
+                        <input type="text" value={vertical} onChange={(e) => setVertical(e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-[#222] bg-[#0a0a0a] text-white placeholder-gray-600 focus:ring-1 focus:ring-violet-500/30 focus:border-violet-500/50 transition-all outline-none text-sm" placeholder="finance" />
                       </div>
                       <div className="space-y-1.5">
-                        <label className="text-sm font-medium text-slate-700">GA4 Account ID</label>
-                        <input type="text" value={ga4AccountId} onChange={(e) => setGa4AccountId(e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-[#3730A3]/20 focus:border-[#3730A3] transition-all outline-none text-sm" />
+                        <label className="text-sm font-medium text-gray-400 font-body">Location ID</label>
+                        <input type="text" value={location} onChange={(e) => setLocation(e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-[#222] bg-[#0a0a0a] text-white placeholder-gray-600 focus:ring-1 focus:ring-violet-500/30 focus:border-violet-500/50 transition-all outline-none text-sm" />
                       </div>
                       <div className="space-y-1.5">
-                        <label className="text-sm font-medium text-slate-700">HubSpot Blog ID</label>
-                        <input type="text" value={hubspotBlogId} onChange={(e) => setHubspotBlogId(e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-[#3730A3]/20 focus:border-[#3730A3] transition-all outline-none text-sm" />
+                        <label className="text-sm font-medium text-gray-400 font-body">Language ID</label>
+                        <input type="text" value={language} onChange={(e) => setLanguage(e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-[#222] bg-[#0a0a0a] text-white placeholder-gray-600 focus:ring-1 focus:ring-violet-500/30 focus:border-violet-500/50 transition-all outline-none text-sm" />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="space-y-1.5">
+                        <label className="text-sm font-medium text-gray-400 font-body">GSC Property</label>
+                        <input type="text" value={gscProperty} onChange={(e) => setGscProperty(e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-[#222] bg-[#0a0a0a] text-white placeholder-gray-600 focus:ring-1 focus:ring-violet-500/30 focus:border-violet-500/50 transition-all outline-none text-sm" placeholder="sc-domain:..." />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-sm font-medium text-gray-400 font-body">GA4 Account ID</label>
+                        <input type="text" value={ga4AccountId} onChange={(e) => setGa4AccountId(e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-[#222] bg-[#0a0a0a] text-white placeholder-gray-600 focus:ring-1 focus:ring-violet-500/30 focus:border-violet-500/50 transition-all outline-none text-sm" />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-sm font-medium text-gray-400 font-body">HubSpot Blog ID</label>
+                        <input type="text" value={hubspotBlogId} onChange={(e) => setHubspotBlogId(e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-[#222] bg-[#0a0a0a] text-white placeholder-gray-600 focus:ring-1 focus:ring-violet-500/30 focus:border-violet-500/50 transition-all outline-none text-sm" />
                       </div>
                     </div>
                     <div className="space-y-1.5">
-                      <label className="text-sm font-medium text-slate-700">Competitors (up to 10)</label>
+                      <label className="text-sm font-medium text-gray-400 font-body">Competitors (up to 10)</label>
                       <div className="flex gap-2">
-                        <input type="text" value={competitorInput} onChange={(e) => setCompetitorInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addCompetitor())} className="flex-1 px-4 py-2.5 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-[#3730A3]/20 focus:border-[#3730A3] transition-all outline-none text-sm" placeholder="competitor.com" />
-                        <button type="button" onClick={addCompetitor} className="px-4 py-2.5 bg-slate-100 rounded-lg text-sm font-semibold hover:bg-slate-200 transition-colors">Add</button>
+                        <input type="text" value={competitorInput} onChange={(e) => setCompetitorInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addCompetitor())} className="flex-1 px-4 py-2.5 rounded-lg border border-[#222] bg-[#0a0a0a] text-white placeholder-gray-600 focus:ring-1 focus:ring-violet-500/30 focus:border-violet-500/50 transition-all outline-none text-sm" placeholder="competitor.com" />
+                        <button type="button" onClick={addCompetitor} className="px-4 py-2.5 bg-[#1a1a1a] border border-[#333] text-white rounded-lg text-sm font-semibold hover:bg-[#222] transition-colors">Add</button>
                       </div>
                       {competitors.length > 0 && (
                         <div className="flex flex-wrap gap-2 mt-2">
                           {competitors.map((c, i) => (
-                            <span key={i} className="inline-flex items-center gap-1 px-3 py-1 bg-slate-100 rounded-lg text-sm">
+                            <span key={i} className="inline-flex items-center gap-1 px-3 py-1 bg-[#1a1a1a] border border-[#333] rounded-lg text-sm">
                               {c}
-                              <button onClick={() => setCompetitors(competitors.filter((_, j) => j !== i))} className="text-slate-400 hover:text-red-500 ml-1">&times;</button>
+                              <button onClick={() => setCompetitors(competitors.filter((_, j) => j !== i))} className="text-gray-600 hover:text-red-400 ml-1">&times;</button>
                             </span>
                           ))}
                         </div>
                       )}
                     </div>
                     <div className="space-y-1.5">
-                      <label className="text-sm font-medium text-slate-700">Content Categories</label>
-                      <input type="text" value={categoriesInput} onChange={(e) => setCategoriesInput(e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-[#3730A3]/20 focus:border-[#3730A3] transition-all outline-none text-sm" placeholder="loans, investments, crypto (comma-separated)" />
+                      <label className="text-sm font-medium text-gray-400 font-body">Content Categories</label>
+                      <input type="text" value={categoriesInput} onChange={(e) => setCategoriesInput(e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-[#222] bg-[#0a0a0a] text-white placeholder-gray-600 focus:ring-1 focus:ring-violet-500/30 focus:border-violet-500/50 transition-all outline-none text-sm" placeholder="loans, investments, crypto (comma-separated)" />
                     </div>
-                    {domainError && <p className="text-sm text-red-600">{domainError}</p>}
+                    {domainError && <p className="text-sm text-red-400">{domainError}</p>}
                   </div>
                 )}
 
@@ -493,22 +492,22 @@ export default function OnboardingPage() {
                 {currentStep === 6 && (
                   <div className="space-y-4">
                     <div className="flex gap-2">
-                      <input type="email" value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} className="flex-1 px-4 py-2.5 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-[#3730A3]/20 focus:border-[#3730A3] transition-all outline-none text-sm" placeholder="team@example.com" />
-                      <select value={inviteRole} onChange={(e) => setInviteRole(e.target.value)} className="px-3 py-2.5 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-[#3730A3]/20 focus:border-[#3730A3] outline-none text-sm">
+                      <input type="email" value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} className="flex-1 px-4 py-2.5 rounded-lg border border-[#222] bg-[#0a0a0a] text-white placeholder-gray-600 focus:ring-1 focus:ring-violet-500/30 focus:border-violet-500/50 transition-all outline-none text-sm" placeholder="team@example.com" />
+                      <select value={inviteRole} onChange={(e) => setInviteRole(e.target.value)} className="px-3 py-2.5 rounded-lg border border-[#222] bg-[#0a0a0a] text-white placeholder-gray-600 focus:ring-1 focus:ring-violet-500/30 focus:border-violet-500/50 outline-none text-sm">
                         <option value="admin">Admin</option>
                         <option value="editor">Editor</option>
                         <option value="viewer">Viewer</option>
                       </select>
-                      <button type="button" onClick={sendInvite} disabled={inviting} className="px-5 py-2.5 bg-[#3730A3] text-white rounded-lg text-sm font-semibold hover:bg-[#3730A3]/90 disabled:opacity-50 transition-colors">
+                      <button type="button" onClick={sendInvite} disabled={inviting} className="px-5 py-2.5 bg-[#8B5CF6] text-white rounded-lg text-sm font-semibold hover:bg-[#8B5CF6]/90 disabled:opacity-50 transition-colors">
                         {inviting ? "..." : "Send"}
                       </button>
                     </div>
-                    {inviteError && <p className="text-sm text-red-600">{inviteError}</p>}
+                    {inviteError && <p className="text-sm text-red-400">{inviteError}</p>}
                     {invites.length > 0 && (
                       <div className="space-y-2">
                         {invites.map((inv, i) => (
-                          <div key={i} className="flex items-center gap-2 text-sm text-slate-600 p-3 rounded-lg border border-slate-200 bg-slate-50">
-                            <CheckCircle className="w-4 h-4 text-[#059669]" />
+                          <div key={i} className="flex items-center gap-2 text-sm text-gray-400 p-3 rounded-lg border border-[#222] bg-[#0a0a0a]">
+                            <CheckCircle className="w-4 h-4 text-[#A3E635]" />
                             {inv.email} — <span className="capitalize">{inv.role}</span>
                           </div>
                         ))}
@@ -520,11 +519,11 @@ export default function OnboardingPage() {
             </div>
 
             {/* Footer Navigation */}
-            <div className="px-8 py-5 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+            <div className="px-8 py-5 bg-[#0a0a0a] border-t border-[#222] flex items-center justify-between">
               <button
                 onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
                 disabled={currentStep === 0}
-                className="px-5 py-2 text-slate-400 font-semibold text-sm flex items-center gap-1 disabled:cursor-not-allowed hover:text-slate-700 transition-colors disabled:hover:text-slate-400"
+                className="px-5 py-2 text-gray-600 font-semibold text-sm flex items-center gap-1 disabled:cursor-not-allowed hover:text-gray-300 transition-colors disabled:hover:text-gray-600"
               >
                 <ArrowLeft className="w-4 h-4" /> Back
               </button>
@@ -532,7 +531,7 @@ export default function OnboardingPage() {
                 {!STEPS[currentStep].required && (
                   <button
                     onClick={() => setCurrentStep(currentStep + 1)}
-                    className="px-5 py-2 text-slate-500 hover:text-slate-800 font-semibold text-sm transition-colors"
+                    className="px-5 py-2 text-gray-600 hover:text-gray-300 font-semibold text-sm transition-colors"
                   >
                     Skip for now
                   </button>
@@ -540,7 +539,7 @@ export default function OnboardingPage() {
                 <button
                   onClick={handleNext}
                   disabled={saving}
-                  className="px-6 py-2.5 bg-[#3730A3] hover:bg-indigo-700 text-white font-semibold rounded-lg text-sm shadow-md shadow-[#3730A3]/20 transition-all flex items-center gap-2 disabled:opacity-50"
+                  className="landing-gradient-border-btn !px-6 !py-2.5 text-white font-semibold rounded-lg text-sm transition-all flex items-center gap-2 disabled:opacity-50"
                 >
                   {saving ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -557,20 +556,20 @@ export default function OnboardingPage() {
           {/* Hint Section */}
           {currentStep < 5 && (
             <div className="mt-8 grid grid-cols-2 gap-4">
-              <div className="p-4 rounded-xl bg-indigo-50 border border-[#3730A3]/10 flex gap-3">
-                <HelpCircle className="w-5 h-5 text-[#3730A3] flex-shrink-0 mt-0.5" />
+              <div className="p-4 rounded-xl bg-[#8B5CF6]/5 border border-[#8B5CF6]/10 flex gap-3">
+                <HelpCircle className="w-5 h-5 text-[#8B5CF6] flex-shrink-0 mt-0.5" />
                 <div>
-                  <h4 className="text-sm font-bold text-[#3730A3]">Where to find API?</h4>
-                  <p className="text-xs text-[#3730A3]/70 leading-relaxed mt-0.5">
+                  <h4 className="text-sm font-bold text-[#8B5CF6]">Where to find API?</h4>
+                  <p className="text-xs text-[#8B5CF6]/70 leading-relaxed mt-0.5">
                     Log in to your provider dashboard and look for &apos;API Credentials&apos; in Account Settings.
                   </p>
                 </div>
               </div>
-              <div className="p-4 rounded-xl bg-[#059669]/5 border border-[#059669]/10 flex gap-3">
-                <Shield className="w-5 h-5 text-[#059669] flex-shrink-0 mt-0.5" />
+              <div className="p-4 rounded-xl bg-[#A3E635]/5 border border-[#A3E635]/10 flex gap-3">
+                <Shield className="w-5 h-5 text-[#A3E635] flex-shrink-0 mt-0.5" />
                 <div>
-                  <h4 className="text-sm font-bold text-[#059669]">Secure Encryption</h4>
-                  <p className="text-xs text-[#059669]/70 leading-relaxed mt-0.5">
+                  <h4 className="text-sm font-bold text-[#A3E635]">Secure Encryption</h4>
+                  <p className="text-xs text-[#A3E635]/70 leading-relaxed mt-0.5">
                     Your credentials are encrypted and stored securely using enterprise-grade AES-256 standards.
                   </p>
                 </div>
@@ -580,7 +579,7 @@ export default function OnboardingPage() {
 
           {/* Footer */}
           <footer className="mt-12 text-center">
-            <p className="text-slate-400 text-sm">Step {currentStep + 1} of {STEPS.length} — Estimated time: 5 minutes</p>
+            <p className="text-gray-600 text-sm">Step {currentStep + 1} of {STEPS.length} — Estimated time: 5 minutes</p>
           </footer>
         </div>
       </main>

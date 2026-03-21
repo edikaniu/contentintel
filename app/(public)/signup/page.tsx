@@ -8,7 +8,7 @@ import { User, Mail, Lock, Building2, ArrowRight } from "lucide-react";
 
 export default function SignupPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-[#F8FAFC]"><p className="text-slate-500">Loading...</p></div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-[#050505]"><p className="text-gray-500 font-body">Loading...</p></div>}>
       <SignupForm />
     </Suspense>
   );
@@ -44,8 +44,8 @@ function SignupForm() {
 
   if (checkingAccess) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC]">
-        <p className="text-slate-500">Loading...</p>
+      <div className="min-h-screen flex items-center justify-center bg-[#050505]">
+        <p className="text-gray-500 font-body">Loading...</p>
       </div>
     );
   }
@@ -53,26 +53,27 @@ function SignupForm() {
   // If no invite token and closed beta, show waitlist message
   if (!inviteToken && closedBeta) {
     return (
-      <div className="min-h-screen flex flex-col bg-[#F8FAFC]">
-        <header className="w-full flex justify-center py-8">
+      <div className="min-h-screen flex flex-col bg-[#050505] relative overflow-hidden">
+        {/* Radial violet glow */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#8B5CF6]/10 rounded-full blur-[120px] pointer-events-none" />
+        {/* Noise texture overlay */}
+        <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")", backgroundRepeat: "repeat" }} />
+
+        <header className="w-full flex justify-center py-8 relative z-10">
           <div className="flex items-center gap-2">
-            <div className="bg-[#3730A3] p-1.5 rounded-lg text-white">
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 48 48">
-                <path clipRule="evenodd" d="M24 4H6V17.3333V30.6667H24V44H42V30.6667V17.3333H24V4Z" fill="currentColor" fillRule="evenodd" />
-              </svg>
-            </div>
-            <span className="text-xl font-bold tracking-tight text-slate-900">ContentIntel</span>
+            <div className="w-2.5 h-2.5 rounded-full bg-[#8B5CF6]" />
+            <span className="text-xl font-headline tracking-tight text-white">ContentIntel</span>
           </div>
         </header>
-        <main className="flex-1 flex items-start justify-center px-4 pb-12">
-          <div className="w-full max-w-[420px] bg-white rounded-2xl shadow-sm border border-slate-200 p-8 text-center">
-            <h1 className="text-2xl font-bold text-slate-900 mb-4">Closed Beta</h1>
-            <p className="text-slate-600 mb-6">
+        <main className="flex-1 flex items-start justify-center px-4 pb-12 relative z-10">
+          <div className="w-full max-w-[420px] bg-[#111111] border border-[#222222] rounded-2xl p-8 text-center">
+            <h1 className="text-2xl font-headline text-white mb-4">Closed Beta</h1>
+            <p className="text-gray-500 font-body mb-6">
               We&apos;re currently in closed beta. Join the waitlist to get early access.
             </p>
             <Link
               href="/#waitlist"
-              className="inline-block bg-[#3730A3] text-white px-6 py-3 rounded-lg hover:bg-[#3730A3]/90 font-semibold transition-all"
+              className="landing-gradient-border-btn inline-flex items-center justify-center"
             >
               Join the Waitlist
             </Link>
@@ -86,8 +87,8 @@ function SignupForm() {
     if (password.length === 0) return { width: "w-0", label: "", color: "" };
     if (password.length < 6) return { width: "w-1/4", label: "Weak", color: "bg-red-500 text-red-500" };
     if (password.length < 8) return { width: "w-1/2", label: "Fair", color: "bg-amber-500 text-amber-500" };
-    if (password.length < 12) return { width: "w-2/3", label: "Strong", color: "bg-[#3730A3] text-[#3730A3]" };
-    return { width: "w-full", label: "Very strong", color: "bg-[#059669] text-[#059669]" };
+    if (password.length < 12) return { width: "w-2/3", label: "Strong", color: "bg-[#8B5CF6] text-[#8B5CF6]" };
+    return { width: "w-full", label: "Very strong", color: "bg-[#A3E635] text-[#A3E635]" };
   }
 
   const strength = getPasswordStrength();
@@ -137,37 +138,38 @@ function SignupForm() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F8FAFC] text-slate-900">
-      <header className="w-full flex justify-center py-8">
+    <div className="min-h-screen flex flex-col bg-[#050505] text-white relative overflow-hidden">
+      {/* Radial violet glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#8B5CF6]/10 rounded-full blur-[120px] pointer-events-none" />
+      {/* Noise texture overlay */}
+      <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")", backgroundRepeat: "repeat" }} />
+
+      <header className="w-full flex justify-center py-8 relative z-10">
         <div className="flex items-center gap-2">
-          <div className="bg-[#3730A3] p-1.5 rounded-lg text-white">
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 48 48">
-              <path clipRule="evenodd" d="M24 4H6V17.3333V30.6667H24V44H42V30.6667V17.3333H24V4Z" fill="currentColor" fillRule="evenodd" />
-            </svg>
-          </div>
-          <span className="text-xl font-bold tracking-tight text-slate-900">ContentIntel</span>
+          <div className="w-2.5 h-2.5 rounded-full bg-[#8B5CF6]" />
+          <span className="text-xl font-headline tracking-tight text-white">ContentIntel</span>
         </div>
       </header>
 
-      <main className="flex-1 flex items-start justify-center px-4 pb-12">
-        <div className="w-full max-w-[420px] bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+      <main className="flex-1 flex items-start justify-center px-4 pb-12 relative z-10">
+        <div className="w-full max-w-[420px] bg-[#111111] border border-[#222222] rounded-2xl p-8">
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-slate-900 mb-2">Create your account</h1>
-            <p className="text-sm text-slate-500">Set up your ContentIntel workspace</p>
+            <h1 className="text-2xl font-headline text-white mb-2">Create your account</h1>
+            <p className="text-sm text-gray-500 font-body">Set up your ContentIntel workspace</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
-              <div className="bg-red-50 text-red-700 px-4 py-3 rounded-lg text-sm">
+              <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg text-sm">
                 {error}
               </div>
             )}
 
             {/* Full Name */}
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-slate-700">Full name</label>
+              <label className="text-sm font-medium text-gray-500 font-body">Full name</label>
               <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-[#3730A3] transition-colors">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-600 group-focus-within:text-[#8B5CF6] transition-colors">
                   <User className="w-5 h-5" />
                 </div>
                 <input
@@ -175,7 +177,7 @@ function SignupForm() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
-                  className="block w-full pl-11 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-[#3730A3]/20 focus:border-[#3730A3] outline-none transition-all text-sm"
+                  className="block w-full pl-11 pr-4 py-2.5 bg-[#0a0a0a] border border-[#222] rounded-xl text-white placeholder-gray-600 focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/30 outline-none transition-all text-sm"
                   placeholder="Jane Smith"
                 />
               </div>
@@ -183,9 +185,9 @@ function SignupForm() {
 
             {/* Email */}
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-slate-700">Email address</label>
+              <label className="text-sm font-medium text-gray-500 font-body">Email address</label>
               <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-[#3730A3] transition-colors">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-600 group-focus-within:text-[#8B5CF6] transition-colors">
                   <Mail className="w-5 h-5" />
                 </div>
                 <input
@@ -193,7 +195,7 @@ function SignupForm() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="block w-full pl-11 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-[#3730A3]/20 focus:border-[#3730A3] outline-none transition-all text-sm"
+                  className="block w-full pl-11 pr-4 py-2.5 bg-[#0a0a0a] border border-[#222] rounded-xl text-white placeholder-gray-600 focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/30 outline-none transition-all text-sm"
                   placeholder="you@company.com"
                 />
               </div>
@@ -201,9 +203,9 @@ function SignupForm() {
 
             {/* Password */}
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-slate-700">Password</label>
+              <label className="text-sm font-medium text-gray-500 font-body">Password</label>
               <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-[#3730A3] transition-colors">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-600 group-focus-within:text-[#8B5CF6] transition-colors">
                   <Lock className="w-5 h-5" />
                 </div>
                 <input
@@ -212,14 +214,14 @@ function SignupForm() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   minLength={8}
-                  className="block w-full pl-11 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-[#3730A3]/20 focus:border-[#3730A3] outline-none transition-all text-sm"
+                  className="block w-full pl-11 pr-4 py-2.5 bg-[#0a0a0a] border border-[#222] rounded-xl text-white placeholder-gray-600 focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/30 outline-none transition-all text-sm"
                   placeholder="••••••••"
                 />
               </div>
               {/* Password Strength */}
               {password.length > 0 && (
                 <div className="pt-1.5">
-                  <div className="h-1 w-full bg-slate-100 rounded-full overflow-hidden">
+                  <div className="h-1 w-full bg-[#1a1a1a] rounded-full overflow-hidden">
                     <div className={`h-full ${strength.width} ${strength.color.split(" ")[0]} rounded-full transition-all`} />
                   </div>
                   <div className="flex justify-between items-center mt-1">
@@ -233,9 +235,9 @@ function SignupForm() {
 
             {/* Organisation */}
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-slate-700">Organisation name</label>
+              <label className="text-sm font-medium text-gray-500 font-body">Organisation name</label>
               <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-[#3730A3] transition-colors">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-600 group-focus-within:text-[#8B5CF6] transition-colors">
                   <Building2 className="w-5 h-5" />
                 </div>
                 <input
@@ -243,7 +245,7 @@ function SignupForm() {
                   value={orgName}
                   onChange={(e) => setOrgName(e.target.value)}
                   required
-                  className="block w-full pl-11 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-[#3730A3]/20 focus:border-[#3730A3] outline-none transition-all text-sm"
+                  className="block w-full pl-11 pr-4 py-2.5 bg-[#0a0a0a] border border-[#222] rounded-xl text-white placeholder-gray-600 focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/30 outline-none transition-all text-sm"
                   placeholder="Acme Marketing Co."
                 />
               </div>
@@ -253,24 +255,24 @@ function SignupForm() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#3730A3] hover:bg-[#3730A3]/90 text-white font-semibold py-3 px-4 rounded-lg shadow-sm shadow-[#3730A3]/20 transition-all flex items-center justify-center gap-2 group disabled:opacity-50"
+              className="landing-gradient-border-btn w-full !py-3 flex items-center justify-center gap-2 group disabled:opacity-50"
             >
               {loading ? "Creating account..." : "Create account"}
               {!loading && <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />}
             </button>
 
             {/* Legal */}
-            <p className="text-[12px] text-center text-slate-500 leading-relaxed px-2">
+            <p className="text-[12px] text-center text-gray-600 font-body leading-relaxed px-2">
               By creating an account, you agree to our{" "}
-              <Link href="/terms" className="text-[#3730A3] hover:underline underline-offset-4">Terms of Service</Link> and{" "}
-              <Link href="/privacy" className="text-[#3730A3] hover:underline underline-offset-4">Privacy Policy</Link>
+              <Link href="/terms" className="text-[#8B5CF6] hover:underline underline-offset-4">Terms of Service</Link> and{" "}
+              <Link href="/privacy" className="text-[#8B5CF6] hover:underline underline-offset-4">Privacy Policy</Link>
             </p>
           </form>
 
-          <div className="mt-8 pt-6 border-t border-slate-100 text-center">
-            <p className="text-sm text-slate-600">
+          <div className="mt-8 pt-6 border-t border-[#222] text-center">
+            <p className="text-sm text-gray-600 font-body">
               Already have an account?{" "}
-              <Link href="/login" className="text-[#3730A3] font-semibold hover:underline underline-offset-4">
+              <Link href="/login" className="text-[#8B5CF6] font-semibold hover:underline underline-offset-4">
                 Sign in
               </Link>
             </p>
@@ -278,8 +280,8 @@ function SignupForm() {
         </div>
       </main>
 
-      <footer className="w-full py-6 text-center">
-        <p className="text-xs text-slate-400">
+      <footer className="w-full py-6 text-center relative z-10">
+        <p className="text-xs text-gray-600 font-body">
           &copy; {new Date().getFullYear()} ContentIntel. All rights reserved.
         </p>
       </footer>
