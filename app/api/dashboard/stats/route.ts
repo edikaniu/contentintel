@@ -8,8 +8,10 @@ import {
   contentSnapshots,
   domains,
   users,
+  weeklyBatches,
 } from "@/lib/db/schema";
 import { eq, and, gte, desc, sql, count, avg } from "drizzle-orm";
+import { listCredentials } from "@/lib/credentials/credential-store";
 
 export async function GET(req: NextRequest) {
   const { session, error } = await requireAuth();
@@ -156,7 +158,7 @@ export async function GET(req: NextRequest) {
       // 8. Organic trend: aggregate clicks/impressions by day over last 8 weeks
       db
         .select({
-          week: sql<string>`date_trunc('day', ${contentSnapshots.snapshotDate})`.as(
+          week: sql<string>`to_char(date_trunc('day', ${contentSnapshots.snapshotDate}), 'YYYY-MM-DD')`.as(
             "week"
           ),
           totalClicks: sql<number>`COALESCE(SUM(${contentSnapshots.organicClicks}), 0)`.as(
@@ -179,7 +181,7 @@ export async function GET(req: NextRequest) {
           )
         )
         .groupBy(
-          sql`date_trunc('day', ${contentSnapshots.snapshotDate})`
+          sql`to_char(date_trunc('day', ${contentSnapshots.snapshotDate}), 'YYYY-MM-DD')`
         )
         .orderBy(
           sql`date_trunc('day', ${contentSnapshots.snapshotDate})`
@@ -192,6 +194,25 @@ export async function GET(req: NextRequest) {
       alertsByType[row.alertType] = row.count;
     }
 
+    // Diagnostic metadata: helps frontend explain why data might be empty
+    const [credentials, lastBatch] = await Promise.all([
+      listCredentials(session!.user.orgId),
+      db.select()
+        .from(weeklyBatches)
+        .where(eq(weeklyBatches.domainId, domainId))
+        .orderBy(desc(weeklyBatches.batchDate))
+        .limit(1)
+        .then((rows) => rows[0] ?? null),
+    ]);
+
+    const windsorCred = credentials.find((c) => c.provider === "windsor");
+    const dataStatus = {
+      windsorConfigured: !!windsorCred?.isConnected,
+      hasSnapshots: organicTrendResult.length > 0,
+      lastBatchDate: lastBatch?.batchDate ?? null,
+      lastBatchStatus: lastBatch?.status ?? null,
+    };
+
     return NextResponse.json({
       newTopicsThisWeek: newTopicsResult[0]?.count ?? 0,
       contentAlertsCount: openAlertsResult[0]?.count ?? 0,
@@ -203,6 +224,7 @@ export async function GET(req: NextRequest) {
       recentActivity,
       alertsByType,
       organicTrend: organicTrendResult,
+      dataStatus,
     });
   } catch (err) {
     console.error("Dashboard stats error:", err);

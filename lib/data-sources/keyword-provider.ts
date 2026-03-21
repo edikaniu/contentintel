@@ -54,7 +54,8 @@ function getSemrushDatabase(locationCode: number, domainSemrushDb?: string | nul
 
 function is402Error(error?: string): boolean {
   if (!error) return false;
-  return error.includes("402") || error.includes("nsufficient credits") || error.includes("balance");
+  const lower = error.toLowerCase();
+  return lower.includes("402") || lower.includes("insufficient") || lower.includes("balance") || lower.includes("credits");
 }
 
 /**

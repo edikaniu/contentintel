@@ -1,4 +1,4 @@
-import { eq, and, desc, lte, gte } from "drizzle-orm";
+import { eq, and, desc, lte, gte, inArray } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { contentInventory, contentSnapshots, contentAlerts, domains } from "@/lib/db/schema";
 
@@ -30,48 +30,33 @@ export async function generateAlerts(
   const fourWeeksAgo = new Date(batchDate);
   fourWeeksAgo.setDate(fourWeeksAgo.getDate() - 28);
 
-  for (const content of inventory) {
-    // Get current snapshot (this batch)
-    const currentSnap = await db
-      .select()
-      .from(contentSnapshots)
-      .where(
-        and(
-          eq(contentSnapshots.contentId, content.id),
-          eq(contentSnapshots.snapshotDate, batchDate)
-        )
-      )
-      .then((rows) => rows[0] ?? null);
+  // Batch-fetch all snapshots in 3 parallel queries instead of 3 per content item
+  const contentIds = inventory.map((c) => c.id);
+  const [currentSnaps, prevSnaps, oldSnaps] = await Promise.all([
+    db.select().from(contentSnapshots)
+      .where(and(inArray(contentSnapshots.contentId, contentIds), eq(contentSnapshots.snapshotDate, batchDate))),
+    db.select().from(contentSnapshots)
+      .where(and(inArray(contentSnapshots.contentId, contentIds), lte(contentSnapshots.snapshotDate, oneWeekAgo)))
+      .orderBy(desc(contentSnapshots.snapshotDate)),
+    db.select().from(contentSnapshots)
+      .where(and(inArray(contentSnapshots.contentId, contentIds), lte(contentSnapshots.snapshotDate, fourWeeksAgo)))
+      .orderBy(desc(contentSnapshots.snapshotDate)),
+  ]);
 
+  // Index by content ID (take latest per content for prev/old)
+  const currentMap = new Map<string, typeof contentSnapshots.$inferSelect>();
+  for (const s of currentSnaps) currentMap.set(s.contentId, s);
+  const prevMap = new Map<string, typeof contentSnapshots.$inferSelect>();
+  for (const s of prevSnaps) { if (!prevMap.has(s.contentId)) prevMap.set(s.contentId, s); }
+  const oldMap = new Map<string, typeof contentSnapshots.$inferSelect>();
+  for (const s of oldSnaps) { if (!oldMap.has(s.contentId)) oldMap.set(s.contentId, s); }
+
+  for (const content of inventory) {
+    const currentSnap = currentMap.get(content.id) ?? null;
     if (!currentSnap) continue;
 
-    // Get previous week snapshot
-    const prevSnap = await db
-      .select()
-      .from(contentSnapshots)
-      .where(
-        and(
-          eq(contentSnapshots.contentId, content.id),
-          lte(contentSnapshots.snapshotDate, oneWeekAgo)
-        )
-      )
-      .orderBy(desc(contentSnapshots.snapshotDate))
-      .limit(1)
-      .then((rows) => rows[0] ?? null);
-
-    // Get 4-weeks-ago snapshot
-    const oldSnap = await db
-      .select()
-      .from(contentSnapshots)
-      .where(
-        and(
-          eq(contentSnapshots.contentId, content.id),
-          lte(contentSnapshots.snapshotDate, fourWeeksAgo)
-        )
-      )
-      .orderBy(desc(contentSnapshots.snapshotDate))
-      .limit(1)
-      .then((rows) => rows[0] ?? null);
+    const prevSnap = prevMap.get(content.id) ?? null;
+    const oldSnap = oldMap.get(content.id) ?? null;
 
     // 1. Declining traffic: >20% drop over 4-week window
     // Use sessions (GA4) if available, otherwise fall back to organicClicks (GSC)

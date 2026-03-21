@@ -1,4 +1,4 @@
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, inArray } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { contentSnapshots, contentInventory, domains } from "@/lib/db/schema";
 import { getDataForSEOClient } from "@/lib/data-sources/dataforseo";
@@ -44,31 +44,23 @@ export async function extractSeedKeywords(
 
   if (inventoryItems.length > 0) {
     const contentIds = inventoryItems.map((i) => i.id);
-    // Get recent snapshots with primary queries, ordered by clicks
-    const snapshots = await db
+    // Single query: fetch all snapshots for domain content, ordered by date desc
+    const allSnapshots = await db
       .select({
+        contentId: contentSnapshots.contentId,
         primaryQuery: contentSnapshots.primaryQuery,
         organicClicks: contentSnapshots.organicClicks,
       })
       .from(contentSnapshots)
-      .where(eq(contentSnapshots.contentId, contentIds[0]))
-      .orderBy(desc(contentSnapshots.organicClicks))
-      .limit(200);
+      .where(inArray(contentSnapshots.contentId, contentIds))
+      .orderBy(desc(contentSnapshots.snapshotDate));
 
-    // For all content items, get their latest snapshots
-    for (const item of inventoryItems) {
-      const snap = await db
-        .select({
-          primaryQuery: contentSnapshots.primaryQuery,
-          organicClicks: contentSnapshots.organicClicks,
-        })
-        .from(contentSnapshots)
-        .where(eq(contentSnapshots.contentId, item.id))
-        .orderBy(desc(contentSnapshots.snapshotDate))
-        .limit(1)
-        .then((rows) => rows[0] ?? null);
-
-      if (snap?.primaryQuery) {
+    // Take the latest snapshot per content item (first occurrence since sorted desc)
+    const seen_content = new Set<string>();
+    for (const snap of allSnapshots) {
+      if (seen_content.has(snap.contentId)) continue;
+      seen_content.add(snap.contentId);
+      if (snap.primaryQuery) {
         addSeed({
           keyword: snap.primaryQuery,
           source: "gsc",

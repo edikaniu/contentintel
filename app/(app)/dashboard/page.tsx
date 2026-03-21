@@ -48,6 +48,13 @@ interface OrganicWeek {
   totalImpressions: number;
 }
 
+interface DataStatus {
+  windsorConfigured: boolean;
+  hasSnapshots: boolean;
+  lastBatchDate: string | null;
+  lastBatchStatus: string | null;
+}
+
 interface DashboardData {
   newTopicsThisWeek: number;
   contentAlertsCount: number;
@@ -57,6 +64,7 @@ interface DashboardData {
   recentActivity: ActivityItem[];
   alertsByType: Record<string, number>;
   organicTrend: OrganicWeek[];
+  dataStatus?: DataStatus;
 }
 
 // ---------------------------------------------------------------------------
@@ -465,6 +473,19 @@ export default function DashboardPage() {
                 <div className="flex items-center justify-center h-[280px] text-slate-400 text-sm">
                   <Loader2 className="w-5 h-5 animate-spin mr-2" />
                   Loading trend data...
+                </div>
+              ) : data.organicTrend.length === 0 && data.dataStatus ? (
+                <div className="flex flex-col items-center justify-center h-[280px] text-slate-400 text-sm gap-2">
+                  <p className="font-medium text-slate-500">No organic data yet</p>
+                  {!data.dataStatus.windsorConfigured && (
+                    <p>Windsor.ai is not connected. Connect it in Settings &gt; Connections.</p>
+                  )}
+                  {data.dataStatus.windsorConfigured && !data.dataStatus.lastBatchDate && (
+                    <p>No batch has run yet. Run one from Settings or wait for the weekly cron.</p>
+                  )}
+                  {data.dataStatus.lastBatchDate && data.dataStatus.lastBatchStatus === "failed" && (
+                    <p>Last batch failed. Check logs for details.</p>
+                  )}
                 </div>
               ) : (
                 <TrendChart data={data.organicTrend} />

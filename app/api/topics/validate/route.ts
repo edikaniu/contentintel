@@ -309,10 +309,13 @@ Respond in exactly this JSON format (no markdown, no code blocks):
 }
 
 function fallbackAnalysis(metrics: { searchVolume: number; keywordDifficulty: number }) {
-  // Simple heuristic score when AI is unavailable
-  const volumeScore = Math.min(40, (metrics.searchVolume / 1000) * 10);
-  const difficultyScore = Math.max(0, 40 - (metrics.keywordDifficulty * 0.4));
-  const score = Math.round(volumeScore + difficultyScore + 20);
+  // Aligned with batch scorer weights: volume 25%, difficulty 25%, relevance 20%, gap 15%, trend 15%
+  const volumeScore = Math.min(25, (metrics.searchVolume / 5000) * 25);
+  const difficultyScore = ((100 - metrics.keywordDifficulty) / 100) * 25;
+  const relevanceScore = 10; // Neutral: 50% of 20% (no category data available)
+  const gapScore = 7.5;     // Neutral: 50% of 15% (no gap data available)
+  const trendScore = 7.5;   // Neutral: 50% of 15% (no trend data available)
+  const score = Math.round(volumeScore + difficultyScore + relevanceScore + gapScore + trendScore);
 
   return {
     angles: [{ angle: "Standard coverage", rationale: "AI analysis unavailable" }],
