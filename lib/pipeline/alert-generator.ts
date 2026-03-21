@@ -27,20 +27,29 @@ export async function generateAlerts(
   let generated = 0;
   const oneWeekAgo = new Date(batchDate);
   oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-  const fourWeeksAgo = new Date(batchDate);
-  fourWeeksAgo.setDate(fourWeeksAgo.getDate() - 28);
+  const fourWeeksAgoStart = new Date(batchDate);
+  fourWeeksAgoStart.setDate(fourWeeksAgoStart.getDate() - 35);
+  const fourWeeksAgoEnd = new Date(batchDate);
+  fourWeeksAgoEnd.setDate(fourWeeksAgoEnd.getDate() - 21);
 
   // Batch-fetch all snapshots in 3 parallel queries instead of 3 per content item
+  // Also fetch open/acknowledged alerts for deduplication
   const contentIds = inventory.map((c) => c.id);
-  const [currentSnaps, prevSnaps, oldSnaps] = await Promise.all([
+  const [currentSnaps, prevSnaps, oldSnaps, openAlerts] = await Promise.all([
     db.select().from(contentSnapshots)
       .where(and(inArray(contentSnapshots.contentId, contentIds), eq(contentSnapshots.snapshotDate, batchDate))),
     db.select().from(contentSnapshots)
       .where(and(inArray(contentSnapshots.contentId, contentIds), lte(contentSnapshots.snapshotDate, oneWeekAgo)))
       .orderBy(desc(contentSnapshots.snapshotDate)),
     db.select().from(contentSnapshots)
-      .where(and(inArray(contentSnapshots.contentId, contentIds), lte(contentSnapshots.snapshotDate, fourWeeksAgo)))
+      .where(and(
+        inArray(contentSnapshots.contentId, contentIds), 
+        gte(contentSnapshots.snapshotDate, fourWeeksAgoStart),
+        lte(contentSnapshots.snapshotDate, fourWeeksAgoEnd)
+      ))
       .orderBy(desc(contentSnapshots.snapshotDate)),
+    db.select().from(contentAlerts)
+      .where(and(inArray(contentAlerts.contentId, contentIds), inArray(contentAlerts.status, ['open', 'acknowledged'])))
   ]);
 
   // Index by content ID (take latest per content for prev/old)
@@ -50,6 +59,10 @@ export async function generateAlerts(
   for (const s of prevSnaps) { if (!prevMap.has(s.contentId)) prevMap.set(s.contentId, s); }
   const oldMap = new Map<string, typeof contentSnapshots.$inferSelect>();
   for (const s of oldSnaps) { if (!oldMap.has(s.contentId)) oldMap.set(s.contentId, s); }
+  
+  // Index existing alerts for deduplication
+  const alertMap = new Map<string, typeof contentAlerts.$inferSelect>();
+  for (const a of openAlerts) alertMap.set(`${a.contentId}-${a.alertType}`, a);
 
   for (const content of inventory) {
     const currentSnap = currentMap.get(content.id) ?? null;
@@ -58,6 +71,14 @@ export async function generateAlerts(
     const prevSnap = prevMap.get(content.id) ?? null;
     const oldSnap = oldMap.get(content.id) ?? null;
 
+    // Pre-compute keyword relevance for alert messages (null-safe)
+    const primaryQuery = currentSnap.primaryQuery ?? "";
+    const isQueryRelevant = primaryQuery.length > 0 && (
+      (content.title ?? "").toLowerCase().includes(primaryQuery.toLowerCase()) ||
+      content.url.toLowerCase().includes(primaryQuery.toLowerCase())
+    );
+    const queryContext = isQueryRelevant ? ` for "${primaryQuery}"` : "";
+
     // 1. Declining traffic: >20% drop over 4-week window
     // Use sessions (GA4) if available, otherwise fall back to organicClicks (GSC)
     if (oldSnap) {
@@ -65,14 +86,14 @@ export async function generateAlerts(
       const oldTraffic = oldSnap.sessions ?? oldSnap.organicClicks ?? null;
       const trafficMetric = currentSnap.sessions != null ? "sessions" : "clicks";
 
-      if (currentTraffic != null && oldTraffic != null && oldTraffic > 0) {
+      // Enforce a minimum threshold to avoid 100% drop noise on insignificant numbers
+      if (currentTraffic != null && oldTraffic != null && oldTraffic > 10) {
         const dropPct = ((oldTraffic - currentTraffic) / oldTraffic) * 100;
         if (dropPct > 20) {
-          const priority = calculatePriority(oldTraffic, dropPct, currentSnap.avgPosition, currentSnap.conversionsJson);
-          await insertAlert(content.id, batchDate, "declining_traffic", priority, currentSnap, oldSnap,
-            `Organic ${trafficMetric} dropped ${dropPct.toFixed(0)}% over 4 weeks (${oldTraffic} → ${currentTraffic}). Review and update content.`
-          );
-          generated++;
+          const priority = calculatePriority(currentTraffic, dropPct, currentSnap.avgPosition, currentSnap.conversionsJson);
+          if (await upsertAlert(content.id, batchDate, "declining_traffic", priority, currentSnap, oldSnap,
+            `Organic ${trafficMetric} dropped ${dropPct.toFixed(0)}% over 4 weeks (${oldTraffic} → ${currentTraffic}). Review and update content.`, alertMap
+          )) generated++;
         }
       }
     }
@@ -82,10 +103,10 @@ export async function generateAlerts(
       const positionDrop = currentSnap.avgPosition - prevSnap.avgPosition;
       if (positionDrop >= 3) {
         const priority = calculatePriority(currentSnap.sessions ?? 0, positionDrop * 10, currentSnap.avgPosition, currentSnap.conversionsJson);
-        await insertAlert(content.id, batchDate, "position_drop", priority, currentSnap, prevSnap,
-          `Average position dropped by ${positionDrop.toFixed(1)} places (${prevSnap.avgPosition.toFixed(1)} → ${currentSnap.avgPosition.toFixed(1)}) for "${currentSnap.primaryQuery}". Refresh content to recover ranking.`
-        );
-        generated++;
+        const posQueryContext = isQueryRelevant ? ` (relevant to "${primaryQuery}")` : "";
+        if (await upsertAlert(content.id, batchDate, "position_drop", priority, currentSnap, prevSnap,
+          `Average position for the page dropped by ${positionDrop.toFixed(1)} places (${prevSnap.avgPosition.toFixed(1)} → ${currentSnap.avgPosition.toFixed(1)})${posQueryContext}. Refresh content to recover ranking.`, alertMap
+        )) generated++;
       }
     }
 
@@ -93,10 +114,9 @@ export async function generateAlerts(
     if (currentSnap.avgPosition != null && currentSnap.avgPosition >= 4 && currentSnap.avgPosition <= 15) {
       if (currentSnap.organicImpressions != null && currentSnap.organicImpressions > 500) {
         const priority = calculatePriority(currentSnap.sessions ?? 0, 0, currentSnap.avgPosition, currentSnap.conversionsJson);
-        await insertAlert(content.id, batchDate, "striking_distance", priority, currentSnap, null,
-          `Ranking at position ${currentSnap.avgPosition.toFixed(1)} for "${currentSnap.primaryQuery}" with ${currentSnap.organicImpressions} impressions/week. Optimize to push into top 3.`
-        );
-        generated++;
+        if (await upsertAlert(content.id, batchDate, "striking_distance", priority, currentSnap, null,
+          `Ranking at position ${currentSnap.avgPosition.toFixed(1)}${queryContext} with ${currentSnap.organicImpressions} impressions/week. Optimize to push into top 3.`, alertMap
+        )) generated++;
       }
     }
 
@@ -111,10 +131,9 @@ export async function generateAlerts(
       if (pubDate < twelveMonthsAgo && neverUpdated && hasTraffic) {
         const traffic = currentSnap.sessions ?? currentSnap.organicClicks ?? 0;
         const priority = calculatePriority(traffic, 0, currentSnap.avgPosition, currentSnap.conversionsJson);
-        await insertAlert(content.id, batchDate, "stale_content", priority, currentSnap, null,
-          `Published ${formatMonthsAgo(pubDate, batchDate)} months ago and never updated, but still receiving ${traffic} ${currentSnap.sessions != null ? "sessions" : "clicks"}/week. Refresh to maintain or improve performance.`
-        );
-        generated++;
+        if (await upsertAlert(content.id, batchDate, "stale_content", priority, currentSnap, null,
+          `Published ${formatMonthsAgo(pubDate, batchDate)} months ago and never updated, but still receiving ${traffic} ${currentSnap.sessions != null ? "sessions" : "clicks"}/week. Refresh to maintain or improve performance.`, alertMap
+        )) generated++;
       }
     }
 
@@ -122,14 +141,14 @@ export async function generateAlerts(
     if (currentSnap.organicImpressions != null && currentSnap.organicImpressions > 1000) {
       if (currentSnap.ctr != null && currentSnap.ctr < 0.02) {
         const priority = calculatePriority(currentSnap.sessions ?? 0, 0, currentSnap.avgPosition, currentSnap.conversionsJson);
-        await insertAlert(content.id, batchDate, "low_ctr", priority, currentSnap, null,
-          `${currentSnap.organicImpressions} impressions/week but only ${(currentSnap.ctr * 100).toFixed(1)}% CTR for "${currentSnap.primaryQuery}". Rewrite title and meta description.`
-        );
-        generated++;
+        if (await upsertAlert(content.id, batchDate, "low_ctr", priority, currentSnap, null,
+          `${currentSnap.organicImpressions} impressions/week but only ${(currentSnap.ctr * 100).toFixed(1)}% CTR${queryContext}. Rewrite title and meta description.`, alertMap
+        )) generated++;
       }
     }
 
     // 6. Conversion drop: Content that previously drove conversions but has stopped
+    // Fallback: If conversions never happened, check a massive drop in engagement (sessions by >50%)
     if (oldSnap) {
       const oldConversions = sumConversions(oldSnap.conversionsJson);
       const currentConversions = sumConversions(currentSnap.conversionsJson);
@@ -137,10 +156,22 @@ export async function generateAlerts(
       if (oldConversions > 0 && currentConversions === 0) {
         const priority = calculatePriority(currentSnap.sessions ?? 0, 100, currentSnap.avgPosition, currentSnap.conversionsJson);
         // Boost priority since conversions are business-critical
-        await insertAlert(content.id, batchDate, "conversion_drop", Math.min(priority * 1.5, 100), currentSnap, oldSnap,
-          `Content was driving ${oldConversions} conversions 4 weeks ago but has dropped to zero. Investigate conversion path and CTA placement.`
-        );
-        generated++;
+        if (await upsertAlert(content.id, batchDate, "conversion_drop", Math.min(priority * 1.5, 100), currentSnap, oldSnap,
+          `Content was driving ${oldConversions} conversions 4 weeks ago but has dropped to zero. Investigate conversion path and CTA placement.`, alertMap
+        )) generated++;
+      } else if (oldConversions === 0 && currentConversions === 0) {
+        // Fallback to engagement drop if conversions were never populated
+        const currentSessions = currentSnap.sessions ?? null;
+        const oldSessions = oldSnap.sessions ?? null;
+        if (currentSessions != null && oldSessions != null && oldSessions > 10) {
+          const sessionDrop = ((oldSessions - currentSessions) / oldSessions) * 100;
+          if (sessionDrop >= 50) {
+             const priority = calculatePriority(currentSnap.sessions ?? 0, 100, currentSnap.avgPosition, currentSnap.conversionsJson);
+             if (await upsertAlert(content.id, batchDate, "conversion_drop", Math.min(priority * 1.2, 100), currentSnap, oldSnap,
+              `Sessions dropped by ${sessionDrop.toFixed(0)}% (${oldSessions} → ${currentSessions}) over 4 weeks, indicating a severe engagement risk. Investigate traffic quality and user experience.`, alertMap
+            )) generated++;
+          }
+        }
       }
     }
   }
@@ -148,46 +179,64 @@ export async function generateAlerts(
   return { generated };
 }
 
-async function insertAlert(
+async function upsertAlert(
   contentId: string,
   batchDate: Date,
   alertType: string,
   priorityScore: number,
   currentSnap: typeof contentSnapshots.$inferSelect,
   previousSnap: typeof contentSnapshots.$inferSelect | null,
-  suggestedAction: string
-): Promise<void> {
+  suggestedAction: string,
+  alertMap: Map<string, typeof contentAlerts.$inferSelect>
+): Promise<boolean> {
   const severity = priorityScore >= 70 ? "high" : priorityScore >= 40 ? "medium" : "low";
 
-  await db.insert(contentAlerts).values({
-    contentId,
-    batchDate,
-    alertType,
-    severity,
-    currentMetricsJson: {
-      sessions: currentSnap.sessions,
-      organicClicks: currentSnap.organicClicks,
-      organicImpressions: currentSnap.organicImpressions,
-      avgPosition: currentSnap.avgPosition,
-      ctr: currentSnap.ctr,
-      primaryQuery: currentSnap.primaryQuery,
-      conversions: currentSnap.conversionsJson,
-    },
-    previousMetricsJson: previousSnap
-      ? {
-          sessions: previousSnap.sessions,
-          organicClicks: previousSnap.organicClicks,
-          organicImpressions: previousSnap.organicImpressions,
-          avgPosition: previousSnap.avgPosition,
-          ctr: previousSnap.ctr,
-          primaryQuery: previousSnap.primaryQuery,
-          conversions: previousSnap.conversionsJson,
-        }
-      : null,
-    suggestedAction,
-    priorityScore,
-    status: "open",
-  });
+  const currentMetricsJson = {
+    sessions: currentSnap.sessions,
+    organicClicks: currentSnap.organicClicks,
+    organicImpressions: currentSnap.organicImpressions,
+    avgPosition: currentSnap.avgPosition,
+    ctr: currentSnap.ctr,
+    primaryQuery: currentSnap.primaryQuery,
+    conversions: currentSnap.conversionsJson,
+  };
+
+  const previousMetricsJson = previousSnap ? {
+    sessions: previousSnap.sessions,
+    organicClicks: previousSnap.organicClicks,
+    organicImpressions: previousSnap.organicImpressions,
+    avgPosition: previousSnap.avgPosition,
+    ctr: previousSnap.ctr,
+    primaryQuery: previousSnap.primaryQuery,
+    conversions: previousSnap.conversionsJson,
+  } : null;
+
+  const existing = alertMap.get(`${contentId}-${alertType}`);
+
+  if (existing) {
+    await db.update(contentAlerts).set({
+      batchDate,
+      severity,
+      currentMetricsJson,
+      previousMetricsJson,
+      suggestedAction,
+      priorityScore,
+    }).where(eq(contentAlerts.id, existing.id));
+    return false; // updated existing alert
+  } else {
+    await db.insert(contentAlerts).values({
+      contentId,
+      batchDate,
+      alertType,
+      severity,
+      currentMetricsJson,
+      previousMetricsJson,
+      suggestedAction,
+      priorityScore,
+      status: "open",
+    });
+    return true; // new alert created
+  }
 }
 
 /**

@@ -73,14 +73,17 @@ export async function pullGSCData(
 
   const pages: GSCPageMetrics[] = [];
   for (const [page, data] of pageMap) {
-    // Primary query = the one with the most clicks
-    const primaryQuery = data.queries.sort((a, b) => b.clicks - a.clicks)[0];
+    // Primary query = the one with the most clicks, tie-break on impressions
+    const primaryQuery = data.queries.sort((a, b) => {
+      if (b.clicks !== a.clicks) return b.clicks - a.clicks;
+      return b.impressions - a.impressions;
+    })[0];
     const totalQueries = data.queries.length;
     const avgCtr = totalQueries > 0
       ? data.queries.reduce((sum, q) => sum + q.ctr, 0) / totalQueries
       : 0;
-    const avgPosition = totalQueries > 0
-      ? data.queries.reduce((sum, q) => sum + q.position, 0) / totalQueries
+    const avgPosition = data.totalImpressions > 0
+      ? data.queries.reduce((sum, q) => sum + (q.position * q.impressions), 0) / data.totalImpressions
       : 0;
 
     pages.push({
