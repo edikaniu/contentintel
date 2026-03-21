@@ -184,7 +184,7 @@ export async function GET(req: NextRequest) {
           sql`to_char(date_trunc('day', ${contentSnapshots.snapshotDate}), 'YYYY-MM-DD')`
         )
         .orderBy(
-          sql`date_trunc('day', ${contentSnapshots.snapshotDate})`
+          sql`to_char(date_trunc('day', ${contentSnapshots.snapshotDate}), 'YYYY-MM-DD')`
         ),
     ]);
 
@@ -238,7 +238,7 @@ export async function GET(req: NextRequest) {
   } catch (err) {
     console.error("Dashboard stats error:", err);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: err instanceof Error ? err.message : "Internal server error" },
       { status: 500 }
     );
   }
