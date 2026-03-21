@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, FormEvent } from "react";
-import { CheckCircle } from "lucide-react";
 
 export function WaitlistForm() {
   const [name, setName] = useState("");
@@ -41,44 +40,38 @@ export function WaitlistForm() {
   }
 
   return (
-    <section id="waitlist" className="max-w-[1200px] mx-auto px-6 py-20">
-      <div className="bg-[#3730A3] rounded-3xl p-12 md:p-24 text-center relative overflow-hidden shadow-2xl">
-        <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
-          <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 100">
-            <path d="M0,0 L100,0 L100,100 L0,100 Z" fill="url(#grad)" />
-            <defs>
-              <linearGradient id="grad" x1="0%" x2="100%" y1="0%" y2="100%">
-                <stop offset="0%" style={{ stopColor: "white", stopOpacity: 1 }} />
-                <stop offset="100%" style={{ stopColor: "white", stopOpacity: 0 }} />
-              </linearGradient>
-            </defs>
-          </svg>
-        </div>
-        <div className="relative z-10 max-w-2xl mx-auto space-y-8">
-          <h2 className="text-4xl md:text-5xl font-black text-white tracking-[-0.02em]">
-            Ready to upgrade your intelligence?
+    <section id="waitlist" className="py-20 px-4 relative z-10">
+      <div className="max-w-2xl mx-auto">
+        <div className="landing-dark-card rounded-2xl p-8 sm:p-12 text-center relative overflow-hidden landing-scale-reveal" style={{ borderColor: "#2D1B69" }}>
+          {/* Background gradient */}
+          <div className="absolute inset-0 bg-gradient-to-br from-violet-900/20 via-transparent to-violet-800/10 pointer-events-none" />
+
+          <h2 className="font-headline font-bold text-3xl sm:text-4xl text-white mb-4 relative">
+            We&apos;re launching soon.<br /><span className="landing-gradient-text">Get early access.</span>
           </h2>
-          <p className="text-lg md:text-xl text-indigo-100/80">
-            Join the waitlist and be among the first to make data-driven content decisions with ContentIntel.
+          <p className="text-gray-500 mb-8 max-w-md mx-auto leading-relaxed relative font-body">
+            ContentIntel is currently in closed beta with a small group of marketing teams. Join the waitlist to be among the first to try it &mdash; and lock in early access pricing.
           </p>
 
           {status === "success" ? (
-            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20">
-              <CheckCircle className="mx-auto h-12 w-12 text-white" />
-              <h3 className="mt-4 text-xl font-bold text-white">You&apos;re on the list!</h3>
-              <p className="mt-2 text-sm text-indigo-100/80">
+            <div className="bg-[#0a0a0a] border border-[#222] rounded-2xl p-8 relative">
+              <svg className="mx-auto h-12 w-12 text-[#A3E635]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <h3 className="mt-4 text-xl font-bold text-white font-headline">You&apos;re on the list!</h3>
+              <p className="mt-2 text-sm text-gray-500 font-body">
                 We&apos;ll be in touch soon. Keep an eye on your inbox for your invite.
               </p>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4 justify-center max-w-lg mx-auto">
+            <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto relative">
               <input
                 type="text"
                 placeholder="Your name"
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="flex-1 px-5 py-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 text-white placeholder:text-indigo-200/60 focus:outline-none focus:ring-2 focus:ring-white/30 text-sm"
+                className="flex-1 bg-[#0a0a0a] border border-[#222] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/30 transition-colors font-body"
               />
               <input
                 type="email"
@@ -86,20 +79,20 @@ export function WaitlistForm() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="flex-1 px-5 py-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 text-white placeholder:text-indigo-200/60 focus:outline-none focus:ring-2 focus:ring-white/30 text-sm"
+                className="flex-1 bg-[#0a0a0a] border border-[#222] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/30 transition-colors font-body"
               />
               <button
                 type="submit"
                 disabled={status === "loading"}
-                className="bg-white text-[#3730A3] px-10 py-4 rounded-2xl text-sm font-black hover:bg-indigo-50 transition-all shadow-xl disabled:opacity-60 whitespace-nowrap"
+                className="landing-gradient-border-btn text-sm whitespace-nowrap !py-3 !px-6 disabled:opacity-60"
               >
-                {status === "loading" ? "Submitting..." : "Get Started Free"}
+                {status === "loading" ? "Submitting..." : "Join the Waitlist"}
               </button>
             </form>
           )}
 
           {status === "error" && (
-            <p className="text-sm text-red-200">{errorMessage}</p>
+            <p className="text-sm text-red-400 mt-4 relative font-body">{errorMessage}</p>
           )}
         </div>
       </div>

@@ -9,6 +9,8 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
   --font-mono: var(--font-geist-mono);
+  --font-headline: var(--font-unbounded), sans-serif;
+  --font-body: var(--font-figtree), sans-serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -126,4 +128,168 @@
   html {
     @apply font-sans;
   }
+}
+
+/* ===== LANDING PAGE — V1A DARK REFINED ===== */
+
+.landing-dark-card {
+  background: #111111;
+  border: 1px solid #222222;
+  border-radius: 12px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.4s ease;
+}
+.landing-dark-card:hover {
+  border-color: #8B5CF6;
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.15), 0 0 40px rgba(139, 92, 246, 0.05);
+}
+
+.landing-scale-reveal {
+  opacity: 0;
+  transform: scale(0.95);
+  transition: opacity 0.7s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.landing-scale-reveal.visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.landing-gradient-text {
+  background: linear-gradient(135deg, #8B5CF6 0%, #A3E635 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.landing-violet-bar {
+  height: 2px;
+  border-radius: 1px;
+  background: #8B5CF6;
+  box-shadow: 0 0 8px rgba(139, 92, 246, 0.4);
+}
+
+.landing-gradient-border-btn {
+  position: relative;
+  background: #111111;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 12px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  z-index: 1;
+  transition: transform 0.2s ease;
+  display: inline-block;
+  text-decoration: none;
+  text-align: center;
+}
+.landing-gradient-border-btn::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 14px;
+  background: conic-gradient(from var(--angle, 0deg), #8B5CF6, #A3E635, #8B5CF6);
+  z-index: -1;
+  animation: landingRotateBorder 3s linear infinite;
+}
+.landing-gradient-border-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  background: #111111;
+  z-index: -1;
+}
+.landing-gradient-border-btn:hover {
+  transform: translateY(-1px);
+}
+
+@property --angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+@keyframes landingRotateBorder {
+  to { --angle: 360deg; }
+}
+
+@supports not (background: conic-gradient(from 0deg, red, blue)) {
+  .landing-gradient-border-btn::before {
+    background: linear-gradient(135deg, #8B5CF6, #A3E635);
+  }
+}
+
+.landing-typewriter-cursor {
+  display: inline-block;
+  width: 3px;
+  height: 1em;
+  background: #8B5CF6;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  animation: landingBlink 0.7s step-end infinite;
+}
+@keyframes landingBlink {
+  50% { opacity: 0; }
+}
+
+.landing-nav {
+  background: #050505;
+  border-bottom: 1px solid transparent;
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+.landing-nav.scrolled {
+  background: #111111;
+  border-bottom-color: #222222;
+}
+
+.landing-mobile-menu {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.landing-mobile-menu.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@keyframes landingChartGrow {
+  from { transform: scaleY(0); }
+  to   { transform: scaleY(1); }
+}
+.landing-chart-bar {
+  transform-origin: bottom;
+  animation: landingChartGrow 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes landingProgressGrow {
+  from { width: 0; }
+}
+.landing-progress-animate {
+  animation: landingProgressGrow 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes landingScoreReveal {
+  from { stroke-dashoffset: 220; }
+}
+.landing-score-ring {
+  animation: landingScoreReveal 1.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes landingDashDraw {
+  to { stroke-dashoffset: 0; }
+}
+.landing-chart-line-animate {
+  stroke-dasharray: 400;
+  stroke-dashoffset: 400;
+  animation: landingDashDraw 2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.landing-pricing-popular {
+  border-color: #8B5CF6 !important;
+  box-shadow: 0 0 30px rgba(139, 92, 246, 0.12), 0 0 60px rgba(139, 92, 246, 0.05);
+}
+
+.landing-star-lime path { fill: #A3E635; }
+
+.landing-step-dash {
+  border-top: 2px dashed #333333;
 }

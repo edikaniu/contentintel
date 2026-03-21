@@ -1,142 +1,120 @@
-import { PlayCircle } from "lucide-react";
+"use client";
+
+import { useEffect, useRef } from "react";
+import Link from "next/link";
 
 export function Hero() {
+  const typewriterRef = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    const target = typewriterRef.current;
+    if (!target) return;
+    const text = "next.";
+    let i = 0;
+    const timer = setTimeout(() => {
+      const interval = setInterval(() => {
+        if (i < text.length) {
+          target.textContent += text.charAt(i);
+          i++;
+        } else {
+          clearInterval(interval);
+        }
+      }, 120);
+      return () => clearInterval(interval);
+    }, 800);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
-    <main className="relative z-10 max-w-[1200px] mx-auto px-6 pt-12 pb-32">
-      <div className="grid lg:grid-cols-12 gap-16 items-center">
-        <div className="lg:col-span-6 space-y-8">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#3730A3]/5 border border-[#3730A3]/10">
-            <span className="flex h-2 w-2 rounded-full bg-[#3730A3] animate-pulse" />
-            <span className="text-xs font-bold uppercase tracking-widest text-[#3730A3]">Now in Beta</span>
-          </div>
-          <h1 className="text-5xl md:text-7xl font-black text-slate-900 leading-[1.1] tracking-[-0.02em]">
-            Content <span className="text-[#3730A3]">Intelligence</span> for the Modern Era.
+    <section className="relative min-h-screen flex items-center pt-24 pb-16 px-4 z-10">
+      <div className="max-w-7xl mx-auto w-full grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
+        {/* Left */}
+        <div className="landing-scale-reveal">
+          <h1 className="font-headline font-extrabold text-4xl sm:text-5xl lg:text-6xl text-white leading-[1.1] tracking-tight mb-6">
+            Know exactly what<br />to write{" "}
+            <span ref={typewriterRef} className="landing-gradient-text" />
+            <span className="landing-typewriter-cursor" />
           </h1>
-          <p className="text-lg text-slate-600 leading-relaxed max-w-xl">
-            Stop guessing and start scaling. ContentIntel uses AI and real search data to discover topics,
-            monitor content health, and optimize your entire content lifecycle.
+          <p className="text-lg sm:text-xl text-gray-300 max-w-xl mb-4 leading-relaxed font-light font-body">
+            ContentIntel uses AI and real search data to tell your marketing team what content to create, what to refresh, and what&apos;s working &mdash; every week, automatically.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 pt-4">
-            <a
-              href="#waitlist"
-              className="bg-[#3730A3] text-white px-8 py-4 rounded-xl text-lg font-bold shadow-xl shadow-[#3730A3]/25 hover:-translate-y-1 transition-all text-center"
-            >
-              Join the Waitlist
-            </a>
-            <a
-              href="#features"
-              className="bg-white border border-slate-200 text-slate-700 px-8 py-4 rounded-xl text-lg font-bold hover:bg-slate-50 transition-all flex items-center justify-center gap-2"
-            >
-              <PlayCircle className="w-5 h-5" />
-              See How It Works
+          <p className="text-gray-600 mb-8 max-w-lg font-body">
+            Connect your existing tools. Get actionable recommendations. Stop guessing.
+          </p>
+          <div className="flex flex-wrap gap-4 mb-10">
+            <Link href="/onboarding" className="landing-gradient-border-btn text-base">Get Started Free</Link>
+            <a href="#how-it-works" className="border border-[#222] hover:border-[#444] text-gray-400 hover:text-white font-medium px-7 py-3.5 rounded-xl text-base transition-colors">
+              See how it works <span className="inline-block ml-1">&#8595;</span>
             </a>
           </div>
-          <div className="flex items-center gap-6 pt-8 border-t border-slate-200">
-            <div className="flex -space-x-3">
-              <div className="w-10 h-10 rounded-full border-2 border-white bg-indigo-200" />
-              <div className="w-10 h-10 rounded-full border-2 border-white bg-emerald-200" />
-              <div className="w-10 h-10 rounded-full border-2 border-white bg-amber-200" />
+          {/* Social Proof */}
+          <div className="flex items-center gap-3">
+            <div className="flex -space-x-2">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-violet-700 border-2 border-[#050505] flex items-center justify-center text-xs text-white font-semibold">S</div>
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-lime-400 to-lime-600 border-2 border-[#050505] flex items-center justify-center text-xs text-white font-semibold">M</div>
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-400 to-purple-600 border-2 border-[#050505] flex items-center justify-center text-xs text-white font-semibold">E</div>
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 border-2 border-[#050505] flex items-center justify-center text-xs text-white font-semibold">J</div>
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-300 to-violet-500 border-2 border-[#050505] flex items-center justify-center text-xs text-white font-semibold">+</div>
             </div>
-            <div>
-              <p className="text-sm font-bold text-slate-900">Trusted by growing teams</p>
-              <p className="text-xs text-slate-500">From startups to enterprise content teams</p>
-            </div>
+            <span className="text-sm text-gray-600 font-body">Trusted by growing teams</span>
           </div>
         </div>
 
-        {/* 3D Mockup Container */}
-        <div className="lg:col-span-6 relative">
-          <div className="bg-white rounded-2xl overflow-hidden border border-slate-200/50 aspect-[4/3] relative shadow-2xl" style={{ transform: "perspective(1200px) rotateX(6deg) rotateY(-8deg) rotateZ(1deg)" }}>
-            {/* Browser UI */}
-            <div className="h-10 border-b border-slate-100 flex items-center px-4 gap-2 bg-slate-50/50">
-              <div className="flex gap-1.5">
-                <div className="w-2.5 h-2.5 rounded-full bg-red-400" />
-                <div className="w-2.5 h-2.5 rounded-full bg-amber-400" />
-                <div className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
+        {/* Right — Dashboard Mockup */}
+        <div className="landing-scale-reveal relative" style={{ transitionDelay: "0.15s" }}>
+          <div className="landing-dark-card p-5 relative overflow-hidden">
+            {/* Mockup title bar */}
+            <div className="flex items-center gap-2 mb-5">
+              <div className="w-3 h-3 rounded-full bg-red-500/60" />
+              <div className="w-3 h-3 rounded-full bg-yellow-500/60" />
+              <div className="w-3 h-3 rounded-full bg-green-500/60" />
+              <span className="ml-3 text-xs text-gray-600 font-mono">contentintel.io/dashboard</span>
+            </div>
+            {/* Metric cards */}
+            <div className="grid grid-cols-3 gap-3 mb-5">
+              <div className="bg-[#0a0a0a] rounded-lg p-3 border border-[#1a1a1a]">
+                <div className="text-xs text-gray-600 mb-1 font-body">Topics Found</div>
+                <div className="text-xl font-headline font-bold text-white">142</div>
+                <div className="text-xs text-[#A3E635] mt-0.5">+18 this week</div>
               </div>
-              <div className="mx-auto bg-white border border-slate-200 rounded-md px-3 py-1 text-[10px] text-slate-400 w-1/2 text-center">
-                app.contentintel.io/dashboard
+              <div className="bg-[#0a0a0a] rounded-lg p-3 border border-[#1a1a1a]">
+                <div className="text-xs text-gray-600 mb-1 font-body">Health Score</div>
+                <div className="text-xl font-headline font-bold text-[#8B5CF6]">87%</div>
+                <div className="text-xs text-[#A3E635] mt-0.5">+3.2%</div>
+              </div>
+              <div className="bg-[#0a0a0a] rounded-lg p-3 border border-[#1a1a1a]">
+                <div className="text-xs text-gray-600 mb-1 font-body">Approved</div>
+                <div className="text-xl font-headline font-bold text-white">24</div>
+                <div className="text-xs text-gray-600 mt-0.5">of 30 this week</div>
               </div>
             </div>
-            <div className="flex h-full">
-              {/* Sidebar Mockup */}
-              <div className="w-16 md:w-20 border-r border-slate-100 bg-slate-50/30 flex flex-col items-center py-6 gap-6">
-                <div className="w-8 h-8 rounded-lg bg-[#3730A3]/10 flex items-center justify-center">
-                  <div className="w-4 h-4 rounded bg-[#3730A3]/30" />
-                </div>
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center">
-                  <div className="w-4 h-4 rounded bg-slate-200" />
-                </div>
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center">
-                  <div className="w-4 h-4 rounded bg-slate-200" />
-                </div>
+            {/* Chart */}
+            <div className="bg-[#0a0a0a] rounded-lg p-4 border border-[#1a1a1a]">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs text-gray-600 font-body">Organic Traffic — Last 12 Weeks</span>
+                <span className="text-xs text-[#A3E635] font-medium">+24.5%</span>
               </div>
-              {/* Main View Mockup */}
-              <div className="flex-1 p-6 space-y-6">
-                <div className="flex justify-between items-end">
-                  <div className="space-y-1">
-                    <div className="h-4 w-32 bg-slate-100 rounded" />
-                    <div className="h-6 w-48 bg-slate-200 rounded" />
-                  </div>
-                  <div className="h-8 w-24 bg-[#3730A3]/10 rounded-lg border border-[#3730A3]/20" />
-                </div>
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="h-24 bg-slate-50 rounded-xl border border-slate-100 p-4 space-y-3">
-                    <div className="h-2 w-12 bg-slate-200 rounded" />
-                    <div className="h-5 w-20 bg-slate-300 rounded" />
-                    <div className="h-4 w-full bg-[#3730A3]/5 rounded" />
-                  </div>
-                  <div className="h-24 bg-slate-50 rounded-xl border border-slate-100 p-4 space-y-3">
-                    <div className="h-2 w-12 bg-slate-200 rounded" />
-                    <div className="h-5 w-20 bg-slate-300 rounded" />
-                    <div className="h-4 w-full bg-[#059669]/5 rounded" />
-                  </div>
-                  <div className="h-24 bg-slate-50 rounded-xl border border-slate-100 p-4 space-y-3">
-                    <div className="h-2 w-12 bg-slate-200 rounded" />
-                    <div className="h-5 w-20 bg-slate-300 rounded" />
-                    <div className="h-4 w-full bg-amber-500/5 rounded" />
-                  </div>
-                </div>
-                <div className="h-40 bg-slate-50 rounded-xl border border-slate-100 relative overflow-hidden">
-                  <div className="absolute inset-0 flex items-end p-0">
-                    <div className="w-full h-1/2 bg-gradient-to-t from-[#3730A3]/10 to-transparent" />
-                  </div>
-                  <svg className="absolute bottom-0 left-0 w-full" viewBox="0 0 400 100">
-                    <path d="M0,80 Q50,20 100,50 T200,30 T300,70 T400,10" fill="none" stroke="#3730A3" strokeWidth="2" />
-                  </svg>
-                </div>
-              </div>
+              <svg viewBox="0 0 400 120" className="w-full h-auto" preserveAspectRatio="none">
+                <line x1="0" y1="30" x2="400" y2="30" stroke="rgba(255,255,255,0.03)" strokeWidth="1" />
+                <line x1="0" y1="60" x2="400" y2="60" stroke="rgba(255,255,255,0.03)" strokeWidth="1" />
+                <line x1="0" y1="90" x2="400" y2="90" stroke="rgba(255,255,255,0.03)" strokeWidth="1" />
+                <defs>
+                  <linearGradient id="chartFillV" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#A3E635" stopOpacity="0.2" />
+                    <stop offset="100%" stopColor="#A3E635" stopOpacity="0" />
+                  </linearGradient>
+                </defs>
+                <path d="M0,95 L33,88 L66,82 L100,78 L133,70 L166,65 L200,58 L233,50 L266,45 L300,38 L333,30 L366,25 L400,18 L400,120 L0,120 Z" fill="url(#chartFillV)" />
+                <polyline points="0,95 33,88 66,82 100,78 133,70 166,65 200,58 233,50 266,45 300,38 333,30 366,25 400,18" fill="none" stroke="#A3E635" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="landing-chart-line-animate" />
+                <circle cx="400" cy="18" r="4" fill="#A3E635" />
+                <circle cx="400" cy="18" r="8" fill="#A3E635" opacity="0.2" />
+              </svg>
             </div>
           </div>
-          {/* Floating Elements */}
-          <div className="absolute -top-6 -right-6 bg-white/70 backdrop-blur-xl border border-white/30 p-4 rounded-2xl shadow-xl animate-bounce" style={{ animationDuration: "4s" }}>
-            <div className="flex items-center gap-3">
-              <div className="bg-[#059669]/10 text-[#059669] p-2 rounded-lg">
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                </svg>
-              </div>
-              <div>
-                <p className="text-[10px] uppercase font-bold text-slate-400">Opportunity Score</p>
-                <p className="text-lg font-black text-slate-900">+142%</p>
-              </div>
-            </div>
-          </div>
-          <div className="absolute -bottom-10 -left-10 bg-white/70 backdrop-blur-xl border border-white/30 p-4 rounded-2xl shadow-2xl">
-            <div className="flex items-center gap-3">
-              <div className="bg-[#3730A3]/10 text-[#3730A3] p-2 rounded-lg">
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-              <div>
-                <p className="text-[10px] uppercase font-bold text-slate-400">AI Analysis</p>
-                <p className="text-sm font-bold text-slate-900">Completed in 2.4s</p>
-              </div>
-            </div>
-          </div>
+          {/* Glow behind mockup */}
+          <div className="absolute -inset-4 bg-gradient-to-br from-violet-600/10 via-transparent to-lime-500/5 rounded-2xl blur-2xl -z-10" />
         </div>
       </div>
-    </main>
+    </section>
   );
 }
