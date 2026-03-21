@@ -49,6 +49,7 @@ export async function POST(req: NextRequest) {
     const keyword = topic.trim().toLowerCase();
     const locationCode = domain.dataforseoLocation ?? 2566;
     const languageCode = domain.dataforseoLanguage ?? 1000;
+    const warnings: string[] = [];
 
     // Step 1: Check keyword provider availability
     const providerAvailable = await hasKeywordProvider(orgId);
@@ -72,9 +73,27 @@ export async function POST(req: NextRequest) {
     ]);
 
     // SERP via DataforSEO only (if available)
-    let serpResult: { success: boolean; data?: { topResults: Array<{ title: string; url: string; domain: string; position: number }>; serpFeatures: string[] } } = { success: false };
+    let serpResult: { success: boolean; data?: { topResults: Array<{ title: string; url: string; domain: string; position: number }>; serpFeatures: string[] }; error?: string } = { success: false };
     if (dfsClient) {
       serpResult = await dfsClient.getSerpResults(keyword, locationCode, languageCode);
+    }
+
+    // Track which steps failed
+    if (!keywordResult.success) {
+      console.warn(`[Validator] Keyword suggestions failed: ${keywordResult.error}`);
+      warnings.push(`Keyword data: ${keywordResult.error ?? "Failed to fetch from DataforSEO/SEMrush"}`);
+    }
+    if (!relatedResult.success) {
+      console.warn(`[Validator] Related keywords failed: ${relatedResult.error}`);
+      warnings.push(`Related keywords: ${relatedResult.error ?? "Failed to fetch"}`);
+    }
+    if (!serpResult.success) {
+      if (!dfsClient) {
+        warnings.push("SERP landscape: DataforSEO not configured");
+      } else {
+        console.warn(`[Validator] SERP failed: ${serpResult.error}`);
+        warnings.push(`SERP landscape: ${serpResult.error ?? "Failed to fetch"}`);
+      }
     }
 
     // Extract primary keyword metrics from suggestions (first match or manual)
@@ -169,7 +188,7 @@ export async function POST(req: NextRequest) {
     };
 
     const anthropicCreds = await getCredentials(orgId, "anthropic");
-    if (anthropicCreds) {
+    if (anthropicCreds && anthropicCreds.api_key) {
       console.log(`[Validator] Anthropic credentials found for org ${orgId}, key starts with: ${anthropicCreds.api_key.slice(0, 10)}...`);
       aiAnalysis = await generateValidationAnalysis(
         anthropicCreds.api_key,
@@ -182,8 +201,14 @@ export async function POST(req: NextRequest) {
         overlappingContent,
         domain.vertical ?? "general"
       );
+      // Check if fallback was used (verdict contains "unavailable")
+      if (aiAnalysis.verdict.includes("unavailable")) {
+        warnings.push("AI analysis: Anthropic API call failed — using heuristic scoring");
+      }
     } else {
       console.log(`[Validator] No Anthropic credentials found for org ${orgId}, using fallback`);
+      warnings.push("AI analysis: Anthropic not configured — using heuristic scoring. Add your API key in Settings > Connections.");
+      aiAnalysis = fallbackAnalysis(primaryMetrics);
     }
 
     // Build the full brief
@@ -211,6 +236,7 @@ export async function POST(req: NextRequest) {
         verdict: aiAnalysis.verdict,
       },
       generatedAt: new Date().toISOString(),
+      warnings,
     };
 
     return NextResponse.json({ brief });
@@ -291,8 +317,14 @@ Respond in exactly this JSON format (no markdown, no code blocks):
     }
 
     const json = await res.json();
-    const text = json.content?.[0]?.text ?? "";
-    console.log(`[Validator] Anthropic response received (model=${json.model ?? modelId}), ${text.length} chars, stop_reason=${json.stop_reason ?? "unknown"}`);
+    const rawText = json.content?.[0]?.text ?? "";
+    console.log(`[Validator] Anthropic response received (model=${json.model ?? modelId}), ${rawText.length} chars, stop_reason=${json.stop_reason ?? "unknown"}`);
+
+    // Strip markdown code block wrapping if present (Claude sometimes wraps JSON in ```json ... ```)
+    let text = rawText.trim();
+    if (text.startsWith("```")) {
+      text = text.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
+    }
 
     const parsed = JSON.parse(text);
     return {

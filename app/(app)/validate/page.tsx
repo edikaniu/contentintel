@@ -40,6 +40,7 @@ interface Brief {
     verdict: string;
   };
   generatedAt: string;
+  warnings?: string[];
 }
 
 const PROGRESS_STEPS = [
@@ -63,18 +64,45 @@ function ValidateTopicPageInner() {
   const [adding, setAdding] = useState(false);
   const autoSubmitDone = useRef(false);
 
-  // Pre-fill keyword from URL query param and auto-submit (e.g. ?keyword=best+loans)
+  // Handle URL params: topicId (load stored brief) or keyword (fresh validation)
   useEffect(() => {
+    if (autoSubmitDone.current) return;
+
+    const topicId = searchParams.get("topicId");
     const kw = searchParams.get("keyword");
-    if (kw && !autoSubmitDone.current) {
+
+    if (topicId) {
+      // Load stored brief from database — no fresh API calls needed
+      autoSubmitDone.current = true;
+      setStatus("loading");
+      setProgressStep(PROGRESS_STEPS.length - 1); // skip to end
+
+      fetch(`/api/topics/${topicId}`)
+        .then(async (res) => {
+          if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            setErrorMessage(data.error || "Failed to load topic brief.");
+            setStatus("error");
+            return;
+          }
+          const data = await res.json();
+          setBrief(data.brief);
+          setTopic(data.brief.keyword);
+          setStatus("done");
+        })
+        .catch(() => {
+          setErrorMessage("Network error. Please try again.");
+          setStatus("error");
+        });
+    } else if (kw) {
       autoSubmitDone.current = true;
       setTopic(kw);
     }
   }, [searchParams]);
 
-  // Auto-submit when topic is set from URL param and domain is ready
+  // Auto-submit fresh validation when keyword is set from URL param and domain is ready
   useEffect(() => {
-    if (autoSubmitDone.current && topic && selectedDomain && status === "idle") {
+    if (autoSubmitDone.current && topic && selectedDomain && status === "idle" && !searchParams.get("topicId")) {
       // Trigger validation programmatically
       setStatus("loading");
       setProgressStep(0);
@@ -108,7 +136,7 @@ function ValidateTopicPageInner() {
           setStatus("error");
         });
     }
-  }, [topic, selectedDomain, status]);
+  }, [topic, selectedDomain, status, searchParams]);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();

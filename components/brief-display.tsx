@@ -36,6 +36,7 @@ interface Brief {
     verdict: string;
   };
   generatedAt: string;
+  warnings?: string[];
 }
 
 interface BriefDisplayProps {
@@ -174,6 +175,23 @@ export function BriefDisplay({ brief, onAddToRecommendations, adding }: BriefDis
 
   return (
     <div className="space-y-6">
+      {/* Warnings banner */}
+      {brief.warnings && brief.warnings.length > 0 && (
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4">
+          <div className="flex items-start gap-2">
+            <AlertTriangle className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
+            <div>
+              <p className="text-sm font-body font-semibold text-amber-800 mb-1">Some data sources returned incomplete results</p>
+              <ul className="space-y-0.5">
+                {brief.warnings.map((w, i) => (
+                  <li key={i} className="text-xs font-body text-amber-700">{w}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header with Score + Verdict */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col md:flex-row gap-6 items-center">
         <ScoreGauge score={brief.aiAnalysis.opportunityScore} />

@@ -646,7 +646,7 @@ export default function TopicsPage() {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              router.push(`/validate?keyword=${encodeURIComponent(topic.primaryKeyword)}`);
+                              router.push(`/validate?topicId=${topic.id}`);
                             }}
                             className="text-sm font-semibold font-body text-indigo-700 hover:text-indigo-800 transition-colors"
                           >
