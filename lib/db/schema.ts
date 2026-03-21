@@ -252,6 +252,8 @@ export const contentAlerts = pgTable(
     priorityScore: real("priority_score"),
     status: varchar("status", { length: 50 }).notNull().default("open"), // open | acknowledged | resolved
     createdAt: timestamp("created_at").defaultNow().notNull(),
+    enrichmentJson: jsonb("enrichment_json"),
+    lastEnrichedAt: timestamp("last_enriched_at"),
   },
   (table) => [index("alerts_content_idx").on(table.contentId)]
 );

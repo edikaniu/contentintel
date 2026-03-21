@@ -73,6 +73,7 @@ export async function GET(req: NextRequest) {
         "Suggested Action",
         "Priority Score",
         "Status",
+        "Enriched",
         "Created At",
       ];
 
@@ -84,6 +85,7 @@ export async function GET(req: NextRequest) {
         `"${(a.alert.suggestedAction || "").replace(/"/g, '""')}"`,
         a.alert.priorityScore ?? "",
         a.alert.status,
+        a.alert.lastEnrichedAt ? "Yes" : "No",
         a.alert.createdAt?.toISOString() ?? "",
       ]);
 

@@ -6,6 +6,7 @@ import { pullGSCData } from "./gsc-pull";
 import { pullGA4Data } from "./ga4-pull";
 import { buildSnapshots } from "./snapshot-builder";
 import { generateAlerts } from "./alert-generator";
+import { enrichAlerts } from "./alert-enricher";
 import { runTopicDiscovery } from "./topic-discovery";
 
 interface BatchResult {
@@ -210,6 +211,12 @@ async function runDomainBatch(
     const alertResult = await generateAlerts(domain, batchDate);
     if (alertResult.error) {
       errors.push(`Alert generation error: ${alertResult.error}`);
+    }
+
+    // Step 5b: Enrich alerts with AI recommendations
+    const enrichResult = await enrichAlerts(orgId, domain, batchDate);
+    if (enrichResult.errors.length > 0) {
+      errors.push(`Alert enrichment: ${enrichResult.errors.join("; ")}`);
     }
 
     // Step 6: Topic discovery pipeline

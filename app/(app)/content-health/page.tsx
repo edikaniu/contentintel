@@ -31,6 +31,8 @@ interface AlertData {
   priorityScore: number | null;
   status: string;
   createdAt: string;
+  enrichmentJson: unknown | null;
+  lastEnrichedAt: string | null;
 }
 
 interface AlertRow {
