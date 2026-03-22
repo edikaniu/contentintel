@@ -146,6 +146,55 @@ export async function getRelatedKeywords(
   return { success: false, error: "DataforSEO failed and SEMrush is not configured", source: "none" };
 }
 
+interface SerpProviderResult {
+  success: boolean;
+  data?: { topResults: Array<{ title: string; url: string; domain: string; position: number }>; serpFeatures: string[] };
+  error?: string;
+  source?: "dataforseo" | "semrush" | "none";
+}
+
+/**
+ * Get SERP results with DataforSEO → SEMrush failover.
+ */
+export async function getSerpResults(
+  orgId: string,
+  keyword: string,
+  locationCode: number,
+  languageCode: number,
+  semrushDatabase?: string | null
+): Promise<SerpProviderResult> {
+  // Try DataforSEO first
+  const dfClient = await getDataForSEOClient(orgId);
+  if (dfClient) {
+    const result = await dfClient.getSerpResults(keyword, locationCode, languageCode);
+    if (result.success && result.data) {
+      return { success: true, data: result.data, source: "dataforseo" };
+    }
+    console.log(`[KeywordProvider] DataforSEO SERP failed for "${keyword}": ${result.error}`);
+  }
+
+  // Fallback to SEMrush
+  const srClient = await getSemrushClient(orgId);
+  if (srClient) {
+    const db = getSemrushDatabase(locationCode, semrushDatabase);
+    const result = await srClient.getSerpResults(keyword, db);
+    if (result.success && result.data) {
+      return { success: true, data: result.data, source: "semrush" };
+    }
+    console.log(`[KeywordProvider] SEMrush SERP also failed for "${keyword}": ${result.error}`);
+    return {
+      success: false,
+      error: `Both providers failed for SERP "${keyword}". DataforSEO: ${dfClient ? "error" : "not configured"}. SEMrush: ${result.error}`,
+      source: "none",
+    };
+  }
+
+  if (!dfClient) {
+    return { success: false, error: "Neither DataforSEO nor SEMrush is configured", source: "none" };
+  }
+  return { success: false, error: "DataforSEO failed and SEMrush is not configured", source: "none" };
+}
+
 /**
  * Check if at least one keyword provider is available for an org.
  */

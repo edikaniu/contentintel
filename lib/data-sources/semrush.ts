@@ -201,5 +201,36 @@ export async function getSemrushClient(orgId: string) {
       const rows = parseSemrushCsv(result.data, ["Ph", "Nq", "Kd", "Cp"]);
       return { success: true, data: rows.length > 0 ? rowToKeywordData(rows[0]) : null };
     },
+
+    /**
+     * Get SERP results (top organic rankings) for a keyword.
+     * Equivalent to DataforSEO's getSerpResults.
+     */
+    async getSerpResults(
+      keyword: string,
+      database: string,
+      limit: number = 10
+    ): Promise<SemrushResult<{ topResults: Array<{ title: string; url: string; domain: string; position: number }>; serpFeatures: string[] }>> {
+      const result = await semrushGet({
+        type: "phrase_organic",
+        phrase: keyword,
+        database,
+        export_columns: "Dn,Ur,Fl,Fp",
+        display_limit: String(limit),
+      });
+
+      if (!result.success) return { success: false, error: result.error };
+      if (!result.data) return { success: true, data: { topResults: [], serpFeatures: [] } };
+
+      const rows = parseSemrushCsv(result.data, ["Dn", "Ur", "Fl", "Fp"]);
+      const topResults = rows.map((row, i) => ({
+        title: row["Fl"] ?? "", // Fl = URL title in SEMrush
+        url: row["Ur"] ?? "",
+        domain: row["Dn"] ?? "",
+        position: i + 1, // Fp = position but may not always be present
+      }));
+
+      return { success: true, data: { topResults: topResults.slice(0, 5), serpFeatures: [] } };
+    },
   };
 }

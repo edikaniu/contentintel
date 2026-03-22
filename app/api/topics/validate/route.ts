@@ -3,8 +3,7 @@ import { requireAuth } from "@/lib/auth/middleware";
 import { db } from "@/lib/db";
 import { domains, competitors, contentInventory } from "@/lib/db/schema";
 import { eq, and, ilike } from "drizzle-orm";
-import { getDataForSEOClient } from "@/lib/data-sources/dataforseo";
-import { getKeywordSuggestions, getRelatedKeywords, hasKeywordProvider } from "@/lib/data-sources/keyword-provider";
+import { getKeywordSuggestions, getRelatedKeywords, getSerpResults as getSerpWithFailover, hasKeywordProvider } from "@/lib/data-sources/keyword-provider";
 import { getCredentials } from "@/lib/credentials/credential-store";
 
 export async function POST(req: NextRequest) {
@@ -63,20 +62,12 @@ export async function POST(req: NextRequest) {
     const semrushDb = domain.semrushDatabase;
 
     // Step 2: Fetch keyword data + SERP results
-    // Keyword suggestions and related use the failover provider
-    // SERP uses DataforSEO directly (no SEMrush equivalent yet)
-    const dfsClient = await getDataForSEOClient(orgId);
-
-    const [keywordResult, relatedResult] = await Promise.all([
+    // All three use the failover provider (DataforSEO → SEMrush)
+    const [keywordResult, relatedResult, serpResult] = await Promise.all([
       getKeywordSuggestions(orgId, keyword, locationCode, languageCode, 10, semrushDb),
       getRelatedKeywords(orgId, keyword, locationCode, languageCode, 10, semrushDb),
+      getSerpWithFailover(orgId, keyword, locationCode, languageCode, semrushDb),
     ]);
-
-    // SERP via DataforSEO only (if available)
-    let serpResult: { success: boolean; data?: { topResults: Array<{ title: string; url: string; domain: string; position: number }>; serpFeatures: string[] }; error?: string } = { success: false };
-    if (dfsClient) {
-      serpResult = await dfsClient.getSerpResults(keyword, locationCode, languageCode);
-    }
 
     // Track which steps failed
     if (!keywordResult.success) {
@@ -88,12 +79,8 @@ export async function POST(req: NextRequest) {
       warnings.push(`Related keywords: ${relatedResult.error ?? "Failed to fetch"}`);
     }
     if (!serpResult.success) {
-      if (!dfsClient) {
-        warnings.push("SERP landscape: DataforSEO not configured");
-      } else {
-        console.warn(`[Validator] SERP failed: ${serpResult.error}`);
-        warnings.push(`SERP landscape: ${serpResult.error ?? "Failed to fetch"}`);
-      }
+      console.warn(`[Validator] SERP failed: ${serpResult.error}`);
+      warnings.push(`SERP landscape: ${serpResult.error ?? "Failed to fetch from DataforSEO/SEMrush"}`);
     }
 
     // Extract primary keyword metrics from suggestions (first match or manual)

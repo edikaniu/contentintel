@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 import { contentAlerts, contentInventory, contentSnapshots, domains } from "@/lib/db/schema";
 import { getCredentials } from "@/lib/credentials/credential-store";
 import { getWindsorClient } from "@/lib/data-sources/windsor";
-import { getDataForSEOClient } from "@/lib/data-sources/dataforseo";
+import { getSerpResults as getSerpWithFailover } from "@/lib/data-sources/keyword-provider";
 
 // ---------------------------------------------------------------------------
 // Enrichment type definitions
@@ -435,13 +435,10 @@ async function enrichIntentAnalysis(
 
   if (!primaryQuery) return null;
 
-  const dfsClient = await getDataForSEOClient(orgId);
-  if (!dfsClient) return null;
-
   const locationCode = domain.dataforseoLocation ?? 2566;
   const languageCode = domain.dataforseoLanguage ?? 1000;
 
-  const serpResult = await dfsClient.getSerpResults(primaryQuery, locationCode, languageCode);
+  const serpResult = await getSerpWithFailover(orgId, primaryQuery, locationCode, languageCode);
   if (!serpResult.success || !serpResult.data) return null;
 
   const serpContext = serpResult.data.topResults
