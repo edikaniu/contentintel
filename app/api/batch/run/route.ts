@@ -11,8 +11,10 @@ export async function POST(req: NextRequest) {
   if (error) return error;
 
   try {
-    console.log(`[Manual Batch] Triggered by ${session!.user.email} for org ${session!.user.orgId}`);
-    const result = await runOrgBatch(session!.user.orgId);
+    const body = await req.json().catch(() => ({}));
+    const forceBackfill = body.forceBackfill === true;
+    console.log(`[Manual Batch] Triggered by ${session!.user.email} for org ${session!.user.orgId}${forceBackfill ? " (force backfill)" : ""}`);
+    const result = await runOrgBatch(session!.user.orgId, { forceBackfill });
 
     return NextResponse.json({
       message: "Batch completed",

@@ -29,7 +29,7 @@ interface DomainBatchResult {
 /**
  * Run the full weekly batch pipeline for a single organisation.
  */
-export async function runOrgBatch(orgId: string): Promise<BatchResult> {
+export async function runOrgBatch(orgId: string, options?: { forceBackfill?: boolean }): Promise<BatchResult> {
   const org = await db
     .select()
     .from(organisations)
@@ -49,7 +49,7 @@ export async function runOrgBatch(orgId: string): Promise<BatchResult> {
   const domainResults: DomainBatchResult[] = [];
 
   for (const domain of activeDomains) {
-    const result = await runDomainBatch(orgId, domain);
+    const result = await runDomainBatch(orgId, domain, options?.forceBackfill);
     domainResults.push(result);
   }
 
@@ -65,7 +65,8 @@ export async function runOrgBatch(orgId: string): Promise<BatchResult> {
  */
 async function runDomainBatch(
   orgId: string,
-  domain: typeof domains.$inferSelect
+  domain: typeof domains.$inferSelect,
+  forceBackfill?: boolean
 ): Promise<DomainBatchResult> {
   const batchDate = new Date();
   const errors: string[] = [];
@@ -109,8 +110,8 @@ async function runDomainBatch(
           .then((rows) => rows[0]?.distinctDates ?? 0)
       : 0;
 
-    const needsBackfill = distinctDatesResult <= 1;
-    console.log(`[Batch] ${domain.domain}: ${distinctDatesResult} distinct snapshot dates, needsBackfill=${needsBackfill}`);
+    const needsBackfill = forceBackfill || distinctDatesResult <= 1;
+    console.log(`[Batch] ${domain.domain}: ${distinctDatesResult} distinct snapshot dates, needsBackfill=${needsBackfill}${forceBackfill ? " (forced)" : ""}`);
     const now = new Date();
 
     // Current week GSC pull (always done)

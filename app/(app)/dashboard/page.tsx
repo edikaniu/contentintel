@@ -158,7 +158,7 @@ function DashboardSkeleton() {
 // ---------------------------------------------------------------------------
 // Granularity type (must match TrendChart)
 // ---------------------------------------------------------------------------
-type Granularity = "daily" | "weekly" | "monthly";
+type Granularity = "weekly" | "monthly";
 
 // ---------------------------------------------------------------------------
 // Main Component
@@ -175,7 +175,8 @@ export default function DashboardPage() {
   const [batchMessage, setBatchMessage] = useState<string | null>(null);
   const [trendRange, setTrendRange] = useState<string>("90");
   const [trendLoading, setTrendLoading] = useState(false);
-  const [granularity, setGranularity] = useState<Granularity>("daily");
+  const [granularity, setGranularity] = useState<Granularity>("weekly");
+  const [includeBackfill, setIncludeBackfill] = useState(false);
 
   // Fetch dashboard data
   const [refreshKey, setRefreshKey] = useState(0);
@@ -250,7 +251,11 @@ export default function DashboardPage() {
     setBatchRunning(true);
     setBatchMessage(null);
     try {
-      const res = await fetch("/api/batch/run", { method: "POST" });
+      const res = await fetch("/api/batch/run", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ forceBackfill: includeBackfill }),
+      });
       const json = await res.json();
       if (res.ok) {
         // Build a detailed message from batch results
@@ -280,7 +285,7 @@ export default function DashboardPage() {
     } finally {
       setBatchRunning(false);
     }
-  }, []);
+  }, [includeBackfill]);
 
   if (!session) return null;
 
@@ -311,10 +316,19 @@ export default function DashboardPage() {
             Here&apos;s what&apos;s happening with your content performance today.
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           {batchMessage && (
             <span className="text-xs font-body text-gray-400">{batchMessage}</span>
           )}
+          <label className="flex items-center gap-1.5 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={includeBackfill}
+              onChange={(e) => setIncludeBackfill(e.target.checked)}
+              className="w-3.5 h-3.5 rounded border-gray-300 text-[#8B5CF6] focus:ring-[#8B5CF6]/20"
+            />
+            <span className="text-xs font-body text-gray-500">Include 90-day history</span>
+          </label>
           <button
             onClick={runBatch}
             disabled={batchRunning}
@@ -479,7 +493,7 @@ export default function DashboardPage() {
                 <div className="flex items-center gap-3 flex-wrap">
                   {/* Granularity toggle */}
                   <div className="inline-flex rounded-xl bg-gray-50 border border-gray-100 p-1">
-                    {(["daily", "weekly", "monthly"] as const).map((g) => (
+                    {(["weekly", "monthly"] as const).map((g) => (
                       <button
                         key={g}
                         onClick={() => setGranularity(g)}
@@ -499,7 +513,6 @@ export default function DashboardPage() {
                     onChange={(e) => setTrendRange(e.target.value)}
                     className="text-xs font-medium font-body text-gray-600 bg-white border border-gray-100 rounded-xl px-3 py-1.5 focus:outline-none focus:border-[#8B5CF6] focus:ring-1 focus:ring-[#8B5CF6]/20"
                   >
-                    <option value="7">Last 7 days</option>
                     <option value="30">Last 30 days</option>
                     <option value="56">Last 8 weeks</option>
                     <option value="90">Last 3 months</option>
