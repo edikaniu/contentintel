@@ -248,6 +248,26 @@ export default function TopicsPage() {
     }
   };
 
+  const handleCleanupTopics = async () => {
+    if (!confirm("This will remove duplicate topic recommendations and keep only the highest-scoring version of each keyword. Continue?")) return;
+    setEnrichingTitles(true);
+    setEnrichMessage(null);
+    try {
+      const res = await fetch("/api/topics/cleanup", { method: "POST" });
+      const data = await res.json();
+      if (res.ok) {
+        setEnrichMessage(data.message);
+        await fetchTopics();
+      } else {
+        setEnrichMessage(data.error ?? "Cleanup failed");
+      }
+    } catch {
+      setEnrichMessage("Network error");
+    } finally {
+      setEnrichingTitles(false);
+    }
+  };
+
   const handleEnrichTitles = async () => {
     setEnrichingTitles(true);
     setEnrichMessage(null);
@@ -296,6 +316,13 @@ export default function TopicsPage() {
           {enrichMessage && (
             <span className="text-xs font-body text-gray-400">{enrichMessage}</span>
           )}
+          <button
+            onClick={handleCleanupTopics}
+            disabled={enrichingTitles}
+            className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium font-body text-gray-700 bg-white border border-gray-100 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+          >
+            Clean Up Duplicates
+          </button>
           <button
             onClick={handleEnrichTitles}
             disabled={enrichingTitles}

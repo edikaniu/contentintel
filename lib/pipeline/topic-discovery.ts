@@ -1,8 +1,7 @@
-import { eq, and } from "drizzle-orm";
+import { eq, and, ilike, ne, inArray } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { domains, topicRecommendations } from "@/lib/db/schema";
-import { getDataForSEOClient } from "@/lib/data-sources/dataforseo";
-import { getKeywordSuggestions, getRelatedKeywords, hasKeywordProvider } from "@/lib/data-sources/keyword-provider";
+import { domains, topicRecommendations, contentInventory } from "@/lib/db/schema";
+import { getKeywordSuggestions, getRelatedKeywords, getSerpResults, hasKeywordProvider } from "@/lib/data-sources/keyword-provider";
 import { extractSeedKeywords, groupSeedsByClusters } from "@/lib/analysis/seed-extractor";
 import { scoreKeywords } from "@/lib/analysis/topic-scorer";
 import { clusterKeywords } from "@/lib/analysis/keyword-clusterer";
@@ -157,20 +156,15 @@ export async function runTopicDiscovery(
     return { topicsGenerated: 0, skipped: false, error: `No topic clusters generated (${allExpandedKeywords.length} expanded, ${scored.length} scored)` };
   }
 
-  // Step 6: SERP analysis for top clusters (DataforSEO only — SEMrush SERP not implemented)
+  // Step 6: SERP analysis for top clusters (with DataforSEO → SEMrush failover)
   const serpDataMap = new Map<string, { topResults: Array<{ title: string; url: string; domain: string; position: number }>; serpFeatures: string[] }>();
-  const dfClient = await getDataForSEOClient(orgId);
-  if (dfClient) {
-    for (const cluster of clusters.slice(0, 30)) {
-      const serpResult = await dfClient.getSerpResults(
-        cluster.primaryKeyword, locationCode, languageCode
-      );
-      if (serpResult.success && serpResult.data) {
-        serpDataMap.set(cluster.primaryKeyword, serpResult.data);
-      }
+  for (const cluster of clusters.slice(0, 30)) {
+    const serpResult = await getSerpResults(
+      orgId, cluster.primaryKeyword, locationCode, languageCode, semrushDb
+    );
+    if (serpResult.success && serpResult.data) {
+      serpDataMap.set(cluster.primaryKeyword, serpResult.data);
     }
-  } else {
-    console.log(`[Topic Discovery] Skipping SERP analysis — DataforSEO not available`);
   }
 
   // Step 7: AI angle generation for top clusters
@@ -185,26 +179,57 @@ export async function runTopicDiscovery(
     }))
   );
 
-  // Step 8: Save topic recommendations (skip duplicates)
-  // Fetch existing pending/approved topics for this domain to avoid duplicates
+  // Step 8: Save topic recommendations (skip duplicates + cannibalization check)
+  // Fetch existing topics across ALL statuses (not just pending) to avoid duplicates
   const existingTopics = await db
     .select({ primaryKeyword: topicRecommendations.primaryKeyword })
     .from(topicRecommendations)
     .where(
       and(
         eq(topicRecommendations.domainId, domain.id),
-        eq(topicRecommendations.status, "pending")
+        inArray(topicRecommendations.status, ["pending", "approved", "in_progress", "assigned"])
       )
     );
   const existingKeywords = new Set(
     existingTopics.map((t) => t.primaryKeyword.toLowerCase())
   );
 
+  // Pre-fetch content inventory for cannibalization checks
+  const inventoryTitles = await db
+    .select({ id: contentInventory.id, title: contentInventory.title, url: contentInventory.url })
+    .from(contentInventory)
+    .where(eq(contentInventory.domainId, domain.id));
+
   let topicsGenerated = 0;
+  let skippedCannibal = 0;
+  let skippedDuplicate = 0;
+
   for (const cluster of clusters) {
-    // Skip if this topic already exists as pending
-    if (existingKeywords.has(cluster.primaryKeyword.toLowerCase())) {
+    const kw = cluster.primaryKeyword.toLowerCase();
+
+    // Skip if this topic already exists (any active status)
+    if (existingKeywords.has(kw)) {
+      skippedDuplicate++;
       continue;
+    }
+
+    // Cannibalization check: do we already have content covering this keyword?
+    const words = kw.split(/\s+/).filter(Boolean).slice(0, 3);
+    if (words.length > 0) {
+      const pattern = `%${words.join("%")}%`;
+      const cannibalMatches = inventoryTitles.filter((item) => {
+        const title = (item.title ?? "").toLowerCase();
+        const url = item.url.toLowerCase();
+        return title.includes(words.join(" ")) ||
+          words.every((w) => title.includes(w)) ||
+          words.every((w) => url.includes(w));
+      });
+
+      if (cannibalMatches.length > 0) {
+        console.log(`[Topic Discovery] Skipping "${cluster.primaryKeyword}" — cannibalization risk with ${cannibalMatches.length} existing page(s): ${cannibalMatches[0].title}`);
+        skippedCannibal++;
+        continue;
+      }
     }
 
     const aiData = aiResult.results.get(cluster.primaryKeyword);
@@ -228,7 +253,9 @@ export async function runTopicDiscovery(
       status: "pending",
     });
     topicsGenerated++;
+    existingKeywords.add(kw); // prevent duplicates within same batch
   }
 
+  console.log(`[Topic Discovery] ${domain.domain}: ${topicsGenerated} topics saved, ${skippedDuplicate} duplicates skipped, ${skippedCannibal} cannibalization risks skipped`);
   return { topicsGenerated, skipped: false };
 }
