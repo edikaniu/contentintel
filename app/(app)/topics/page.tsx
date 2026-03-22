@@ -12,6 +12,7 @@ import {
   Search,
   Play,
   Loader2,
+  Lightbulb,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
@@ -30,6 +31,7 @@ interface Topic {
   competitorDataJson: { competitor: string; rank?: number; url?: string }[] | null;
   serpFeaturesJson: string[] | null;
   suggestedContentType: string | null;
+  suggestedTitle: string | null;
   aiAngle: string | null;
   aiOutline: string | null;
   source: string;
@@ -119,6 +121,8 @@ export default function TopicsPage() {
   const [rejectionReason, setRejectionReason] = useState("");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [discoveryRunning, setDiscoveryRunning] = useState(false);
+  const [enrichingTitles, setEnrichingTitles] = useState(false);
+  const [enrichMessage, setEnrichMessage] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
 
   const fetchTopics = useCallback(async () => {
@@ -235,13 +239,31 @@ export default function TopicsPage() {
     try {
       const res = await fetch("/api/batch/run", { method: "POST" });
       if (res.ok) {
-        // Refetch topics after discovery completes
         await fetchTopics();
       }
     } catch {
       // failed
     } finally {
       setDiscoveryRunning(false);
+    }
+  };
+
+  const handleEnrichTitles = async () => {
+    setEnrichingTitles(true);
+    setEnrichMessage(null);
+    try {
+      const res = await fetch("/api/topics/enrich-titles", { method: "POST" });
+      const data = await res.json();
+      if (res.ok) {
+        setEnrichMessage(data.message);
+        await fetchTopics();
+      } else {
+        setEnrichMessage(data.error ?? "Failed to generate titles");
+      }
+    } catch {
+      setEnrichMessage("Network error");
+    } finally {
+      setEnrichingTitles(false);
     }
   };
 
@@ -270,7 +292,18 @@ export default function TopicsPage() {
             {topics.length} potential high-traffic topics identified for your domain.
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
+          {enrichMessage && (
+            <span className="text-xs font-body text-gray-400">{enrichMessage}</span>
+          )}
+          <button
+            onClick={handleEnrichTitles}
+            disabled={enrichingTitles}
+            className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium font-body text-gray-700 bg-white border border-gray-100 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+          >
+            {enrichingTitles ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lightbulb className="w-4 h-4" />}
+            {enrichingTitles ? "Generating..." : "Generate Topic Titles"}
+          </button>
           <button
             onClick={handleExportCsv}
             className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium font-body text-gray-700 bg-white border border-gray-100 rounded-lg hover:bg-gray-50 transition-colors"
@@ -428,9 +461,15 @@ export default function TopicsPage() {
                 >
                   {/* Topic name + tags + status */}
                   <div className="min-w-0">
-                    <div className="flex items-center gap-2.5 flex-wrap">
-                      <span className="font-headline font-semibold text-gray-900 text-sm">
-                        {topic.primaryKeyword}
+                    <div className="flex flex-col gap-1">
+                      {topic.suggestedTitle && (
+                        <span className="font-headline font-semibold text-gray-900 text-sm">
+                          {topic.suggestedTitle}
+                        </span>
+                      )}
+                      <div className="flex items-center gap-2.5 flex-wrap">
+                      <span className={`font-body ${topic.suggestedTitle ? "text-xs text-gray-500" : "font-headline font-semibold text-gray-900 text-sm"}`}>
+                        {topic.suggestedTitle ? `Keyword: ${topic.primaryKeyword}` : topic.primaryKeyword}
                       </span>
                       <span
                         className={`inline-flex px-2 py-0.5 text-[10px] font-bold font-body uppercase tracking-wider rounded-full ${statusBadgeClasses(
@@ -439,6 +478,7 @@ export default function TopicsPage() {
                       >
                         {statusLabel(topic.status)}
                       </span>
+                    </div>
                     </div>
                     {categoryTags.length > 0 && (
                       <div className="flex items-center gap-1.5 mt-1.5">

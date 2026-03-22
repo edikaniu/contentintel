@@ -68,6 +68,8 @@ export default function ContentHealthPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [rescanning, setRescanning] = useState(false);
+  const [cleaning, setCleaning] = useState(false);
+  const [cleanupMessage, setCleanupMessage] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 20;
 
@@ -131,6 +133,26 @@ export default function ContentHealthPage() {
       // rescan failed
     } finally {
       setRescanning(false);
+    }
+  };
+
+  const handleCleanup = async () => {
+    if (!confirm("This will remove duplicate alerts and keep only the highest-priority version of each. Continue?")) return;
+    setCleaning(true);
+    setCleanupMessage(null);
+    try {
+      const res = await fetch("/api/content/alerts/cleanup", { method: "POST" });
+      const data = await res.json();
+      if (res.ok) {
+        setCleanupMessage(data.message);
+        await fetchAlerts();
+      } else {
+        setCleanupMessage(data.error ?? "Cleanup failed");
+      }
+    } catch {
+      setCleanupMessage("Network error");
+    } finally {
+      setCleaning(false);
     }
   };
 
@@ -207,7 +229,17 @@ export default function ContentHealthPage() {
             scanned {lastScanned}
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
+          {cleanupMessage && (
+            <span className="text-xs font-body text-gray-400">{cleanupMessage}</span>
+          )}
+          <button
+            onClick={handleCleanup}
+            disabled={cleaning}
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-body font-semibold border border-gray-100 text-gray-600 hover:bg-gray-50 rounded-xl transition-all disabled:opacity-60"
+          >
+            {cleaning ? "Cleaning..." : "Clean Up Duplicates"}
+          </button>
           <button
             onClick={handleExport}
             className="inline-flex items-center gap-2 px-4 py-2 text-sm font-body font-semibold text-gray-600 border border-gray-100 hover:bg-gray-50 rounded-xl transition-all"

@@ -222,6 +222,7 @@ export const topicRecommendations = pgTable(
     competitorDataJson: jsonb("competitor_data_json"),
     serpFeaturesJson: jsonb("serp_features_json"),
     suggestedContentType: varchar("suggested_content_type", { length: 100 }),
+    suggestedTitle: varchar("suggested_title", { length: 500 }),
     aiAngle: text("ai_angle"),
     aiOutline: text("ai_outline"),
     source: varchar("source", { length: 50 }).notNull().default("discovery"), // discovery | validator | manual

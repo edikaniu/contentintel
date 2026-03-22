@@ -1,0 +1,1 @@
+ALTER TABLE "topic_recommendations" ADD COLUMN "suggested_title" varchar(500);
