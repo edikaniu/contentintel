@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, and, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { contentInventory, contentSnapshots, domains } from "@/lib/db/schema";
 
@@ -59,9 +59,7 @@ export async function buildSnapshots(
     // Truncate primaryQuery to 500 chars max (varchar limit) — some GSC queries are full paragraphs
     const primaryQuery = gsc?.primaryQuery ? gsc.primaryQuery.slice(0, 500) : null;
 
-    await db.insert(contentSnapshots).values({
-      contentId: content.id,
-      snapshotDate,
+    const snapshotValues = {
       organicClicks: gsc?.totalClicks ?? null,
       organicImpressions: gsc?.totalImpressions ?? null,
       avgPosition: gsc?.avgPosition ?? null,
@@ -72,7 +70,30 @@ export async function buildSnapshots(
       engagementRate: ga4?.engagementRate ?? null,
       bounceRate: ga4?.bounceRate ?? null,
       conversionsJson: ga4?.conversions ?? null,
-    });
+    };
+
+    // Upsert: check if snapshot exists for this content + date (prevents duplicates on re-runs)
+    const existing = await db
+      .select({ id: contentSnapshots.id })
+      .from(contentSnapshots)
+      .where(
+        and(
+          eq(contentSnapshots.contentId, content.id),
+          sql`DATE(${contentSnapshots.snapshotDate}) = DATE(${snapshotDate})`
+        )
+      )
+      .limit(1)
+      .then((rows) => rows[0] ?? null);
+
+    if (existing) {
+      await db.update(contentSnapshots).set(snapshotValues).where(eq(contentSnapshots.id, existing.id));
+    } else {
+      await db.insert(contentSnapshots).values({
+        contentId: content.id,
+        snapshotDate,
+        ...snapshotValues,
+      });
+    }
 
     created++;
   }

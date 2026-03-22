@@ -13,6 +13,7 @@ interface WindsorAccount {
 }
 
 interface GSCPageData {
+  date: string;
   page: string;
   query: string;
   clicks: number;
@@ -80,7 +81,7 @@ export async function getWindsorClient(orgId: string) {
       dateTo: string
     ): Promise<WindsorResult<GSCPageData[]>> {
       // Use connector-specific endpoint per Windsor docs (not /all?connector=)
-      const qs = `fields=page,query,clicks,impressions,ctr,position&date_from=${dateFrom}&date_to=${dateTo}&account_id=${encodeURIComponent(gscProperty)}`;
+      const qs = `fields=date,page,query,clicks,impressions,ctr,position&date_from=${dateFrom}&date_to=${dateTo}&account_id=${encodeURIComponent(gscProperty)}`;
 
       const result = await request<{ data?: Array<Record<string, unknown>> }>(
         `/searchconsole?${qs}`
@@ -95,6 +96,7 @@ export async function getWindsorClient(orgId: string) {
         : result.data.data ?? [];
 
       const pageData: GSCPageData[] = (rows as Array<Record<string, unknown>>).map((row) => ({
+        date: String(row.date ?? ""),
         page: String(row.page ?? row.landing_page ?? ""),
         query: String(row.query ?? row.search_query ?? row.campaign ?? ""),
         clicks: Number(row.clicks ?? 0),

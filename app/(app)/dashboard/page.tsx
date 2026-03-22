@@ -158,7 +158,7 @@ function DashboardSkeleton() {
 // ---------------------------------------------------------------------------
 // Granularity type (must match TrendChart)
 // ---------------------------------------------------------------------------
-type Granularity = "weekly" | "monthly";
+type Granularity = "daily" | "weekly" | "monthly";
 
 // ---------------------------------------------------------------------------
 // Main Component
@@ -175,7 +175,7 @@ export default function DashboardPage() {
   const [batchMessage, setBatchMessage] = useState<string | null>(null);
   const [trendRange, setTrendRange] = useState<string>("90");
   const [trendLoading, setTrendLoading] = useState(false);
-  const [granularity, setGranularity] = useState<Granularity>("weekly");
+  const [granularity, setGranularity] = useState<Granularity>("daily");
   const [includeBackfill, setIncludeBackfill] = useState(false);
 
   // Fetch dashboard data
@@ -493,7 +493,7 @@ export default function DashboardPage() {
                 <div className="flex items-center gap-3 flex-wrap">
                   {/* Granularity toggle */}
                   <div className="inline-flex rounded-xl bg-gray-50 border border-gray-100 p-1">
-                    {(["weekly", "monthly"] as const).map((g) => (
+                    {(["daily", "weekly", "monthly"] as const).map((g) => (
                       <button
                         key={g}
                         onClick={() => setGranularity(g)}
@@ -513,6 +513,7 @@ export default function DashboardPage() {
                     onChange={(e) => setTrendRange(e.target.value)}
                     className="text-xs font-medium font-body text-gray-600 bg-white border border-gray-100 rounded-xl px-3 py-1.5 focus:outline-none focus:border-[#8B5CF6] focus:ring-1 focus:ring-[#8B5CF6]/20"
                   >
+                    <option value="7">Last 7 days</option>
                     <option value="30">Last 30 days</option>
                     <option value="56">Last 8 weeks</option>
                     <option value="90">Last 3 months</option>

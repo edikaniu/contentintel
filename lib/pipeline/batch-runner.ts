@@ -141,20 +141,7 @@ async function runDomainBatch(
       }
     }
 
-    // Step 4: Build snapshots combining GSC + GA4 data (current week)
-    const gscMap = new Map(
-      gscResult.pages.map((p) => [
-        p.page,
-        {
-          primaryQuery: p.primaryQuery,
-          totalClicks: p.totalClicks,
-          totalImpressions: p.totalImpressions,
-          avgCtr: p.avgCtr,
-          avgPosition: p.avgPosition,
-        },
-      ])
-    );
-
+    // Step 4: Build daily snapshots from GSC data + GA4 (GA4 applied to batch date only)
     const ga4Map = new Map(
       ga4Result.pages.map((p) => [
         p.page,
@@ -168,9 +155,50 @@ async function runDomainBatch(
       ])
     );
 
-    const snapshotResult = await buildSnapshots(domain, batchDate, gscMap, ga4Map);
-    if (snapshotResult.error) {
-      errors.push(`Snapshot build error: ${snapshotResult.error}`);
+    let totalSnapshots = 0;
+    if (gscResult.dailyPages.size > 0) {
+      // Create per-day snapshots from daily GSC breakdown
+      const sortedDays = Array.from(gscResult.dailyPages.entries()).sort(([a], [b]) => a.localeCompare(b));
+      const lastDay = sortedDays[sortedDays.length - 1]?.[0];
+
+      for (const [dateKey, dayPages] of sortedDays) {
+        const dayGscMap = new Map(
+          dayPages.map((p) => [
+            p.page,
+            {
+              primaryQuery: p.primaryQuery,
+              totalClicks: p.totalClicks,
+              totalImpressions: p.totalImpressions,
+              avgCtr: p.avgCtr,
+              avgPosition: p.avgPosition,
+            },
+          ])
+        );
+        const dayDate = new Date(dateKey + "T00:00:00Z");
+        // Attach GA4 data only to the most recent day (it's weekly aggregated, not daily)
+        const dayGa4 = dateKey === lastDay ? ga4Map : new Map();
+        const dayResult = await buildSnapshots(domain, dayDate, dayGscMap, dayGa4);
+        totalSnapshots += dayResult.created;
+        if (dayResult.error) errors.push(`Snapshot build error (${dateKey}): ${dayResult.error}`);
+      }
+      console.log(`[Batch] ${domain.domain}: Created ${totalSnapshots} daily snapshots across ${sortedDays.length} days`);
+    } else if (gscResult.pages.length > 0) {
+      // Fallback: no daily data available, use aggregated (legacy behavior)
+      const gscMap = new Map(
+        gscResult.pages.map((p) => [
+          p.page,
+          {
+            primaryQuery: p.primaryQuery,
+            totalClicks: p.totalClicks,
+            totalImpressions: p.totalImpressions,
+            avgCtr: p.avgCtr,
+            avgPosition: p.avgPosition,
+          },
+        ])
+      );
+      const fallbackResult = await buildSnapshots(domain, batchDate, gscMap, ga4Map);
+      totalSnapshots = fallbackResult.created;
+      if (fallbackResult.error) errors.push(`Snapshot build error: ${fallbackResult.error}`);
     }
 
     // Step 4b: Historical backfill — pull GSC in weekly buckets for past 90 days
@@ -187,21 +215,23 @@ async function runDomainBatch(
         const weekDate = new Date(wEnd); // snapshot date = end of that week
 
         const histGsc = await pullGSCData(orgId, domain, wStart, wEnd);
-        if (!histGsc.skipped && histGsc.pages.length > 0) {
-          const histMap = new Map(
-            histGsc.pages.map((p) => [
-              p.page,
-              {
-                primaryQuery: p.primaryQuery,
-                totalClicks: p.totalClicks,
-                totalImpressions: p.totalImpressions,
-                avgCtr: p.avgCtr,
-                avgPosition: p.avgPosition,
-              },
-            ])
-          );
-          const histSnap = await buildSnapshots(domain, weekDate, histMap, new Map());
-          backfillSnapshots += histSnap.created;
+        if (!histGsc.skipped) {
+          // Use daily breakdown if available, otherwise fall back to aggregated
+          if (histGsc.dailyPages.size > 0) {
+            for (const [dateKey, dayPages] of histGsc.dailyPages) {
+              const dayGscMap = new Map(
+                dayPages.map((p) => [p.page, { primaryQuery: p.primaryQuery, totalClicks: p.totalClicks, totalImpressions: p.totalImpressions, avgCtr: p.avgCtr, avgPosition: p.avgPosition }])
+              );
+              const dayResult = await buildSnapshots(domain, new Date(dateKey + "T00:00:00Z"), dayGscMap, new Map());
+              backfillSnapshots += dayResult.created;
+            }
+          } else if (histGsc.pages.length > 0) {
+            const histMap = new Map(
+              histGsc.pages.map((p) => [p.page, { primaryQuery: p.primaryQuery, totalClicks: p.totalClicks, totalImpressions: p.totalImpressions, avgCtr: p.avgCtr, avgPosition: p.avgPosition }])
+            );
+            const histSnap = await buildSnapshots(domain, weekDate, histMap, new Map());
+            backfillSnapshots += histSnap.created;
+          }
         }
       }
 
@@ -244,7 +274,7 @@ async function runDomainBatch(
       domainId: domain.id,
       domain: domain.domain,
       contentSynced: syncResult.synced,
-      snapshotsCreated: snapshotResult.created,
+      snapshotsCreated: totalSnapshots,
       alertsGenerated: alertResult.generated,
       topicsGenerated: topicResult.topicsGenerated,
       errors,

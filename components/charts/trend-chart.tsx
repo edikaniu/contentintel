@@ -17,19 +17,29 @@ interface TrendChartProps {
 // ---------------------------------------------------------------------------
 // Granularity types & aggregation
 // ---------------------------------------------------------------------------
-type Granularity = "weekly" | "monthly";
+type Granularity = "daily" | "weekly" | "monthly";
 
 function aggregate(data: OrganicWeek[], granularity: Granularity): OrganicWeek[] {
-  if (granularity === "weekly") return data;
+  if (granularity === "daily") return data;
 
-  // Monthly: SUM the weekly snapshots (not average — each snapshot is already a week's total)
+  // Weekly/Monthly: SUM the daily snapshots into larger buckets
   const buckets = new Map<string, { clicks: number; impressions: number }>();
 
   for (const d of data) {
     const dt = new Date(d.week);
     if (isNaN(dt.getTime())) continue;
 
-    const key = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}-01`;
+    let key: string;
+    if (granularity === "weekly") {
+      const day = dt.getDay();
+      const diff = day === 0 ? -6 : 1 - day;
+      const monday = new Date(dt);
+      monday.setDate(dt.getDate() + diff);
+      key = monday.toISOString().slice(0, 10);
+    } else {
+      key = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}-01`;
+    }
+
     const bucket = buckets.get(key) ?? { clicks: 0, impressions: 0 };
     bucket.clicks += d.totalClicks;
     bucket.impressions += d.totalImpressions;
@@ -54,7 +64,10 @@ function formatXLabel(dateStr: string, granularity: Granularity): string {
   if (granularity === "monthly") {
     return d.toLocaleDateString("en-US", { month: "short" });
   }
-  return "Wk " + d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  if (granularity === "weekly") {
+    return "Wk " + d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  }
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
 function formatDate(dateStr: string): string {
@@ -117,7 +130,7 @@ const PAD = { top: 20, right: 20, bottom: 40, left: 56 };
 const SVG_W = 800;
 
 export function TrendChart({ data, granularity: externalGranularity, onGranularityChange }: TrendChartProps) {
-  const [internalGranularity, setInternalGranularity] = useState<Granularity>("weekly");
+  const [internalGranularity, setInternalGranularity] = useState<Granularity>("daily");
   const [hoverIdx, setHoverIdx] = useState<number | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);
 
@@ -189,7 +202,7 @@ export function TrendChart({ data, granularity: externalGranularity, onGranulari
       {!isControlled && (
         <div className="flex items-center gap-1 mb-4">
           <div className="inline-flex rounded-xl bg-gray-50 border border-gray-100 p-1">
-            {(["weekly", "monthly"] as Granularity[]).map((g) => (
+            {(["daily", "weekly", "monthly"] as Granularity[]).map((g) => (
               <button
                 key={g}
                 onClick={() => setGranularity(g)}
